@@ -1,0 +1,122 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  regular
+  cashier
+  manager
+  superuser
+}
+
+enum TransactionType {
+  purchase
+  redemption
+  adjustment
+  event
+  transfer
+}
+
+enum PromotionType {
+  automatic
+  onetime
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  utorid     String      @unique
+  name       String
+  email      String      @unique
+  role       RoleType    @default(regular)
+  verified   Boolean?
+  activated  Boolean?
+  suspicious Boolean?
+  birthday   String?
+  avatarUrl  String? // stores file path
+  password   String?
+  createdAt  DateTime    @default(now())
+  lastLogin  DateTime?
+  resetToken ResetToken?
+  points     Int         @default(0)
+
+  organizedEvents Event[]      @relation("EventOrganizers") // events user hosted
+  guestEvents     EventGuest[] @relation("EventGuestRelation") // events user attended 
+}
+
+model Transaction {
+  id          Int             @id @default(autoincrement())
+  utorid      String?
+  type        TransactionType @default(purchase)
+  spent       Float?
+  promotions  Promotion[]     @relation("PromotionTransactions")
+  remark      String?
+  amount      Int
+  relatedId   Int?
+  createdBy   String?
+  suspicious  Boolean         @default(false)
+  processed   Boolean
+  processedBy String?
+  Event       Event?          @relation(fields: [eventId], references: [id])
+  eventId     Int?
+  event       Event?          @relation("EventTransaction", fields: [eventId], references: [id])
+}
+
+model Event {
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  location     String
+  startTime    DateTime
+  endTime      DateTime
+  capacity     Int?
+  pointsRemain Int?
+  pointsAwarded Int?          @default(0)
+  transactions Transaction[] @relation("EventTransaction")
+  published    Boolean?      @default(false)
+  organizers   User[]        @relation("EventOrganizers")
+  guests       EventGuest[]  @relation("EventGuestRelation") // guests who attended the event
+  Transaction  Transaction[]
+}
+
+model EventGuest {
+  id          Int    @id @default(autoincrement())
+  eventId     Int
+  event       Event  @relation("EventGuestRelation", fields: [eventId], references: [id])
+  utoridGuest String
+  guest       User   @relation("EventGuestRelation", fields: [utoridGuest], references: [utorid], onDelete: Restrict)
+  amount      Int // points awarded to guest
+
+  @@unique([eventId, utoridGuest]) // host cannot be guest, no duplicate guest
+}
+
+model Promotion {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String
+  type        PromotionType
+  startTime   DateTime
+  endTime     DateTime
+  minSpending Float?
+  rate        Float?
+  points      Int?
+  started     Boolean?
+  end         Boolean?
+
+  transactions Transaction[] @relation("PromotionTransactions")
+}
+
+model ResetToken {
+  id        Int      @id @default(autoincrement())
+  utorid    String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [utorid], references: [utorid])
+}

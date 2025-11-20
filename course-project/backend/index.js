@@ -27,12 +27,18 @@ const events = require("./routes/events.js");
 const promo = require("./routes/promo.js");
 const transactions = require("./routes/transaction.js");
 const users = require("./routes/user.js");
+const cors = require('cors');
 
 const app = express();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 app.use(express.json());
 

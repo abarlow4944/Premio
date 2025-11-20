@@ -3,4 +3,7 @@
 # You should write detailed description on:
 
 # 1. All the packages you need to install
+
+To install Tailwind v4: npm install tailwindcss @tailwindcss/vite
+To start the server: npm run dev
 # 2. How to configure various servers (e.g., Nginx, Apache, etc)

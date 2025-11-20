@@ -24,16 +24,16 @@ router.post("/tokens", async (req, res) => {
 	try {
 		const user = await prisma.user.findUnique({ where: { utorid } });
 		if (!user) {
-			return res.status(404).json({ error: "User not found" });
+			return res.status(404).json({ error: "UTORid not found" });
 		}
 
 		if (!user.password) {
-			return res.status(401).json({ error: "Incorrect credentials" });
+			return res.status(401).json({ error: "Incorrect password" });
 		}
 
 		const match = await bcrypt.compare(password, user.password);
 		if (!match) {
-			return res.status(401).json({ error: "Invalid credentials" });
+			return res.status(401).json({ error: "Invalid UTORid or password" });
 		}
 
 		// mark user as activated and update lastLogin

@@ -54,12 +54,51 @@ router.post("/tokens", async (req, res) => {
 		const token = jwt.sign(payload, JWT_SECRET, { algorithm: "HS256", expiresIn: expiresInSeconds });
 		const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 
-		return res.status(200).json({ token, expiresAt });
+		// HTTP-only cookie
+		res.cookie("auth_token", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production", //true in production
+			sameSite: "strict",
+			maxAge: expiresInSeconds * 1000
+		});
+
+		// return only non-sensitive info to front end
+		return res.status(200).json({ ok: true, role: user.role });
 	} catch (err) {
 		console.error("Error in /auth/tokens:", err);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 });
+
+// for decoding the token from the cookie
+router.get("/me", async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ error: "Not authenticated" });
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    return res.status(200).json({
+      utorid: payload.utorid,
+      role: payload.role,
+    });
+
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+});
+
+// for logging out
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", { // clear the cookie
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // true in production
+    sameSite: "strict",
+  });
+
+  return res.status(200).json({ ok: true });
+});
+
 
 // POST /auth/resets: Request a password reset email
 router.post("/resets", async (req, res) => {

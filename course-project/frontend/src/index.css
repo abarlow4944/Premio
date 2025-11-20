@@ -1,68 +1,77 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* GLOBAL CSS FILE */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  /* ─── SPACE INDIGO (#2B2D42) ─────────────────────────── */
+  --color-space-indigo-50:  #f4f5f7;
+  --color-space-indigo-100: #e9eaef;
+  --color-space-indigo-200: #c8cbd7;
+  --color-space-indigo-300: #a6acc0;
+  --color-space-indigo-400: #858da8;
+  --color-space-indigo-500: #2B2D42; /* your original */
+  --color-space-indigo-600: #232436;
+  --color-space-indigo-700: #1b1c29;
+  --color-space-indigo-800: #12131c;
+  --color-space-indigo-900: #0a0b10;
+  --color-space-indigo-950: #050508;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* ─── LAVENDER GREY (#8D99AE) ─────────────────────────── */
+  --color-lavender-grey-50:  #f5f6f8;
+  --color-lavender-grey-100: #eceef2;
+  --color-lavender-grey-200: #d7dbe2;
+  --color-lavender-grey-300: #c2c8d2;
+  --color-lavender-grey-400: #acb5c3;
+  --color-lavender-grey-500: #8D99AE; /* your original */
+  --color-lavender-grey-600: #727c8b;
+  --color-lavender-grey-700: #575f68;
+  --color-lavender-grey-800: #3b4145;
+  --color-lavender-grey-900: #1f2322;
+  --color-lavender-grey-950: #111214;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  /* ─── PLATINUM (#EDF2F4) ─────────────────────────────── */
+  --color-platinum-50:  #ffffff;
+  --color-platinum-100: #f8fafb;
+  --color-platinum-200: #f1f4f6;
+  --color-platinum-300: #eaf0f2;
+  --color-platinum-400: #e6edf0;
+  --color-platinum-500: #EDF2F4; /* your original */
+  --color-platinum-600: #c1c6c8;
+  --color-platinum-700: #969a9c;
+  --color-platinum-800: #6a6d6f;
+  --color-platinum-900: #3e4042;
+  --color-platinum-950: #242526;
+
+  /* ─── STRAWBERRY RED (#EF233C) ───────────────────────── */
+  --color-strawberry-red-50:  #fff0f2;
+  --color-strawberry-red-100: #ffe1e5;
+  --color-strawberry-red-200: #ffb7c1;
+  --color-strawberry-red-300: #ff8b9c;
+  --color-strawberry-red-400: #ff5f77;
+  --color-strawberry-red-500: #EF233C; /* your original */
+  --color-strawberry-red-600: #c81d32;
+  --color-strawberry-red-700: #a01828;
+  --color-strawberry-red-800: #78121e;
+  --color-strawberry-red-900: #500c14;
+  --color-strawberry-red-950: #38080e;
+
+  /* ─── FLAG RED (#D90429) ─────────────────────────────── */
+  --color-flag-red-50:  #fff1f2;
+  --color-flag-red-100: #ffe1e4;
+  --color-flag-red-200: #ffb8bd;
+  --color-flag-red-300: #ff8e95;
+  --color-flag-red-400: #ff646d;
+  --color-flag-red-500: #D90429; /* your original */
+  --color-flag-red-600: #b10322;
+  --color-flag-red-700: #88021a;
+  --color-flag-red-800: #5f0213;
+  --color-flag-red-900: #36010b;
+  --color-flag-red-950: #210107;
+
+  /* ─── FONT ─────────────────────────────── */
+  --font-inter: "Inter", sans-serif;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  font-family: var(--font-inter)
 }

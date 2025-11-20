@@ -1,77 +1,117 @@
+import { useState } from "react";
+
 export default function Login() {
-  return (
+    const API_URL = import.meta.env.VITE_API_URL; // API base URL 
+
+    const[utorid, setUtorid] = useState("")
+    const[password, setPassword] = useState("")
+    const[error, setError] = useState("")
+
+    const handleSubmit = async(e) =>{ // handle form submission
+        // send data to backend
+        setError("")
+
+        try {
+            e.preventDefault(); // stop browser from refreshing the page
+
+            const res = await fetch(`${API_URL}/auth/tokens`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify({ utorid, password }), // convert a JS value into a JSON-formatted string
+            });
+
+            const data = await res.json();
+            
+            if(!res.ok){ // handle login error
+                setError(data.error || "Login failed")
+                return;
+            }
+        }
+        catch(error){
+            setError(`Network error: ${error}`)
+        }
+    };
+
+    return (
     <>
-      <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            alt="Your Company"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-            className="mx-auto h-10 w-auto"
-          />
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-flag-red-500">
-            Sign in to your account
-          </h2>
-        </div>
-
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900 text-left">
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
-                />
-              </div>
+        <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+            <img
+                alt="Your Company"
+                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+                className="mx-auto h-10 w-auto"
+            />
+            <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-flag-red-500">
+                Sign in to Premio
+            </h2>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
-                  Password
+            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form onSubmit={handleSubmit} method="POST" className="space-y-6">
+                <div>
+                <label htmlFor="utorid" className="block text-sm/6 font-medium text-gray-900 text-left">
+                    UTORid
                 </label>
-                <div className="text-sm">
-                  <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400">
-                    Forgot password?
-                  </a>
+                <div className="mt-2">
+                    <input
+                    id="utorid"
+                    name="utorid"
+                    type="utorid"
+                    required
+                    autoComplete="utorid"
+                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
+                    onChange={(e) => setUtorid(e.target.value)}
+                    />
                 </div>
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
-                />
-              </div>
+                </div>
+
+                <div>
+                <div className="flex items-center justify-between">
+                    <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
+                    Password
+                    </label>
+                    <div className="text-sm">
+                    <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400">
+                        Forgot password?
+                    </a>
+                    </div>
+                </div>
+                <div className="mt-2">
+                    <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
+                    onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
+                </div>
+
+                <div>
+                <button
+                    type="submit"
+                    className="flex w-full justify-center rounded-md bg-strawberry-red-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-strawberry-red-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strawberry-red-500 hover:cursor-pointer"
+                >
+                    Sign in
+                </button>
+                </div>
+            </form>
+
+            <p className="mt-10 text-center text-sm/6 text-gray-500">
+                Not a member?{' '}
+                <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
+                Make an account
+                </a>
+            </p>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-strawberry-red-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-strawberry-red-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strawberry-red-500"
-              >
-                Sign in
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-10 text-center text-sm/6 text-gray-500">
-            Not a member?{' '}
-            <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400">
-              Start a 14 day free trial
-            </a>
-          </p>
+            {error && <p className="font-semibold text-flag-red-500 text-sm">{error}</p>}
         </div>
-      </div>
     </>
-  )
+    )
 }

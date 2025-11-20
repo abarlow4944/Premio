@@ -75,3 +75,17 @@
 body {
   font-family: var(--font-inter)
 }
+
+header {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50; 
+  font-family: var(--font-inter);
+}
+
+.navigation-bar {
+  background-color: var(--color-strawberry-red-600);
+}
+

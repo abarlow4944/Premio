@@ -8,6 +8,7 @@ import './App.css'
 import Login from "./pages/Login"
 import Layout from "./components/Layout"
 import Home from "./pages/Home"
+import { UserProvider } from "./contexts/UserContexts";
 
 function App() {
 
@@ -18,7 +19,11 @@ function App() {
         <Route path="/" element={<Login />} /> 
 
         {/* Protected Landing Page */}
-        <Route path="/home" element={<Layout />} >
+        <Route path="/home" element={
+            <UserProvider>
+              <Layout />
+            </UserProvider>
+          }>
 
           {/* Regular / Cashier / Manager / Superuser Specific Landing Page */}
           <Route index element={<Home />} />

@@ -130,7 +130,9 @@ export default function Login() {
                 <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
                 Make an account
                 </a>
+                
             </p>
+            
             </div>
 
             {error && <p className="font-semibold text-flag-red-500 text-sm">{error}</p>}

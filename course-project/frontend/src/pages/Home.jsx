@@ -5,8 +5,7 @@ import ManagerHome from './landing/ManagerHome';
 import SuperuserHome from './landing/SuperuserHome';
 
 export default function Home() {
-    // const {role} = useUser();
-    const role = "regular";
+    const {role} = useUser();
 
     if (!role){
         console.log("no role");

@@ -41,7 +41,7 @@ export default function NavBar() {
             credentials: "include",
         });
         
-        setRole(null); // clear the role in the context
+        //setRole(null); // clear the role in the context
         navigate("/"); // navigate back to login page
     }
 

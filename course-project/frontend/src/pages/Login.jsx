@@ -124,14 +124,6 @@ export default function Login() {
                 </button>
                 </div>
             </form>
-
-            <p className="mt-10 text-center text-sm/6 text-gray-500">
-                Not a member?{' '}
-                <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
-                Make an account
-                </a>
-                
-            </p>
             
             </div>
 

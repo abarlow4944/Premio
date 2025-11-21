@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from 'react'
-import './App.css'
 
 
 import Login from "./pages/Login"
@@ -31,7 +30,7 @@ function App() {
 
         {/* Users Page */}
         <Route path="/users" element={
-          <ProtectedRoute allowedRoles={["manager", "superuser"]}>
+          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
             <Users/>
           </ProtectedRoute>
         }>

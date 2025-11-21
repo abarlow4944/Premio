@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useUser } from "../contexts/UserContexts";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -6,6 +8,8 @@ export default function Login() {
     const[utorid, setUtorid] = useState("")
     const[password, setPassword] = useState("")
     const[error, setError] = useState("")
+    const { role, setRole } = useUser();
+    const navigate = useNavigate();
 
     const handleSubmit = async(e) =>{ // handle form submission
         // send data to backend
@@ -28,6 +32,10 @@ export default function Login() {
             if(!res.ok){ // handle login error
                 setError(data.error || "Login failed")
                 return;
+            }
+            else{ // save the role
+                setRole(data.role);
+                navigate("/home")
             }
         }
         catch(error){

@@ -28,6 +28,8 @@ const promo = require("./routes/promo.js");
 const transactions = require("./routes/transaction.js");
 const users = require("./routes/user.js");
 const cors = require('cors');
+const cookieParser = require("cookie-parser");
+
 
 const app = express();
 const { PrismaClient } = require('@prisma/client');
@@ -41,6 +43,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(cookieParser());
 
 // ADD YOUR WORK HERE
 // mount routers

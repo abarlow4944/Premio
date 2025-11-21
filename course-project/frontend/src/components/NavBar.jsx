@@ -20,6 +20,8 @@ SquaresPlusIcon,
 XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContexts";
 
 const products = [
 
@@ -29,6 +31,19 @@ const callsToAction = []
 
 export default function NavBar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const navigate = useNavigate();
+    const { setRole } = useUser();
+    const API_URL = import.meta.env.VITE_API_URL; // API base URL
+
+    const handleLogout = async() => {
+        await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
+            method: "POST",
+            credentials: "include",
+        });
+        
+        //setRole(null); // clear the role in the context
+        navigate("/"); // navigate back to login page
+    }
 
     return (
         <header className='navigation-bar'>
@@ -108,7 +123,7 @@ export default function NavBar() {
             </Popover>
             </PopoverGroup>
             <div className="lg:flex lg:flex-1 lg:justify-end">
-                <a href="#" className="font-bold text-gray-900">
+                <a onClick={handleLogout} className="font-bold text-gray-900 hover:cursor-pointer">
                     Logout <span aria-hidden="true"></span>
                 </a>
             </div>

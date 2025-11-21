@@ -73,7 +73,7 @@ router.post("/tokens", async (req, res) => {
 // for decoding the token from the cookie
 router.get("/me", async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.auth_token;
     if (!token) return res.status(401).json({ error: "Not authenticated" });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -90,7 +90,7 @@ router.get("/me", async (req, res) => {
 
 // for logging out
 router.post("/logout", (req, res) => {
-  res.clearCookie("token", { // clear the cookie
+  res.clearCookie("auth_token", { // clear the cookie
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // true in production
     sameSite: "strict",

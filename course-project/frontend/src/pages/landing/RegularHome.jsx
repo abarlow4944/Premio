@@ -1,4 +1,5 @@
 import { ArrowPathIcon, CloudArrowUpIcon, FingerPrintIcon, LockClosedIcon } from '@heroicons/react/24/outline'
+import { useUser } from "../../contexts/UserContexts";
 console.log("RegularHome rendered...");
 const features = [
   {
@@ -28,16 +29,20 @@ const features = [
 ]
 
 export default function Regular() {
+  const { user, loadingUser } = useUser();
+  const nameDisplay = loadingUser ? "Loading..." : (user ? user.name : "(FirstName), (LastName)");
+  const pointsDisplay = loadingUser ? "..." : (user ? user.points : "(##)");
+
   return (
     <div className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
           <h2 className="text-base/7 font-semibold text-indigo-600">Taking Your Point to Premio!</h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">
-            (FirstName), (LastName)
+            {nameDisplay}
           </p>
           <p className="mt-6 text-lg/8 text-gray-700">
-            You currently have (##) points. 
+            You currently have {pointsDisplay} points.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">

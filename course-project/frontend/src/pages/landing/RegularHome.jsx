@@ -2,9 +2,9 @@ import { ArrowPathIcon, CloudArrowUpIcon, FingerPrintIcon, LockClosedIcon } from
 console.log("RegularHome rendered...");
 const features = [
   {
-    name: 'Push to deploy',
+    name: 'QR Code',
     description:
-      'Morbi viverra dui mi arcu sed. Tellus semper adipiscing suspendisse semper morbi. Odio urna massa nunc massa.',
+      'Create a transaction or redeem unclaimed ',
     icon: CloudArrowUpIcon,
   },
   {
@@ -29,16 +29,15 @@ const features = [
 
 export default function Regular() {
   return (
-    <div className="bg-white py-24 sm:py-32">
+    <div className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base/7 font-semibold text-indigo-600">Deploy faster</h2>
+          <h2 className="text-base/7 font-semibold text-indigo-600">Taking Your Point to Premio!</h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">
-            Everything you need to deploy your app
+            (FirstName), (LastName)
           </p>
           <p className="mt-6 text-lg/8 text-gray-700">
-            Quis tellus eget adipiscing convallis sit sit eget aliquet quis. Suspendisse eget egestas a elementum
-            pulvinar et feugiat blandit at. In mi viverra elit nunc.
+            You currently have (##) points. 
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">

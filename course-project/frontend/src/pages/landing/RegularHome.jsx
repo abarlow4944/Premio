@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { ArrowPathIcon, CloudArrowUpIcon, FingerPrintIcon, LockClosedIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { useUser } from '../../contexts/UserContexts'
 
@@ -10,25 +10,25 @@ const features = [
     name: 'QR Code',
     description:
       'Create a transaction or redeem unclaimed ',
-    icon: CloudArrowUpIcon,
+    icon: QrCodeIcon,
   },
   {
-    name: 'SSL certificates',
+    name: 'Pending Redemptions',
     description:
       'Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.',
-    icon: LockClosedIcon,
-  },
-  {
-    name: 'Simple queues',
-    description:
-      'Quisque est vel vulputate cursus. Risus proin diam nunc commodo. Lobortis auctor congue commodo diam neque.',
     icon: ArrowPathIcon,
   },
   {
-    name: 'Advanced security',
+    name: 'Transfer Points',
+    description:
+      'Quisque est vel vulputate cursus. Risus proin diam nunc commodo. Lobortis auctor congue commodo diam neque.',
+    icon: ArrowsRightLeftIcon,
+  },
+  {
+    name: 'Redeem Points',
     description:
       'Arcu egestas dolor vel iaculis in ipsum mauris. Tincidunt mattis aliquet hac quis. Id hac maecenas ac donec pharetra eget.',
-    icon: FingerPrintIcon,
+    icon: CursorArrowRaysIcon,
   },
 ]
 
@@ -77,12 +77,12 @@ export default function Regular() {
             You currently have {pointsDisplay} points.
           </p>
         </div>
-        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+        <div className="mx-auto mt-12 max-w-2xl sm:mt-12 lg:mt-14 lg:max-w-4xl">
           <div className="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
             {features.map((feature) => (
               <Card
                 key={feature.name}
-                className="group cursor-pointer transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600"
+                className="group cursor-pointer transition hover:shadow-md border-2 border-[#2B2D42] focus-visible:ring-2 focus-visible:ring-[#2B2D42] focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 tabIndex={0}
                 role="button"
                 aria-haspopup="dialog"
@@ -95,13 +95,13 @@ export default function Regular() {
                   }
                 }}
               >
-                <CardHeader className="flex flex-row items-start gap-4">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                    <feature.icon aria-hidden="true" className="size-6" />
+                <CardHeader className="flex flex-row items-start gap-5">
+                  <div className="flex h-12 w-12 aspect-square items-center justify-center rounded-xl bg-[#EF233C] text-white shadow-sm">
+                    <feature.icon aria-hidden="true" className="h-8 w-8" />
                   </div>
                   <div className="space-y-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900">{feature.name}</CardTitle>
-                    <CardDescription className="text-gray-600">{feature.description}</CardDescription>
+                    <CardTitle className="text-lg font-semibold text-[#2B2D42]">{feature.name}</CardTitle>
+                    <CardDescription className="text-[#2B2D42]">{feature.description}</CardDescription>
                   </div>
                 </CardHeader>
               </Card>

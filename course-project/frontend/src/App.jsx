@@ -8,6 +8,7 @@ import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Users from "./pages/Users";
 
 function App() {
 
@@ -19,14 +20,21 @@ function App() {
 
         {/* Protected Landing Page */}
         <Route path="/home" element={
-            <ProtectedRoute>    
+            <ProtectedRoute>      
               <Layout />
             </ProtectedRoute>
           }>
 
           {/* Regular / Cashier / Manager / Superuser Specific Landing Page */}
           <Route index element={<Home />} />
+        </Route>
 
+        {/* Users Page */}
+        <Route path="/users" element={
+          <ProtectedRoute allowedRoles={["manager", "superuser"]}>
+            <Users/>
+          </ProtectedRoute>
+        }>
         </Route>
       </Routes>
     </BrowserRouter>

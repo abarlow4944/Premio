@@ -4,10 +4,9 @@ require('dotenv').config();
 function authenticateToken(req, res, next) {
   // Expecting header: Authorization: Bearer <token>
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Missing token" });
+  let token = authHeader && authHeader.split(" ")[1];
+  if (!token && req.cookies && req.cookies.auth_token) {
+    token = req.cookies.auth_token; // cookie fallback
   }
 
   try {

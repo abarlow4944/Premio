@@ -8,7 +8,7 @@ export default function Login() {
     const[utorid, setUtorid] = useState("")
     const[password, setPassword] = useState("")
     const[error, setError] = useState("")
-    const { role, setRole } = useUser();
+    const { role, setRole, user, setUser } = useUser();
     const navigate = useNavigate();
 
     const handleSubmit = async(e) =>{ // handle form submission
@@ -33,9 +33,24 @@ export default function Login() {
                 setError(data.error || "Login failed")
                 return;
             }
-            else{ // save the role
-                setRole(data.role);
-                navigate("/home")
+
+            setRole(data.role);
+
+            // Fetch user profile using cookie-based auth
+            try {
+                const profileRes = await fetch(`${API_URL}/users/me`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const profile = await profileRes.json();
+                if (!profileRes.ok) {
+                    setError(profile.error || "Failed to load user profile");
+                    return;
+                }
+                setUser(profile);
+                navigate("/home");
+            } catch (e) {
+                setError(`Profile fetch error: ${e}`);
             }
         }
         catch(error){
@@ -115,7 +130,9 @@ export default function Login() {
                 <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
                 Make an account
                 </a>
+                
             </p>
+            
             </div>
 
             {error && <p className="font-semibold text-flag-red-500 text-sm">{error}</p>}

@@ -9,10 +9,6 @@ function authenticateToken(req, res, next) {
     token = req.cookies.auth_token; // cookie fallback
   }
 
-  if (!token) {
-    return res.status(401).json({ error: "Missing token" });
-  }
-
   try {
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {

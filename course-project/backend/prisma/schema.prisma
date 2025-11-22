@@ -43,6 +43,7 @@ model User {
   lastLogin  DateTime?
   resetToken ResetToken?
   points     Int         @default(0)
+  qrToken    String?     @unique
 
   organizedEvents Event[]      @relation("EventOrganizers") // events user hosted
   guestEvents     EventGuest[] @relation("EventGuestRelation") // events user attended 

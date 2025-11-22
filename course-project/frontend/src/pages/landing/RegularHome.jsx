@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { ArrowPathIcon, CloudArrowUpIcon, FingerPrintIcon, LockClosedIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
+import QRCode from 'react-qr-code'
+import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { useUser } from '../../contexts/UserContexts'
 
 console.log('RegularHome rendered...')
@@ -9,41 +10,67 @@ const features = [
   {
     name: 'QR Code',
     description:
-      'Create a transaction or redeem unclaimed ',
-    icon: CloudArrowUpIcon,
+      'View your QR code.',
+    icon: QrCodeIcon,
   },
   {
-    name: 'SSL certificates',
+    name: 'Pending Redemptions',
     description:
       'Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.',
-    icon: LockClosedIcon,
-  },
-  {
-    name: 'Simple queues',
-    description:
-      'Quisque est vel vulputate cursus. Risus proin diam nunc commodo. Lobortis auctor congue commodo diam neque.',
     icon: ArrowPathIcon,
   },
   {
-    name: 'Advanced security',
+    name: 'Transfer Points',
+    description:
+      'Quisque est vel vulputate cursus. Risus proin diam nunc commodo. Lobortis auctor congue commodo diam neque.',
+    icon: ArrowsRightLeftIcon,
+  },
+  {
+    name: 'Redeem Points',
     description:
       'Arcu egestas dolor vel iaculis in ipsum mauris. Tincidunt mattis aliquet hac quis. Id hac maecenas ac donec pharetra eget.',
-    icon: FingerPrintIcon,
+    icon: CursorArrowRaysIcon,
   },
 ]
 
 export default function Regular() {
+  const API_URL = import.meta.env.VITE_API_URL; // API base URL
   const { user, loadingUser } = useUser()
   const nameDisplay = loadingUser ? 'Loading...' : user ? user.name : '(FirstName), (LastName)'
   const pointsDisplay = loadingUser ? '...' : user ? user.points : '(##)'
 
   const [selected, setSelected] = useState(null)
+  const [qrValue, setQrValue] = useState(null)
+  const [qrLoading, setQrLoading] = useState(false)
   const triggerRef = useRef(null)
+
+  const fetchQr = useCallback(async () => {
+    if (!user) return
+    setQrLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/users/me/qr`, {
+        credentials: 'include'
+      })
+      if (!res.ok) throw new Error('Failed to fetch QR token')
+      const data = await res.json()
+      setQrValue(data.qrToken)
+    } catch (e) {
+      console.error(e)
+      setQrValue(null)
+    } finally {
+      setQrLoading(false)
+    }
+  }, [user])
+
 
   const openFeature = useCallback((f, target) => {
     triggerRef.current = target
     setSelected(f)
-  }, [])
+    if (f.name === 'QR Code') {
+      fetchQr()
+    }
+  }, [fetchQr])
+
   const close = useCallback(() => {
     setSelected(null)
     if (triggerRef.current) {
@@ -77,7 +104,7 @@ export default function Regular() {
             You currently have {pointsDisplay} points.
           </p>
         </div>
-        <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+        <div className="mx-auto mt-12 max-w-2xl sm:mt-12 lg:mt-14 lg:max-w-4xl">
           <div className="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-2">
             {features.map((feature) => (
               <Card
@@ -137,12 +164,25 @@ export default function Regular() {
               <CardTitle id="popup-title" className="flex items-center gap-3 text-lg">
                 <selected.icon className="size-6 text-strawberry-500" /> {selected.name}
               </CardTitle>
-              <CardDescription>{selected.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-700 leading-relaxed pb-6">
-                {selected.details}
-              </p>
+              {selected.name === 'QR Code' ? (
+                <div className="space-y-4 pb-6">
+                  {qrLoading && <p className="text-sm text-gray-500">Generating QR code...</p>}
+                  {!qrLoading && user && qrValue && (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 bg-white rounded-md">
+                        <QRCode value={qrValue} size={192} fgColor="#2B2D42" />
+                      </div>
+                    </div>
+                  )}
+                  {!qrLoading && !user && (
+                    <p className="text-sm text-red-600">User not loaded. Please wait.</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-700 leading-relaxed pb-6">{selected.details}</p>
+              )}
             </CardContent>
           </Card>
         </div>

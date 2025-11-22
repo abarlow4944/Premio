@@ -92,7 +92,9 @@ export default function NavBar() {
 
         
         <div className="lg:flex lg:flex-1 lg:justify-end gap-4 flex flex-wrap items-center">
+            {/* Role */}
             <h2 className="text-m font-bold text-space-indigo-500">{role}</h2>
+            
             {/* Logout */}
             <button
                 type="button"

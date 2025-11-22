@@ -70,7 +70,7 @@ export default function Regular() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
           <h2 className="text-base/7 font-semibold text-flag-red-500">Taking Your Point to Premio!</h2>
-          <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">
+          <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-flag-red-500 sm:text-5xl lg:text-balance">
             {nameDisplay}
           </p>
           <p className="mt-6 text-lg/8 text-gray-700">
@@ -100,7 +100,7 @@ export default function Regular() {
                     <feature.icon aria-hidden="true" className="size-6" />
                   </div>
                   <div className="space-y-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900">{feature.name}</CardTitle>
+                    <CardTitle className="text-lg font-semibold text-flag-red-500">{feature.name}</CardTitle>
                     <CardDescription className="text-gray-600">{feature.description}</CardDescription>
                   </div>
                 </CardHeader>

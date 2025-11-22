@@ -70,7 +70,7 @@ export default function Users() {
                 View and manage all users in the system.
                 </p>
             </div>
-            <DataTable data={data} columns={userColumns}/>
+            <DataTable data={data} columns={userColumns} count={totalCount} />
         
         </div>
 

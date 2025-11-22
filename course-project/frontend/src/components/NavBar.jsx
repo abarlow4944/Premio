@@ -23,9 +23,6 @@ import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContexts";
 
-const products = [
-
-]
 
 const callsToAction = []
 

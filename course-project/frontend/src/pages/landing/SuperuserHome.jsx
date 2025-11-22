@@ -1,12 +1,31 @@
 import { ArrowPathIcon, CloudArrowUpIcon, FingerPrintIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 console.log("Superuser Home rendered...");
+
 const features = [
   {
-    name: 'Promote an Employee',
+    name: 'Users',
     description:
-      'Find and promote user.',
-    icon: CloudArrowUpIcon,
+      'View and manage users.',
+    icon: UsersIcon,
   },
+  {
+    name: 'Transactions',
+    description:
+      'View and manage transactions.',
+    icon: CreditCardIcon,
+  },
+  {
+    name: 'Promotions',
+    description:
+      'View and manage promotions',
+    icon: StarIcon,
+  },
+  {
+    name: 'Events',
+    description:
+      'Create and manage events',
+    icon: CalendarIcon,
+  }
 ]
 
 export default function Superuser() {

@@ -127,7 +127,7 @@ export default function Login() {
             
             </div>
 
-            {error && <p className="font-semibold text-flag-red-500 text-sm">{error}</p>}
+            {error && <p className="font-semibold text-flag-red-500 text-sm text-center mt-4">{error}</p>}
         </div>
     </>
     )

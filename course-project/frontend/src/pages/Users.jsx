@@ -11,7 +11,7 @@ export default function Users() {
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
 
-    const [query, setQuery] = useState({
+    const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
         role: "",
         verified: "",
@@ -42,7 +42,7 @@ export default function Users() {
                     credentials: "include"
                 });
 
-                const data = await res.json();
+                const data = await res.json(); // response from endpoint
                 
                 if(!res.ok){ // handle error
                     console.log("Error:", data.error)
@@ -60,7 +60,6 @@ export default function Users() {
         }
     }, [query]);
 
-
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -70,7 +69,13 @@ export default function Users() {
                 View and manage all users in the system.
                 </p>
             </div>
-            <DataTable data={data} columns={userColumns}/>
+            <DataTable
+                data={data}
+                columns={userColumns}
+                count={totalCount} // total number of rows
+                query={query} // the filters we are applying
+                setQuery={setQuery}
+            />
         
         </div>
 

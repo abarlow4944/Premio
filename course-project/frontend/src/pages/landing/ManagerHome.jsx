@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { UsersIcon, CreditCardIcon, StarIcon, CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useUser } from "../../contexts/UserContexts";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 
 
 const features = [

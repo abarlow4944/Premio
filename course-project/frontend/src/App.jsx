@@ -8,6 +8,7 @@ import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/Users";
+import ProfileManagement from "./pages/ProfileManagement";
 
 function App() {
 
@@ -27,6 +28,13 @@ function App() {
           {/* Regular / Cashier / Manager / Superuser Specific Landing Page */}
           <Route index element={<Home />} />
         </Route>
+
+        {/* Profile Management Page */}
+        <Route path="/profile" element={
+            <ProtectedRoute>      
+              <ProfileManagement />
+            </ProtectedRoute>
+        }></Route>
 
         {/* Users Page */}
         <Route path="/users" element={

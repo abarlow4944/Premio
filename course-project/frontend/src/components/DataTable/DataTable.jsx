@@ -3,20 +3,34 @@ import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel } fro
 import { Button } from '@headlessui/react';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
 
-export default function DataTable({data, columns, count}) {
+export default function DataTable({data, columns, count, query, setQuery}) {
 
     const table = useReactTable({
         data,
         columns,
-        getCoreRowModel: getCoreRowModel(),
-        manualPagination: true, // turn off client-side pagination,
-        getPaginationRowModel: getPaginationRowModel(),
-        initialState: {
+        pageCount: Math.ceil(count / query.limit), // number of pages
+        manualPagination: true, // true bc we handle pagination ourselves
+        state: {
             pagination: {
-                pageIndex: 0, // initial page index (page number -> zero-indexed)
-                pageSize: 10, // initial page size (how many rows in a page)
-            }
+                pageIndex: query.page - 1, // page number (table uses 0-index)
+                pageSize: query.limit, // number of rows per page
+            },
         },
+        onPaginationChange: (updater) => { // called when pagination state changes (any of the arrow buttons/dropped down is changed)
+            const next = typeof updater === "function"
+                ? updater({ // update pagination state
+                    pageIndex: query.page - 1,
+                    pageSize: query.limit
+                })
+                : updater;
+
+            setQuery(q => ({ // trigger API fetch in backend to receive new data based on page & limit
+                ...q, // keep all other fields the same
+                page: next.pageIndex + 1, // update page and limit in backend
+                limit: next.pageSize
+            }));
+        },
+        getCoreRowModel: getCoreRowModel(),
     });
 
     return ( 
@@ -65,7 +79,7 @@ export default function DataTable({data, columns, count}) {
                         table.setPageSize(Number(e.target.value))
                     }}
                     >
-                    {[1, 20, 30, 40, 50].map(pageSize => (
+                    {[10, 20, 30, 40, 50].map(pageSize => (
                         <option key={pageSize} value={pageSize}>
                         {pageSize}
                         </option>

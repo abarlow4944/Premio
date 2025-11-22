@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DataTable from "../components/DataTable/DataTable";
-import { promoColumns } from "../components/DataTable/Columns/PromoColumns";
+import { getPromoColumns } from "../components/DataTable/Columns/PromoColumns";
+import { useUser } from "../contexts/UserContexts";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
+    const { user } = useUser();
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -55,6 +57,8 @@ export default function Promotions() {
         }
     }, [query]);
 
+    const columns = useMemo(() => getPromoColumns(user?.role || 'regular'), [user?.role]);
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -66,7 +70,7 @@ export default function Promotions() {
             </div>
             <DataTable
                 data={data}
-                columns={promoColumns}
+                columns={columns}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
                 setQuery={setQuery}

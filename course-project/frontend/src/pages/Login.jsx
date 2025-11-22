@@ -124,18 +124,10 @@ export default function Login() {
                 </button>
                 </div>
             </form>
-
-            <p className="mt-10 text-center text-sm/6 text-gray-500">
-                Not a member?{' '}
-                <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
-                Make an account
-                </a>
-                
-            </p>
             
             </div>
 
-            {error && <p className="font-semibold text-flag-red-500 text-sm">{error}</p>}
+            {error && <p className="font-semibold text-flag-red-500 text-sm text-center mt-4">{error}</p>}
         </div>
     </>
     )

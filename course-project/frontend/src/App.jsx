@@ -30,11 +30,14 @@ function App() {
 
         {/* Users Page */}
         <Route path="/users" element={
-          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
-            <Users/>
-          </ProtectedRoute>
-        }>
+            <ProtectedRoute>      
+              <Layout />
+            </ProtectedRoute>
+          }>
+            
+          <Route index element={<Users />} />
         </Route>
+
       </Routes>
     </BrowserRouter>
   </UserProvider>

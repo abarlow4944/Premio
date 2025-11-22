@@ -64,8 +64,8 @@ export default function Users() {
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div>
-                <h1 className="text-center text-2xl font-semibold text-flag-red-500">Users</h1>
+            <div className="mb-[10vh]">
+                <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>
                 <p className="text-center text-sm text-space-indigo-500">
                 View and manage all users in the system.
                 </p>

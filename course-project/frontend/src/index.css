@@ -1,5 +1,5 @@
 /* GLOBAL CSS FILE */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Lexend+Deca:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Zalando+Sans:ital,wght@0,200..900;1,200..900&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -69,7 +69,7 @@
   --color-flag-red-950: #210107;
 
   /* ─── FONT ─────────────────────────────── */
-  --font-inter: "Inter", sans-serif;
+  --font-inter: "Lexend Deca", sans-serif;
 }
 
 body {
@@ -85,7 +85,5 @@ header {
   font-family: var(--font-inter);
 }
 
-.navigation-bar {
-  background-color: var(--color-strawberry-red-600);
-}
+
 

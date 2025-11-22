@@ -28,7 +28,7 @@ export default function DataTable({data, columns}) {
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id} className="hover:bg-gray-50">
                         {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-4 py-3 text-sm text-gray-600">
+                            <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </td>
                         ))}

@@ -11,7 +11,7 @@ export default function DataTable({data, columns, count}) {
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true, // turn off client-side pagination,
         getPaginationRowModel: getPaginationRowModel(),
-        initialstate: {
+        initialState: {
             pagination: {
                 pageIndex: 0, // initial page index (page number -> zero-indexed)
                 pageSize: 10, // initial page size (how many rows in a page)

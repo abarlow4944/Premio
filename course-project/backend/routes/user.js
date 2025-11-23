@@ -189,6 +189,7 @@ router.get("/", async(req, res) => {
 /////////////////////////////// /USERS/ME
 router.patch("/me", upload.single("avatarUrl"), async (req, res) => {
     try{
+        
         const { name, email, birthday} = req.body;
 
         // check if the user has proper clearance (must be regular or higher)
@@ -198,13 +199,13 @@ router.patch("/me", upload.single("avatarUrl"), async (req, res) => {
 
         // check validity of the payload
         if(!name && !email && !birthday && !req.file){
-            return res.status(400).json({"error": "Empty payload"})
+            return res.status(400).json({"error": "No changes to make"})
         }
         if((name && typeof name !== "string") || (email && typeof email !== "string") || (birthday && typeof birthday !== "string")){
             return res.status(400).json({"error": "Incorrect type for fields"})
         }
         if(name && (name.length < 1 || name.length > 50)){
-            return res.status(400).json({"error": "Name length is out of range (1-50)"})
+            return res.status(400).json({"error": "Name length is out of range (1-50 characters)"})
         }
         if(email && !email.endsWith("@mail.utoronto.ca")){
             return res.status(400).json({"error": "Invalid UofT email"})
@@ -238,7 +239,7 @@ router.patch("/me", upload.single("avatarUrl"), async (req, res) => {
                 dateObj.getMonth() !== month - 1 ||
                 dateObj.getDate() !== day
             ) {
-                return res.status(400).json({ error: "Invalid birthday date" });
+                return res.status(400).json({ error: "Invalid birthday" });
             }
 
             // check if birthday is in the future
@@ -321,31 +322,34 @@ router.get("/me", async (req, res) => {
     }
 })
 
-    /////////////////////////////// /USERS/ME/QR
-    router.get('/me/qr', async (req, res) => {
-        try {
-            if (!['regular','cashier','manager','superuser'].includes(req.user.role)) {
-                return res.status(403).json({ error: 'Not authorized' });
-            }
-            const user = await prisma.user.findUnique({ where: { utorid: req.user.utorid } });
-            if (!user) return res.status(404).json({ error: 'User not found' });
-            let token = user.qrToken;
-            if (!token) {
-                token = uuidv4();
-                await prisma.user.update({ where: { utorid: req.user.utorid }, data: { qrToken: token } });
-            }
-            return res.status(200).json({ qrToken: token });
-        } catch (err) {
-            console.error('Error /users/me/qr:', err);
-            return res.status(500).json({ error: 'Internal server error' });
+/////////////////////////////// /USERS/ME/QR
+router.get('/me/qr', async (req, res) => {
+    try {
+        if (!['regular','cashier','manager','superuser'].includes(req.user.role)) {
+            return res.status(403).json({ error: 'Not authorized' });
         }
-    });
+        const user = await prisma.user.findUnique({ where: { utorid: req.user.utorid } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        let token = user.qrToken;
+        if (!token) {
+            token = uuidv4();
+            await prisma.user.update({ where: { utorid: req.user.utorid }, data: { qrToken: token } });
+        }
+        return res.status(200).json({ qrToken: token });
+    } catch (err) {
+        console.error('Error /users/me/qr:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 /////////////////////////////// /USERS/ME/PASSWORD
 router.patch("/me/password", async (req, res) =>{
+
     try{
         const { old, new: newPassword } = req.body;
-
+        console.log(req.body)
+        console.log(typeof(old))
+        console.log(typeof(newPassword))
         // check if the user has proper clearance (must be cashier or higher)
         if (!["regular", "cashier", "manager", "superuser"].includes(req.user.role)) {
             return res.status(403).json({ error: "Not authorized" });
@@ -353,7 +357,7 @@ router.patch("/me/password", async (req, res) =>{
 
         // check validity of payload
         if(!old || !newPassword){
-            return res.status(400).json({ error: "Missing fields" });
+            return res.status(400).json({ error: "Missing password field(s)" });
         }
         if(typeof old !== "string" || typeof newPassword !== "string"){
             return res.status(400).json({ error: "Incorrect type for fields" });

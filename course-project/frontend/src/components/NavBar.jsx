@@ -106,8 +106,8 @@ export default function NavBar() {
             </button>
 
             {/* Profile Settings */}
-            <a onClick={() => navigate("/home")} className="-m-1.5 p-1.5 hover:cursor-pointer text-flag-red-500 hover:text-strawberry-red-700"> 
-                <span className="sr-only">Your Company</span>
+            <a onClick={() => navigate("/profile")} className="-m-1.5 p-1.5 hover:cursor-pointer text-flag-red-500 hover:text-strawberry-red-700"> 
+                <span className="sr-only">Profile</span>
                 <UserCircleIcon className="size-10 " />
             </a>
         </div>

@@ -7,7 +7,7 @@ import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Users from "./pages/Users";
+import ProfileManagement from "./pages/ProfileManagement";
 import Promotions from "./pages/Promotions";
 
 function App() {
@@ -27,6 +27,15 @@ function App() {
 
           {/* Regular / Cashier / Manager / Superuser Specific Landing Page */}
           <Route index element={<Home />} />
+        </Route>
+
+        {/* Profile Management Page */}
+        <Route path="/profile" element={
+            <ProtectedRoute>      
+              <Layout />
+            </ProtectedRoute>
+          }>
+          <Route index element={<ProfileManagement />} />
         </Route>
 
         {/* Users Page */}

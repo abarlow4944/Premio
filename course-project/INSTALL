@@ -4,10 +4,13 @@
 
 # 1. All the packages you need to install
 
-To install Tailwind v4: npm install tailwindcss @tailwindcss/vite
 To start the server: npm run dev
+
+To install Tailwind v4: npm install tailwindcss @tailwindcss/vite
 To install Nodemon: npm install --save-dev nodemon
   - you can then use npm run dev to start the backend server at port 3000, and the server will automatically restart everytime the backend is changed, meaning you don't have to manually restart it
 To install cookie-parser: npm install cookie-parser
 To install TanStack Table: npm install @tanstack/react-table
+To install React QR Code: npm install react-qr-code
+
 # 2. How to configure various servers (e.g., Nginx, Apache, etc)

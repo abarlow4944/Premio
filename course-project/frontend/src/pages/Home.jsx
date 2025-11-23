@@ -5,15 +5,19 @@ import ManagerHome from './landing/ManagerHome';
 import SuperuserHome from './landing/SuperuserHome';
 
 export default function Home() {
-    const {role} = useUser();
+    // const {role} = useUser();
+    const role = "regular";
 
     if (!role){
+        console.log("no role");
         return (
             <div>
                 Loading...
             </div>
         );
     }
+    console.log("role is " + role); 
+
     switch(role){
         case "regular":
             return <RegularHome />;

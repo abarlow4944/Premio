@@ -8,6 +8,7 @@ import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/Users";
+import TransactionPage from "./pages/transactions/Transactions";
 
 function App() {
 
@@ -35,6 +36,16 @@ function App() {
           </ProtectedRoute>
         }>
         </Route>
+
+        {/* Transaction Page */}
+        <Route path="/transactions" element={
+          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
+            <Layout/>
+          </ProtectedRoute>
+        }>
+          <Route index element={<TransactionPage />} />
+        </Route>
+
       </Routes>
     </BrowserRouter>
   </UserProvider>

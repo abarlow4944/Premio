@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import ResetPassword from "./pages/forgotPassword/ResetPassword";
 import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/Promotions";
+import Events from "./pages/events/Events";
 
 function App() {
 
@@ -63,9 +64,18 @@ function App() {
         <Route path="/promotions" element={
             <ProtectedRoute>
               <Layout />
+              <Promotions />
             </ProtectedRoute>
           }>
-          <Route index element={<Promotions />} />
+        </Route>
+
+        {/* Events Page */}
+        <Route path="/events" element={
+            <ProtectedRoute>
+              <Layout />
+              <Events />
+            </ProtectedRoute>
+          }>
         </Route>
 
       </Routes>

@@ -6,7 +6,7 @@ export const userColumns = [
   },
   {
     accessorKey: "utorid",
-    header: "UTorID",
+    header: "UTORid",
   },
   {
     accessorKey: "name",

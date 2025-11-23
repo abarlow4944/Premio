@@ -23,11 +23,15 @@ export function getPromoColumns(role) {
   if (!isManager) {
     return [
       { accessorKey: 'name', header: 'Name', enableSorting: true },
+      { accessorKey: 'description', header: 'Description', enableSorting: true },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
+      { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+      { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
     ];
   }
   return [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
+    { accessorKey: 'description', header: 'Description', enableSorting: true },
     { accessorKey: 'type', header: 'Type', enableSorting: true },
     { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
     { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },

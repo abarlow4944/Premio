@@ -10,6 +10,7 @@ import { useUser } from "../contexts/UserContexts";
 const NAV_ITEMS_BY_ROLE = {
   regular: [
     { label: "Transactions", path: "/transactions" },
+    { label: "Promotions", path: "/promotions" },
     { label: "Events", path: "/events" },
   ],
   cashier: [

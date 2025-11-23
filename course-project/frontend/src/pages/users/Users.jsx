@@ -14,6 +14,8 @@ export default function Users() {
         role: "",
         verified: "",
         activated: "",
+        sortBy: "",
+        sortOrder: "asc",
         page: 1,
         limit: 10
     })
@@ -33,6 +35,9 @@ export default function Users() {
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
+              
+                if(query.sortBy) params.append("sortBy", query.sortBy)
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder)
 
                 // retrieve users
                 const res = await fetch(`${API_URL}/users?${params}`, {
@@ -61,7 +66,7 @@ export default function Users() {
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div className="mb-[10vh]">
+            <div className="mb-[5vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>
                 <p className="text-center text-sm text-space-indigo-500">
                 View and manage all users in the system.

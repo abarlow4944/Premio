@@ -107,11 +107,14 @@ router.get('/', async (req, res) => {
 
 		const {
 			name: nameFilter,
+			description: descriptionFilter,
 			type: typeFilter,
 			page: pageRaw = '1',
 			limit: limitRaw = '10',
 			started: startedRaw,
 			ended: endedRaw,
+			sortBy: sortByRaw,
+			sortOrder: sortOrderRaw,
 		} = req.query;
 
 		const page = Number(pageRaw);
@@ -123,6 +126,10 @@ router.get('/', async (req, res) => {
 
 		if (nameFilter && typeof nameFilter === 'string') {
 			where.name = { contains: nameFilter };
+		}
+
+		if (descriptionFilter && typeof descriptionFilter === 'string') {
+			where.description = { contains: descriptionFilter };
 		}
 
 		if (typeFilter && typeof typeFilter === 'string') {
@@ -167,6 +174,7 @@ router.get('/', async (req, res) => {
 		const selectFields = {
 			id: true,
 			name: true,
+			description: true,
 			type: true,
 			startTime: isManager, // only include startTime for managers
 			endTime: true,
@@ -175,18 +183,33 @@ router.get('/', async (req, res) => {
 			points: true,
 		};
 
+
+		// sorting
+		const allowedSorts = isManager
+			? ['name','description','type','startTime','endTime','minSpending','rate','points','id']
+			: ['name','description','endTime','points','minSpending'];
+		let orderBy = undefined;
+		if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
+			const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+			orderBy = { [String(sortByRaw)]: dir };
+		} else {
+			// defaults
+			orderBy = isManager ? { startTime: 'asc' } : { endTime: 'asc' };
+		}
+
 		const promotions = await prisma.promotion.findMany({
 			where,
 			skip: (page - 1) * limit,
 			take: limit,
 			select: selectFields,
-			orderBy: { startTime: 'asc' },
+			orderBy,
 		});
 
 		const results = promotions.map(p => {
 			const base = {
 				id: p.id,
 				name: p.name,
+				description: p.description,
 				type: p.type,
 				endTime: p.endTime,
 				minSpending: p.minSpending ?? null,

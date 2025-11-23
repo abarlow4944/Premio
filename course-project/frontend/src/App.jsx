@@ -32,9 +32,11 @@ function App() {
         {/* Profile Management Page */}
         <Route path="/profile" element={
             <ProtectedRoute>      
-              <ProfileManagement />
+              <Layout />
             </ProtectedRoute>
-        }></Route>
+          }>
+          <Route index element={<ProfileManagement />} />
+        </Route>
 
         {/* Users Page */}
         <Route path="/users" element={

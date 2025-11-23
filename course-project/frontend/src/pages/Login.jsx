@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUser } from "../contexts/UserContexts";
 import { useNavigate } from "react-router-dom";
+import Message from "@/components/Message";
 
 export default function Login() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -125,9 +126,13 @@ export default function Login() {
                 </div>
             </form>
             
+            {error && (
+                <Message message={error} status="error" onClose={() => setError(null)}/>
+            )}
+            
             </div>
 
-            {error && <p className="font-semibold text-flag-red-500 text-sm text-center mt-4">{error}</p>}
+
         </div>
     </>
     )

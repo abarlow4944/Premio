@@ -7,6 +7,7 @@ import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Users from "./pages/users/Users";
 import ProfileManagement from "./pages/ProfileManagement";
 import Promotions from "./pages/Promotions";
 
@@ -45,7 +46,7 @@ function App() {
             </ProtectedRoute>
           }>
             
-          <Route index element={<ProfileManagement />} />
+          <Route index element={<Users />} />
         </Route>
 
         {/* Promotions Page */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { InputDefault } from "@/components/ui/Input";
+import { InputDefault } from "@/components/UI/Input";
 import { useUser } from "@/contexts/UserContexts";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/UI/button";
 import Message from "@/components/Message";
 
 export default function ProfileManagement() {

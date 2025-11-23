@@ -45,7 +45,7 @@ function App() {
             </ProtectedRoute>
           }>
             
-          <Route index element={<Users />} />
+          <Route index element={<ProfileManagement />} />
         </Route>
 
         {/* Promotions Page */}

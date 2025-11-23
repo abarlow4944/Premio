@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import DataTable from "../../components/DataTable/DataTable";
-import { userColumns } from "@/components/DataTable/Columns/EventColumns";
+import { eventColumns } from "@/components/DataTable/Columns/EventColumns";
 
 
 export default function Events() {
@@ -74,7 +74,7 @@ export default function Events() {
             </div>
             <DataTable
                 data={data}
-                columns={userColumns}
+                columns={eventColumns}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
                 setQuery={setQuery}

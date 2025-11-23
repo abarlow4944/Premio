@@ -12,7 +12,7 @@ import ProfileManagement from "./pages/ProfileManagement";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import ResetPassword from "./pages/forgotPassword/ResetPassword";
 import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
-import Promotions from "./pages/Promotions";
+import Promotions from "./pages/promotions/Promotions";
 import Events from "./pages/events/Events";
 
 function App() {

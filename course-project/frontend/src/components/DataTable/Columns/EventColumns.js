@@ -18,14 +18,16 @@ function formatDateTime(iso) {
 // Viewable columns depends on user role
 // regular => name, endTime
 // manager/superuser => all promotion fields
-export function getPromoColumns(role) {
+export function getEventColumns(role) {
   const isManager = role === 'manager' || role === 'superuser';
   if (!isManager) {
     return [
       { accessorKey: 'name', header: 'Name', enableSorting: true },
       { accessorKey: 'description', header: 'Description', enableSorting: true },
+      { accessorKey: 'location', header: 'Description', enableSorting: true },
+      { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-      { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+      { accessorKey: 'capacity', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
       { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
     ];
   }
@@ -41,4 +43,4 @@ export function getPromoColumns(role) {
   ];
 }
 
-export const promoColumns = getPromoColumns('regular');
+export const eventColumns = getEventColumns('regular');

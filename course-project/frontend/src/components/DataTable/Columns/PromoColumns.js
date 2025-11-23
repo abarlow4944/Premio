@@ -22,18 +22,18 @@ export function getPromoColumns(role) {
   const isManager = role === 'manager' || role === 'superuser';
   if (!isManager) {
     return [
-      { accessorKey: 'name', header: 'Name' },
-      { accessorKey: 'endTime', header: 'End Time', cell: ({ row }) => formatDateTime(row.original.endTime) },
+      { accessorKey: 'name', header: 'Name', enableSorting: true },
+      { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
     ];
   }
   return [
-    { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'type', header: 'Type' },
-    { accessorKey: 'startTime', header: 'Start Time', cell: ({ row }) => formatDateTime(row.original.startTime) },
-    { accessorKey: 'endTime', header: 'End Time', cell: ({ row }) => formatDateTime(row.original.endTime) },
-    { accessorKey: 'minSpending', header: 'Min Spending', cell: ({ row }) => row.original.minSpending ?? '—' },
-    { accessorKey: 'rate', header: 'Rate', cell: ({ row }) => row.original.rate ?? '—' },
-    { accessorKey: 'points', header: 'Points', cell: ({ row }) => row.original.points ?? 0 },
+    { accessorKey: 'name', header: 'Name', enableSorting: true },
+    { accessorKey: 'type', header: 'Type', enableSorting: true },
+    { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
+    { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
+    { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+    { accessorKey: 'rate', header: 'Rate', enableSorting: true, cell: ({ row }) => row.original.rate ?? '—' },
+    { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
   ];
 }
 

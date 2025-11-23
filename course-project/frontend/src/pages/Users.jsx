@@ -16,6 +16,8 @@ export default function Users() {
         role: "",
         verified: "",
         activated: "",
+        sortBy: "",
+        sortOrder: "asc",
         page: 1,
         limit: 10
     })
@@ -35,6 +37,8 @@ export default function Users() {
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
+                if(query.sortBy) params.append("sortBy", query.sortBy)
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder)
 
                 // retrieve users
                 const res = await fetch(`${API_URL}/users?${params}`, {

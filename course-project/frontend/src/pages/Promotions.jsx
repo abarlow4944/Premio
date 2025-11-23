@@ -15,6 +15,8 @@ export default function Promotions() {
         role: "",
         verified: "",
         activated: "",
+        sortBy: "",
+        sortOrder: "asc",
         page: 1,
         limit: 10
     })
@@ -29,6 +31,8 @@ export default function Promotions() {
                 // add necessary params to the URL
                 if(query.name) params.append("name", query.name);
                 if(query.endTime) params.append("endTime", query.endTime);
+                if(query.sortBy) params.append("sortBy", query.sortBy);
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)

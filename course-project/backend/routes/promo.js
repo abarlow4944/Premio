@@ -112,6 +112,8 @@ router.get('/', async (req, res) => {
 			limit: limitRaw = '10',
 			started: startedRaw,
 			ended: endedRaw,
+			sortBy: sortByRaw,
+			sortOrder: sortOrderRaw,
 		} = req.query;
 
 		const page = Number(pageRaw);
@@ -175,12 +177,26 @@ router.get('/', async (req, res) => {
 			points: true,
 		};
 
+
+		// sorting
+		const allowedSorts = isManager
+			? ['name','type','startTime','endTime','minSpending','rate','points','id']
+			: ['name','endTime'];
+		let orderBy = undefined;
+		if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
+			const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+			orderBy = { [String(sortByRaw)]: dir };
+		} else {
+			// defaults
+			orderBy = isManager ? { startTime: 'asc' } : { endTime: 'asc' };
+		}
+
 		const promotions = await prisma.promotion.findMany({
 			where,
 			skip: (page - 1) * limit,
 			take: limit,
 			select: selectFields,
-			orderBy: { startTime: 'asc' },
+			orderBy,
 		});
 
 		const results = promotions.map(p => {

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel } from "@tanstack/react-table";
 import { Button } from '@headlessui/react';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 
 export default function DataTable({data, columns, count, query, setQuery}) {
 
@@ -33,6 +33,15 @@ export default function DataTable({data, columns, count, query, setQuery}) {
         getCoreRowModel: getCoreRowModel(),
     });
 
+    const handleSort = (accessorKey, sortable) => {
+        if (!sortable || !accessorKey) return;
+        setQuery(q => {
+            const isSame = q.sortBy === accessorKey;
+            const nextOrder = isSame ? (q.sortOrder === 'asc' ? 'desc' : 'asc') : 'asc';
+            return { ...q, page: 1, sortBy: accessorKey, sortOrder: nextOrder };
+        });
+    };
+
     return ( 
         <div>
             {/* Table */}
@@ -42,11 +51,34 @@ export default function DataTable({data, columns, count, query, setQuery}) {
                 <thead className="bg-strawberry-red-500 text-left ">
                     {table.getHeaderGroups().map((hg) => (
                         <tr key={hg.id}>
-                        {hg.headers.map((header) => (
-                            <th key={header.id} className="px-4 py-3 text-sm font-semibold text-platinum-500 border-b">
-                                {flexRender(header.column.columnDef.header, header.getContext())}
-                            </th>
-                        ))}
+                        {hg.headers.map((header) => {
+                            const def = header.column.columnDef;
+                            const accessorKey = def.accessorKey;
+                            const sortable = def.enableSorting === false ? false : Boolean(accessorKey);
+                            const isActive = sortable && query.sortBy === accessorKey;
+                            const order = isActive ? (query.sortOrder || 'asc') : null;
+                            return (
+                                <th key={header.id} className="px-4 py-3 text-sm font-semibold text-platinum-500 border-b">
+                                    {sortable ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSort(accessorKey, sortable)}
+                                            className="inline-flex items-center gap-1 select-none hover:opacity-90"
+                                        >
+                                            {flexRender(def.header, header.getContext())}
+                                            {isActive && order === 'asc' && (
+                                                <ChevronUpIcon className="size-3.5" />
+                                            )}
+                                            {isActive && order === 'desc' && (
+                                                <ChevronDownIcon className="size-3.5" />
+                                            )}
+                                        </button>
+                                    ) : (
+                                        flexRender(def.header, header.getContext())
+                                    )}
+                                </th>
+                            );
+                        })}
                         </tr>
                     ))}
                 </thead>

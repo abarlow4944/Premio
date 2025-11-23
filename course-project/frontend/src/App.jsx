@@ -7,7 +7,7 @@ import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Users from "./pages/Users";
+import Users from "./pages/users/Users";
 import ProfileManagement from "./pages/ProfileManagement";
 
 function App() {

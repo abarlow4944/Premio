@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { useUser } from "../contexts/UserContexts";
-import { useNavigate } from "react-router-dom";
-import DataTable from "../components/DataTable/DataTable";
-import { userColumns } from "../components/DataTable/Columns/UserColumns";
+import DataTable from "../../components/DataTable/DataTable";
+import { userColumns } from "@/components/DataTable/Columns/UserColumns";
 
 
 export default function Users() {

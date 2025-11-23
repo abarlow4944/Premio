@@ -1,13 +1,55 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useReactTable, getCoreRowModel, flexRender, getPaginationRowModel } from "@tanstack/react-table";
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
 import { Button } from '@headlessui/react';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { Checkbox } from '@/components/ui/checkbox';
 
-export default function DataTable({data, columns, count, query, setQuery}) {
+export default function DataTable({
+    data,
+    columns,
+    count,
+    query,
+    setQuery,
+    selectionEnabled = false,
+    onSelectionChange,
+    onEditSelected,
+    onDeleteSelected,
+    onCreate,
+}) {
+
+    const [rowSelection, setRowSelection] = useState({});
+
+    const computedColumns = useMemo(() => {
+        if (!selectionEnabled) return columns;
+        return [
+            {
+                id: '__select',
+                header: ({ table }) => (
+                    <Checkbox
+                        aria-label="Select all rows"
+                        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                        onCheckedChange={(val) => table.toggleAllPageRowsSelected(!!val)}
+                        className="translate-y-[1px]"
+                    />
+                ),
+                cell: ({ row }) => (
+                    <Checkbox
+                        aria-label={`Select row ${row.id}`}
+                        checked={row.getIsSelected()}
+                        onCheckedChange={(val) => row.toggleSelected(!!val)}
+                        className="translate-y-[1px]"
+                    />
+                ),
+                enableSorting: false,
+                size: 32,
+            },
+            ...columns,
+        ];
+    }, [columns, selectionEnabled]);
 
     const table = useReactTable({
         data,
-        columns,
+        columns: computedColumns,
         pageCount: Math.ceil(count / query.limit), // number of pages
         manualPagination: true, // true bc we handle pagination ourselves
         state: {
@@ -15,6 +57,7 @@ export default function DataTable({data, columns, count, query, setQuery}) {
                 pageIndex: query.page - 1, // page number (table uses 0-index)
                 pageSize: query.limit, // number of rows per page
             },
+            rowSelection,
         },
         onPaginationChange: (updater) => { // called when pagination state changes (any of the arrow buttons/dropped down is changed)
             const next = typeof updater === "function"
@@ -31,7 +74,16 @@ export default function DataTable({data, columns, count, query, setQuery}) {
             }));
         },
         getCoreRowModel: getCoreRowModel(),
+        enableRowSelection: selectionEnabled,
+        onRowSelectionChange: setRowSelection,
+        getRowId: (original, index) => original.id !== undefined ? String(original.id) : String(index),
     });
+
+    useEffect(() => {
+        if (!selectionEnabled || !onSelectionChange) return;
+        const selected = table.getSelectedRowModel().flatRows.map(r => r.original);
+        onSelectionChange(selected);
+    }, [rowSelection, selectionEnabled, onSelectionChange, table]);
 
     const handleSort = (accessorKey, sortable) => {
         if (!sortable || !accessorKey) return;
@@ -42,10 +94,54 @@ export default function DataTable({data, columns, count, query, setQuery}) {
         });
     };
 
-    return ( 
-        <div>
+    const selectedRowObjects = selectionEnabled ? table.getSelectedRowModel().flatRows.map(r => r.original) : [];
+    const selectedCount = selectedRowObjects.length;
+
+        return ( 
+            <div>
+            {/* Action Bar */}
+            {(onCreate || selectionEnabled) && (
+                <div className="mb-2 h-8 flex items-center justify-between gap-2">
+                    {/* Left side: create button */}
+                    <div className="flex items-center gap-2">
+                        {onCreate && (
+                            <button
+                                type="button"
+                                onClick={() => onCreate()}
+                                className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
+                                aria-label="Create new item"
+                            >
+                                <PlusIcon className="size-6" /> Create
+                            </button>
+                        )}
+                    </div>
+                    {/* Right side: selection actions */}
+                    <div className="flex items-center gap-2">
+                        {selectionEnabled && selectedCount === 1 && (
+                            <button
+                                type="button"
+                                onClick={() => onEditSelected && onEditSelected(selectedRowObjects)}
+                                className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
+                                aria-label="Edit selected row"
+                            >
+                                <PencilSquareIcon className="size-6" /> Edit
+                            </button>
+                        )}
+                        {selectionEnabled && selectedCount >= 1 && (
+                            <button
+                                type="button"
+                                onClick={() => onDeleteSelected && onDeleteSelected(selectedRowObjects)}
+                                className="inline-flex items-center gap-1 rounded-md border border-red-600 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-600 hover:text-white transition"
+                                aria-label="Delete selected row(s)"
+                            >
+                                <TrashIcon className="size-6" /> Delete
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
             {/* Table */}
-        <div className="rounded-xl shadow-sm overflow-hidden">
+            <div className="rounded-xl shadow-sm overflow-hidden">
             {/* Header */}
             <table className="w-full table-auto">
                 <thead className="bg-strawberry-red-500 text-left ">

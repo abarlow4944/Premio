@@ -107,6 +107,7 @@ router.get('/', async (req, res) => {
 
 		const {
 			name: nameFilter,
+			description: descriptionFilter,
 			type: typeFilter,
 			page: pageRaw = '1',
 			limit: limitRaw = '10',
@@ -125,6 +126,10 @@ router.get('/', async (req, res) => {
 
 		if (nameFilter && typeof nameFilter === 'string') {
 			where.name = { contains: nameFilter };
+		}
+
+		if (descriptionFilter && typeof descriptionFilter === 'string') {
+			where.description = { contains: descriptionFilter };
 		}
 
 		if (typeFilter && typeof typeFilter === 'string') {
@@ -169,6 +174,7 @@ router.get('/', async (req, res) => {
 		const selectFields = {
 			id: true,
 			name: true,
+			description: true,
 			type: true,
 			startTime: isManager, // only include startTime for managers
 			endTime: true,
@@ -180,8 +186,8 @@ router.get('/', async (req, res) => {
 
 		// sorting
 		const allowedSorts = isManager
-			? ['name','type','startTime','endTime','minSpending','rate','points','id']
-			: ['name','endTime'];
+			? ['name','description','type','startTime','endTime','minSpending','rate','points','id']
+			: ['name','description','endTime','points','minSpending'];
 		let orderBy = undefined;
 		if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
 			const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -203,6 +209,7 @@ router.get('/', async (req, res) => {
 			const base = {
 				id: p.id,
 				name: p.name,
+				description: p.description,
 				type: p.type,
 				endTime: p.endTime,
 				minSpending: p.minSpending ?? null,

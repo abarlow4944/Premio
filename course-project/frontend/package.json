@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-checkbox": "^1.3.3",
     "@tailwindcss/vite": "^4.1.17",
     "@tanstack/react-table": "^8.21.3",
     "cors": "^2.8.5",

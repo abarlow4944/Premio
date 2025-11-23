@@ -69,11 +69,11 @@
   --color-flag-red-950: #210107;
 
   /* ─── FONT ─────────────────────────────── */
-  --font-inter: "Lexend Deca", sans-serif;
+  --font-lexend-deca: "Lexend Deca", sans-serif;
 }
 
 body {
-  font-family: var(--font-inter)
+  font-family: var(--font-lexend-deca)
 }
 
 header {
@@ -82,8 +82,15 @@ header {
   left: 0;
   width: 100%;
   z-index: 50; 
-  font-family: var(--font-inter);
+  font-family: var(--font-lexend-deca);
 }
 
+/* Animations for fade out */
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
-
+.animate-fade-out {
+  animation: fade-out 0.3s ease-out forwards;
+}

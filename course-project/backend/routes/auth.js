@@ -111,15 +111,15 @@ router.post("/resets", async (req, res) => {
 		return res.status(400).json({ error: "Missing or invalid UTORid" });
 	}
 
-	// rate limit: 60 seconds between requests
-	// const ip = req.ip || req.connection?.remoteAddress || "unknown";
-	// const key = (utorid && typeof utorid === 'string') ? `utorid:${utorid}` : `ip:${ip}`;
-	// const last = resetRateLimiter.get(key) || 0;
-	// const now = Date.now();
-	// if (now - last < 60 * 1000) {
-	// 	return res.status(429).json({ error: "Too Many Requests" });
-	// }
-	//resetRateLimiter.set(key, now);
+	//rate limit: 60 seconds between requests
+	const ip = req.ip || req.connection?.remoteAddress || "unknown";
+	const key = (utorid && typeof utorid === 'string') ? `utorid:${utorid}` : `ip:${ip}`;
+	const last = resetRateLimiter.get(key) || 0;
+	const now = Date.now();
+	if (now - last < 60 * 1000) {
+		return res.status(429).json({ error: "Too Many Requests" });
+	}
+	resetRateLimiter.set(key, now);
 
 	try {
 		const user = await prisma.user.findUnique({ where: { utorid } });

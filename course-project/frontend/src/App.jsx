@@ -19,34 +19,35 @@ function App() {
         {/* Login Page */}
         <Route path="/" element={<Login />} /> 
 
+        {/* Forgot Password Page */}
+        <Route path="/forgot-pasword" element={<ForgotPassword />} /> 
+
         {/* Protected Landing Page */}
         <Route path="/home" element={
             <ProtectedRoute>      
               <Layout />
+              <Home />
             </ProtectedRoute>
           }>
-
-          {/* Regular / Cashier / Manager / Superuser Specific Landing Page */}
-          <Route index element={<Home />} />
         </Route>
 
         {/* Profile Management Page */}
         <Route path="/profile" element={
             <ProtectedRoute>      
               <Layout />
+              <ProfileManagement />
             </ProtectedRoute>
           }>
-          <Route index element={<ProfileManagement />} />
+          
         </Route>
 
         {/* Users Page */}
         <Route path="/users" element={
             <ProtectedRoute>      
               <Layout />
+              <Users />
             </ProtectedRoute>
           }>
-            
-          <Route index element={<Users />} />
         </Route>
 
         {/* Promotions Page */}

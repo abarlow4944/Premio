@@ -35,6 +35,7 @@ export default function Users() {
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
+              
                 if(query.sortBy) params.append("sortBy", query.sortBy)
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder)
 

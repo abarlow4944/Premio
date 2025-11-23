@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+require('dotenv').config();
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -7,6 +8,7 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer'); 
 
 const resetRateLimiter = new Map();
 
@@ -103,26 +105,27 @@ router.post("/logout", (req, res) => {
 // POST /auth/resets: Request a password reset email
 router.post("/resets", async (req, res) => {
 	const { utorid } = req.body;
+	const API_URL = process.env.VITE_API_URL; // API base URL
 
 	if (!utorid || typeof utorid !== "string") {
-		return res.status(400).json({ error: "Missing or invalid utorid" });
+		return res.status(400).json({ error: "Missing or invalid UTORid" });
 	}
 
 	// rate limit: 60 seconds between requests
-	const ip = req.ip || req.connection?.remoteAddress || "unknown";
-	const key = (utorid && typeof utorid === 'string') ? `utorid:${utorid}` : `ip:${ip}`;
-	const last = resetRateLimiter.get(key) || 0;
-	const now = Date.now();
-	if (now - last < 60 * 1000) {
-		return res.status(429).json({ error: "Too Many Requests" });
-	}
-	resetRateLimiter.set(key, now);
+	// const ip = req.ip || req.connection?.remoteAddress || "unknown";
+	// const key = (utorid && typeof utorid === 'string') ? `utorid:${utorid}` : `ip:${ip}`;
+	// const last = resetRateLimiter.get(key) || 0;
+	// const now = Date.now();
+	// if (now - last < 60 * 1000) {
+	// 	return res.status(429).json({ error: "Too Many Requests" });
+	// }
+	//resetRateLimiter.set(key, now);
 
 	try {
 		const user = await prisma.user.findUnique({ where: { utorid } });
 
 		if (!user) {
-			return res.status(404).json({ message: "User not found" });
+			return res.status(404).json({ error: "User not found" });
 		}
 
 		const token = uuidv4();
@@ -133,6 +136,44 @@ router.post("/resets", async (req, res) => {
 			update: { token, expiresAt: expiresAtDate, used: false },
 			create: { utorid, token, expiresAt: expiresAtDate, used: false },
 		});
+
+		// send the password reset email
+		const resetLink = `${API_URL}/reset-password?token=${token}&utorid=${utorid}` // reset link
+		const recipientEmail = user.email
+
+		// email configuration
+		const transporter = nodemailer.createTransport({
+			host: process.env.SMTP_HOST, // for gmail
+			port: Number(process.env.SMTP_PORT),
+			secure: process.env.SMTP_SECURE === "true",
+			auth: {
+				user: process.env.SMTP_USER, // email
+				pass: process.env.SMTP_PASS, //password
+			},
+		});
+
+		// Define the email options
+		const mailOptions = {
+			from: process.env.SMTP_USER, 
+			to: recipientEmail, 
+			subject: "Password Reset Request", 
+			html: `
+				<p>Click below to reset your password:</p>
+				<a href="${resetLink}">${resetLink}</a>
+				<p>This link expires in 1 hour.</p>
+			`,
+		};
+
+		// Send the email
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.error("Error occurred:", error);
+				res.status(500).send('Error in sending email. Please try again later.');
+			} else {
+				res.send('Email sent successfully!');
+			}
+		});
+
 
 		return res.status(202).json({ expiresAt: saved.expiresAt.toISOString(), resetToken: saved.token });
 	} catch (err) {
@@ -159,7 +200,7 @@ router.post("/resets/:resetToken", async (req, res) => {
 	// password requirement: 8-20 chars, at least one uppercase, one lowercase, one number, one special character
 	const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/;
 	if (!pwdRegex.test(password)) {
-		return res.status(400).json({ error: "Password does not meet complexity requirements" });
+		return res.status(400).json({ error: "New password must be 8-20 characters, have at least one uppercase, one lowercase, one number, and one special character" });
 	}
 
 	try {

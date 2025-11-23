@@ -311,6 +311,26 @@ router.get("/me", async (req, res) => {
     }
 })
 
+    /////////////////////////////// /USERS/ME/QR
+    router.get('/me/qr', async (req, res) => {
+        try {
+            if (!['regular','cashier','manager','superuser'].includes(req.user.role)) {
+                return res.status(403).json({ error: 'Not authorized' });
+            }
+            const user = await prisma.user.findUnique({ where: { utorid: req.user.utorid } });
+            if (!user) return res.status(404).json({ error: 'User not found' });
+            let token = user.qrToken;
+            if (!token) {
+                token = uuidv4();
+                await prisma.user.update({ where: { utorid: req.user.utorid }, data: { qrToken: token } });
+            }
+            return res.status(200).json({ qrToken: token });
+        } catch (err) {
+            console.error('Error /users/me/qr:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+
 /////////////////////////////// /USERS/ME/PASSWORD
 router.patch("/me/password", async (req, res) =>{
     try{

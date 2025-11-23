@@ -31,19 +31,12 @@ function App() {
 
         {/* Users Page */}
         <Route path="/users" element={
-          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
-            <Users/>
-          </ProtectedRoute>
-        }>
-        </Route>
-
-        {/* Transaction Page */}
-        <Route path="/transactions" element={
-          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
-            <Layout/>
-          </ProtectedRoute>
-        }>
-          <Route index element={<TransactionPage />} />
+            <ProtectedRoute>      
+              <Layout />
+            </ProtectedRoute>
+          }>
+            
+          <Route index element={<Users />} />
         </Route>
 
       </Routes>

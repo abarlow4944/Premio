@@ -9,6 +9,9 @@ import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
 import ProfileManagement from "./pages/ProfileManagement";
+import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
+import ResetPassword from "./pages/forgotPassword/ResetPassword";
+import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/Promotions";
 
 function App() {
@@ -20,7 +23,13 @@ function App() {
         <Route path="/" element={<Login />} /> 
 
         {/* Forgot Password Page */}
-        <Route path="/forgot-pasword" element={<ForgotPassword />} /> 
+        <Route path="/forgot-password" element={<ForgotPassword />} /> 
+
+        {/* Reset Password Page */}
+        <Route path="/reset-password" element={<ResetPassword />} /> 
+
+        {/* Reset Password Page */}
+        <Route path="/email-confirmation" element={<EmailConfirmation />} /> 
 
         {/* Protected Landing Page */}
         <Route path="/home" element={

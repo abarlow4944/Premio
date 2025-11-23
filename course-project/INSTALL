@@ -12,5 +12,7 @@ To install Nodemon: npm install --save-dev nodemon
 To install cookie-parser: npm install cookie-parser
 To install TanStack Table: npm install @tanstack/react-table
 To install React QR Code: npm install react-qr-code
+To install nodemailer: npm install express nodemailer body-parser
+To install dotenv: npm install dotenv
 
 # 2. How to configure various servers (e.g., Nginx, Apache, etc)

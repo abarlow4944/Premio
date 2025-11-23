@@ -16,6 +16,19 @@ export default function Message({status, message, onClose}){
         icon = XCircleIcon
     }
 
+    const colours = {
+    green: {
+        text: "text-green-600",
+        bg: "bg-green-50",
+        border: "border-green-200",
+    },
+    red: {
+        text: "text-red-600",
+        bg: "bg-red-50",
+        border: "border-red-200",
+    },
+    };
+
     // Auto disappear after 2 seconds
     useEffect(() => {
         // start fade-out slightly before removal
@@ -29,7 +42,7 @@ export default function Message({status, message, onClose}){
     }, []);
 
     return (
-        <p className={`mt-4 text-sm font-medium text-${colour}-600 bg-${colour}-50 border border-${colour}-200 rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
+        <p className={`mt-4 text-sm font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
             {message}
         </p>
     )

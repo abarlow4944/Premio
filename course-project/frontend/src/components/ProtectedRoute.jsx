@@ -8,7 +8,6 @@ export default function ProtectedRoute({ children, allowedRoles }) {
     
 
     if(role === null){ // if the user has no role (not logged in)
-        console.log("user role is :", role)
         navigate("/")
         return
     }

@@ -40,6 +40,9 @@ export default function Events() {
                 if(query.activated) params.append("showFull", query.showFull);
                 if(query.activated) params.append("published", query.published);
 
+                // regular users can only see published events
+                if(role === "regular") params.append("published", true)
+
                 params.append("page", query.page)
                 params.append("limit", query.limit)
               

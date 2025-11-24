@@ -19,27 +19,28 @@ function formatDateTime(iso) {
 // regular => name, endTime
 // manager/superuser => all promotion fields
 export function getEventColumns(role) {
+    console.log("my role is", role)
   const isManager = role === 'manager' || role === 'superuser';
   if (!isManager) {
     return [
       { accessorKey: 'name', header: 'Name', enableSorting: true },
       { accessorKey: 'description', header: 'Description', enableSorting: true },
-      { accessorKey: 'location', header: 'Description', enableSorting: true },
+      { accessorKey: 'location', header: 'Location', enableSorting: true },
       { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-      { accessorKey: 'capacity', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
       { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
     ];
   }
   return [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
     { accessorKey: 'description', header: 'Description', enableSorting: true },
-    { accessorKey: 'type', header: 'Type', enableSorting: true },
+    { accessorKey: 'location', header: 'Location', enableSorting: true },
     { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
     { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-    { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
-    { accessorKey: 'rate', header: 'Rate', enableSorting: true, cell: ({ row }) => row.original.rate ?? '—' },
+    { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
     { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
+    { accessorKey: 'published', header: 'Published', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
   ];
 }
 

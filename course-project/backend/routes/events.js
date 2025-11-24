@@ -157,8 +157,9 @@ router.get("/", async(req, res) => {
                 where.published = published === 'true';
             }
         }
-
-        const take = limit;
+        
+        
+        const take = limitNum;
         const skip = (pageNum - 1) * take;
 
         const count = await prisma.event.count({

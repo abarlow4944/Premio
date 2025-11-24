@@ -16,11 +16,11 @@ export default function Events() {
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
-        role: "",
-        verified: "",
-        activated: "",
-        sortBy: "",
-        sortOrder: "asc",
+        location: "",
+        started: "",
+        ended: "",
+        showFull: false,
+        published: null,
         page: 1,
         limit: 10
     })
@@ -34,18 +34,18 @@ export default function Events() {
 
                 // add necessary params to the URL
                 if(query.name) params.append("name", query.name);
-                if(query.role) params.append("role", query.role);
-                if(query.verified) params.append("verified", query.verified);
-                if(query.activated) params.append("activated", query.activated);
+                if(query.role) params.append("location", query.location);
+                if(query.verified) params.append("started", query.started);
+                if(query.activated) params.append("ended", query.ended);
+                if(query.activated) params.append("showFull", query.showFull);
+                if(query.activated) params.append("published", query.published);
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
               
-                if(query.sortBy) params.append("sortBy", query.sortBy)
-                if(query.sortOrder) params.append("sortOrder", query.sortOrder)
 
                 // retrieve users
-                const res = await fetch(`${API_URL}/users?${params}`, {
+                const res = await fetch(`${API_URL}/events?${params}`, {
                     method: "GET",
                     credentials: "include"
                 });

@@ -16,8 +16,8 @@ function formatDateTime(iso) {
 }
 
 // Viewable columns depends on user role
-// regular => name, endTime
-// manager/superuser => all promotion fields
+// regular => cannot see published column 
+// manager/superuser => can see published column
 export function getEventColumns(role) {
     console.log("my role is", role)
   const isManager = role === 'manager' || role === 'superuser';
@@ -28,7 +28,7 @@ export function getEventColumns(role) {
       { accessorKey: 'location', header: 'Location', enableSorting: true },
       { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.capacity ?? '—' },
       { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
     ];
   }
@@ -38,9 +38,9 @@ export function getEventColumns(role) {
     { accessorKey: 'location', header: 'Location', enableSorting: true },
     { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
     { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-    { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+    { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, cell: ({ row }) => row.original.capacity ?? '—' },
     { accessorKey: 'points', header: 'Points', enableSorting: true, cell: ({ row }) => row.original.points ?? 0 },
-    { accessorKey: 'published', header: 'Published', enableSorting: true, cell: ({ row }) => row.original.minSpending ?? '—' },
+    { accessorKey: 'published', header: 'Published', enableSorting: true},
   ];
 }
 

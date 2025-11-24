@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import DataTable from "../components/DataTable/DataTable";
-import { getPromoColumns } from "../components/DataTable/Columns/PromoColumns";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
-import { useUser } from "../contexts/UserContexts";
+import DataTable from "../../components/DataTable/DataTable";
+import { getPromoColumns } from "../../components/DataTable/Columns/PromoColumns";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
+import { useUser } from "../../contexts/UserContexts";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 

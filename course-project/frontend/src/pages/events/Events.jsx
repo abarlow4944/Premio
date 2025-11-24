@@ -21,6 +21,8 @@ export default function Events() {
         ended: "",
         showFull: false,
         published: null,
+        sortBy: "",
+        sortOrder: "asc",
         page: 1,
         limit: 10
     })
@@ -45,6 +47,10 @@ export default function Events() {
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
+
+                // sorting
+                if(query.sortBy) params.append("sortBy", query.sortBy);
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
               
 
                 // retrieve users

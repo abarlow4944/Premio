@@ -159,9 +159,9 @@ export default function Promotions() {
                 selectionEnabled={selectionEnabled}
                 onSelectionChange={setSelectedPromos}
                 onDeleteSelected={handleDeleteSelected}
-                onCreate={() => {
+                onCreate={role == "manager" ? () => {
                     // placeholder for creating a new promotion
-                }}
+                } : undefined}
             />
             {selectionEnabled && selectedPromos.length > 0 && (
                 <div className="text-xs mt-2 text-gray-600">{selectedPromos.length} promotion(s) selected</div>

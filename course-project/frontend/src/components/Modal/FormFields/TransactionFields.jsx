@@ -41,6 +41,13 @@ export const TransactionFieldSets = {
             { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark" }
         ]
+    },
+    regular: {
+        redeem: [
+            { name: "type", label: "Purpose", required: true, value: "redemption", disabled: true },
+            { name: "amount", label: "Points", type: "number", required: true },
+            { name: "remark", label: "Remark" },            
+        ]
     }
 }
 

@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable/DataTable";
 import { getPromoColumns } from "../../components/DataTable/Columns/PromoColumns";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 import { useUser } from "../../contexts/UserContexts";
+import Message from "@/components/Message";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -10,6 +11,9 @@ export default function Promotions() {
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+
+    const[error, setError] = useState("")
+    const[success, setSuccess] = useState("")
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
@@ -64,13 +68,14 @@ export default function Promotions() {
 
     const role = user?.role || 'regular';
     const columns = useMemo(() => getPromoColumns(role), [role]);
-    const selectionEnabled = role === 'manager';
+    const selectionEnabled = role === 'manager' || role === 'superuser';
     const [selectedPromos, setSelectedPromos] = useState([]);
     const [pendingDelete, setPendingDelete] = useState(null);
 
     const performDeletion = async (rows) => {
+        setError("")
+        setSuccess("")
         if (!selectionEnabled || !rows || rows.length === 0) return;
-        const failures = [];
         for (const r of rows) {
             try {
                 const res = await fetch(`${API_URL}/promotions/${r.id}`, {
@@ -80,15 +85,16 @@ export default function Promotions() {
                 if (!res.ok && res.status !== 204) {
                     let body = {};
                     try { body = await res.json(); } catch {}
-                    failures.push({ id: r.id, error: body.error || `Status ${res.status}` });
+                    setError(`Could not complete deletion: ${body.error}` || "Could not complete deletion")
                 }
             } catch (err) {
-                failures.push({ id: r.id, error: err.message });
+                setError(err.message || "Could not complete deletion")
             }
         }
         setQuery(q => ({ ...q }));
         setSelectedPromos([]);
         setPendingDelete(null);
+        setSuccess("Successfully completed deletion")
     };
 
     const handleDeleteSelected = (rows) => {
@@ -105,6 +111,7 @@ export default function Promotions() {
                 View and manage all available promotions.
                 </p>
             </div>
+
             {/* Deletion Confirmation Modal */}
             {pendingDelete && (
                 <div
@@ -150,6 +157,7 @@ export default function Promotions() {
                     </Card>
                 </div>
             )}
+
             <DataTable
                 data={data}
                 columns={columns}
@@ -162,11 +170,14 @@ export default function Promotions() {
                 onCreate={() => {
                     // placeholder for creating a new promotion
                 }}
+                error={error}
+                success={success}
             />
+
+            {/* _ promotion(s) selected message */}
             {selectionEnabled && selectedPromos.length > 0 && (
                 <div className="text-xs mt-2 text-gray-600">{selectedPromos.length} promotion(s) selected</div>
             )}
-        
         </div>
 
     )

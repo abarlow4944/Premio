@@ -3,6 +3,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 const modalStyle = {
     position: 'absolute',
@@ -16,8 +18,8 @@ const modalStyle = {
     p: 4,
 };
 
-export default function ModalForm({modalType, fields = []}) {
-    const [open, setOpen] = useState(false);
+export default function ModalForm({ modalType, fields = [], open, setOpen, onSubmit }) {
+    const [errors, setErrors] = useState({});
 
     const dataFields = Object.fromEntries(
         fields.map(f => [f.name, ""])
@@ -26,18 +28,30 @@ export default function ModalForm({modalType, fields = []}) {
     const [formData, setFormData] = useState(dataFields);
 
     useEffect(() => {
-        setFormData(dataFields);
-    }, [fields]);
+        const initData = Object.fromEntries(fields.map(f => [f.name, f.value ?? ""]));
+        setFormData(initData);
+        setErrors({});
+    }, [fields, open]);
 
     const handleChange = (e) => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value
-        }));
+        setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
+        setErrors(prev => ({ ...prev, [e.target.name]: "" }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const newErrors = {};
+        fields.forEach(field => {
+            if (field.required && !formData[field.name].trim()) {
+                newErrors[field.name] = `${field.label} is required`;
+            }
+        });
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return; 
+        }
 
         const finalData = {...formData};
 
@@ -50,57 +64,62 @@ export default function ModalForm({modalType, fields = []}) {
             }
         });
 
+        if (onSubmit) onSubmit(finalData);
+
         console.log("Submitting... ", modalType, finalData);
         setOpen(false);
     };
 
     const handleClose = () => setOpen(false);
-    
+
     return (
         <div>
-        <Button onClick={() => setOpen(true)}>Open {modalType}</Button>
-        <Modal
-            open={open}
-            onClose={handleClose}
-            // aria-labelledby="modal-modal-title"
-            // aria-describedby="modal-modal-description"
-        >
+        {/* <Button onClick={() => setOpen(true)}>Open {modalType}</Button> */}
+        <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle}>
-            <Typography id="modal-modal-title" variant="h6" component="h2">
-                Enter {modalType} Details
-            </Typography>
+                {/* Close button */}
+                <IconButton
+                    onClick={handleClose}
+                    sx={{ position: 'absolute', top: 8, right: 8 }}
+                >
+                    <CloseIcon />
+                </IconButton>
 
-            <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Complete the form.
-            </Typography>
+                <Typography variant="h6" component="h2">
+                    Enter {modalType} details
+                </Typography>
 
-            <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-                {fields.map(f => (
-                    <div key={f.name} style={{ marginBottom: "12px" }}>
-                        <label style={{ display: "block", marginBottom: 4 }}>
-                        {f.label}
-                        </label>
+                <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
+                    {fields.map(f => (
+                        <div key={f.name} style={{ marginBottom: "12px" }}>
+                            <label style={{ display: "block", marginBottom: 4 }}>
+                                {f.label}{f.required ? " *" : ""}
+                            </label>
+                            <input
+                                type={f.type || "text"}
+                                name={f.name}
+                                value={formData[f.name]}
+                                onChange={handleChange}
+                                style={{
+                                    width: "100%",
+                                    padding: "8px",
+                                    border: errors[f.name] ? "1px solid red" : "1px solid #ccc",
+                                    borderRadius: "4px",
+                                }}
+                            />
+                            {errors[f.name] && (
+                                <span style={{ color: "red", fontSize: "0.8rem" }}>
+                                    {errors[f.name]}
+                                </span>
+                            )}
+                        </div>
+                    ))}
 
-                        <input
-                        type={f.type || "text"}
-                        name={f.name}
-                        value={formData[f.name]}
-                        onChange={handleChange}
-                        style={{
-                            width: "100%",
-                            padding: "8px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px"
-                        }}
-                        />
-                    </div>
-                ))}
-
-                <Button type="submit" variant="contained">
-                    Submit
-                </Button>
-            </form>
-        </Box>
+                    <Button type="submit" variant="contained">
+                        Submit
+                    </Button>
+                </form>
+            </Box>
         </Modal>
         </div>
     );

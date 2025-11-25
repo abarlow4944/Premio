@@ -6,19 +6,22 @@ const TransactionColumns = [
   },
   {
     accessorKey: "utorid",
-    header: "UTORid",
-  },
-  {
-    accessorKey: "name",
     header: "Name",
   },
   {
-    accessorKey: "createdId",
-    header: "ID of Creator",
+    accessorKey: "createdBy",
+    header: "Employee ID",
   },
   {
     accessorKey: "promotionId",
     header: "Promotion",
+    cell: ({ row }) => {
+        const ids = row.original.promotionIds;
+
+        if (!ids || ids.length === 0) return "-";
+
+        return ids.join(", ");
+    }
   },
   {
     accessorKey: "type",

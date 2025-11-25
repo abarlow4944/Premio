@@ -48,7 +48,16 @@ function App() {
             
           <Route index element={<Users />} />
         </Route>
-
+        
+        {/* Transaction Page */}
+        <Route path="/transactions" element={
+          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
+            <Layout/>
+          </ProtectedRoute>
+        }>
+          <Route index element={<TransactionPage />} />
+        </Route>
+        
       </Routes>
     </BrowserRouter>
   </UserProvider>

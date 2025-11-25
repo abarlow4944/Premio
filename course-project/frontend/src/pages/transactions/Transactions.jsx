@@ -3,26 +3,20 @@ import DataTable from "../../components/DataTable/DataTable";
 import TransactionColumns from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
+import { Button } from "../../components/ui/button";
+import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
 
-export default function TransactionPage(){
+export default function TransactionPage() {
     const { role } = useUser();
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
-    const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
-    const allowedRoles = ["cashier", "manager", "superuser"];
-    const allowed = allowedRoles.includes(role);
+    const [modalMode, setModalMode] = useState(null);
+    const API_URL = import.meta.env.VITE_API_URL;
 
-    const API_URL = import.meta.env.VITE_API_URL; // API base URL 
-    console.log("API_URL: " + API_URL);
-    const formFields = [
-        { name: "utorid", label: "UtorID", required: true },
-        { name: "type", label: "Type", required: true },
-        { name: "amount", label: "Amount", type: "number", required: true },
-        { name: "relatedId", label: "Transaction ID", type: "number", required: true},
-        { name: "promotionIds", label: "Promotion ID", multiNumber: true}, // can separate values by commas or whitespace
-        { name: "remark", label: "Remark"}
-    ];
+    // const formFields = ;
+    const canCreate = ["cashier", "manager", "superuser"].includes(role);
+    const canAdjust = ["manager", "superuser"].includes(role);
 
     const [query, setQuery] = useState({
         utorid: "",
@@ -32,85 +26,155 @@ export default function TransactionPage(){
         promotionIds: "",
         remark: "",
         page: 1,
-        limit: 10
-    })
+        limit: 10,
+    });
 
-    const handleSubmit = (data) => {
-        const newRow = {
-            id: rows.length + 1,
-            ...data,
-        };
-
-        setRows((prev) => [...prev, newRow]);
-        setOpen(false);
-    };
-
-    console.log("rendering transactions");
-    
-    useEffect(() =>{
-        const fetchData = async() =>{
-            try{
+    // Fetch table data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
                 const params = new URLSearchParams();
 
-                if(query.utorid) params.append("utorid", query.utorid);
-                if(query.type) params.append("type", query.type);
-                if(query.amount) params.append("amount", query.amount);
-                if(query.relatedId) params.append("relatedId", query.relatedId);
-                if(query.promotionIds) params.append("promotionIds", query.promotionIds);
-                
+                Object.entries(query).forEach(([key, val]) => {
+                    if (val) params.append(key, val);
+                });
+
                 const res = await fetch(`${API_URL}/transactions?${params}`, {
                     method: "GET",
-                    credentials: "include"
+                    credentials: "include",
                 });
 
                 const text = await res.text();
-                console.log("RAW:", text);
-
                 let data;
                 try {
                     data = JSON.parse(text);
-                } catch (err) {
+                } catch {
                     console.error("Not JSON:", text);
                     return;
                 }
 
-                if(!res.ok){ // handle error
-                    console.log("Error:", data.error)
-                    return
+                if (!res.ok) {
+                    console.error("Error:", data.error);
+                    return;
                 }
 
-                setData(data.results)
-                setTotalCount(data.count)
-            }
-            catch(error){
-                console.log("in catch");
-                console.log("Error:", error)
-                return
+                setRows(data.results);
+                setTotalCount(data.count);
+
+            } catch (error) {
+                console.error("Fetch error:", error);
             }
         };
-        fetchData();
 
+        fetchData();
     }, [query]);
 
     return (
-        <div>
-            <h2>TRANSACTION PAGE</h2>
-            <p>Working</p>
-            {allowed && (
-                <button onClick={() => setOpen(true)}>
-                    New Transaction
-                </button>
-            )}
+        <div className="p-6 space-y-4">
+            {/* Page Title */}
+            <div className="mb-[10vh]">
+                <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
+                    Transactions
+                </h1>
+                <p className="text-center text-sm text-space-indigo-500">
+                    View and manage all transactions in the system.
+                </p>
+            </div>
 
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+                {canCreate && (
+                <Button
+                    className="bg-[var(--color-strawberry-red-500)] text-white"
+                    onClick={() => {
+                    setModalMode("create"); 
+                    setOpen(true);
+                    }}
+                >
+                    New Transaction
+                </Button>
+                )}
+
+                {canAdjust && (
+                <Button
+                    className="bg-[var(--color-strawberry-red-500)] text-white"
+                    onClick={() => {
+                    setModalMode("adjust"); 
+                    setOpen(true);
+                    }}
+                >
+                    Adjust Transaction
+                </Button>
+                )}
+            </div>
+
+            {/* Modal */}
+            {modalMode && (
             <ModalForm
                 open={open}
                 setOpen={setOpen}
-                modalType="Transaction"
-                fields={formFields}
-                onSubmit={handleSubmit}
+                modalType="transactions"
+                fields={getTransactionFields(role, modalMode)}
+                onSubmit={async (data) => {
+                    const formFields = getTransactionFields(role, modalMode);
+                    const payload = {};
+
+                    formFields.forEach((f) => {
+                        let value = data[f.name];
+
+                        if (f.multiNumber) {
+                            const str = typeof value === "string" ? value.trim() : "";
+                            payload[f.name] = str === ""
+                                ? [] // empty input → empty array
+                                : str.split(/[\s,]+/)
+                                    .map(Number)
+                                    .filter(n => !isNaN(n));
+                        }
+                        else if (f.type === "number") {
+                            payload[f.name] = value ? Number(value) : 0; // or null if you prefer
+                        }
+                        else {
+                            payload[f.name] = value ?? "";
+                        }
+
+
+                    });
+
+                    try {
+                        const res = await fetch(`${API_URL}/transactions`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify(payload),
+                        });
+
+                        const result = await res.json();
+                        console.log("RAW: ", JSON.stringify(result))
+
+                        if (!res.ok) {
+                            console.error("Error creating transaction:", result.error);
+                            return;
+                        }
+
+                        setRows(prev => [{ ...result }, ...prev.map(r => ({ ...r }))]);
+                        setTotalCount(prev => prev + 1);
+                        setOpen(false);
+                        setModalMode(null); // reset after closing
+                    } catch (err) {
+                        console.error("Network error:", err);
+                    }
+                }}
             />
-            <DataTable data={rows} columns={TransactionColumns} />
-            
+            )}
+
+            {/* Table */}
+            <DataTable
+                data={rows}
+                columns={TransactionColumns}
+                count={totalCount}
+                query={query}
+                setQuery={q => ({ ...q})}
+            />
         </div>
     );
 }

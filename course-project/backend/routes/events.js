@@ -438,7 +438,7 @@ router.delete("/:eventId", async(req, res) =>{
         });
 
         if (event.published){
-            return res.status(400).json({ "error": "Bad Request" });
+            return res.status(400).json({ "error": "Cannot delete an event that has been published" });
         }
 
         await prisma.eventGuest.deleteMany({

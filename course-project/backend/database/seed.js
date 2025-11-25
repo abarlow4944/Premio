@@ -61,13 +61,16 @@ async function seedData() {
     }
 
     const now = new Date();
+  // helper lists of seeded users by role
+  const managerUsers = createdUsers.filter(u => u.role === 'manager');
+  const cashierUsers = createdUsers.filter(u => u.role === 'cashier');
     const promotionsData = [
       { name: 'Welcome Bonus', description: 'One-time welcome points for new users', type: 'automatic', startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30), points: 50, started: true, end: false },
       { name: 'Double Points Weekend', description: 'Earn +100 bonus points on purchases over $20 this weekend', type: 'onetime', startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 1), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2), minSpending: 20, points: 100, started: true, end: false },
       { name: 'Holiday Bonus', description: 'Extra 25 points for purchases during holidays', type: 'automatic', startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 60), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 60), points: 25, started: true, end: false },
-      { name: 'Referral Reward', description: 'Invite a friend and both get 30 points', type: 'onetime', startTime: now, endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 90), points: 30, started: true, end: false },
-      { name: 'Big Spender Bonus', description: 'Extra points proportional to spend above $50', type: 'automatic', startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 10), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 20), minSpending: 50, rate: 0.05, points: 0, started: true, end: false },
-      { name: 'Student Saver', description: 'Small discount + small points bonus for students', type: 'automatic', startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 10), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 20), rate: 0.02, points: 10, started: true, end: false },
+      { name: 'Referral Reward', description: 'Invite a friend and both get 30 points', type: 'onetime', startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 60), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 150), points: 30, started: false, end: false },
+      { name: 'Big Spender Bonus', description: 'Extra points proportional to spend above $50', type: 'automatic', startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 45), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 75), minSpending: 50, rate: 0.05, points: 0, started: false, end: false },
+      { name: 'Student Saver', description: 'Small discount + small points bonus for students', type: 'automatic', startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30), endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 60), rate: 0.02, points: 10, started: false, end: false },
     ];
 
     const promotions = [];
@@ -78,70 +81,70 @@ async function seedData() {
 
     const eventsData = [
     {
-        name: '20x Points Weekend',
-        description: 'Earn 20x the points on all beauty and personal care products.',
-        location: 'All Participating Stores',
-        startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 4),
-        capacity: 5000,
-        pointsRemain: 5000,
-        pointsAwarded: 500,
-        published: true
+      name: '20x Points Weekend',
+      description: 'Earn 20x the points on all beauty and personal care products.',
+      location: 'All Participating Stores',
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 3),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 5),
+      capacity: 5000,
+      pointsRemain: 5000,
+      pointsAwarded: 500,
+      published: true
     },
     {
-        name: 'Digital Offers Week',
-        description: 'Load your personalized offers through the app and earn bonus points.',
-        location: 'Mobile App',
-        startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 3),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7),
-        capacity: 99999,
-        pointsRemain: 99999,
-        pointsAwarded: 200,
-        published: true
+      name: 'Digital Offers Week',
+      description: 'Load your personalized offers through the app and earn bonus points.',
+      location: 'Mobile App',
+      startTime: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 4),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 3),
+      capacity: 99999,
+      pointsRemain: 99999,
+      pointsAwarded: 200,
+      published: true
     },
     {
-        name: 'Grocery Bonus Event',
-        description: 'Earn 5000 bonus points when you spend $30 or more on groceries.',
-        location: 'All Participating Stores',
-        startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 1),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 1 + 1000 * 60 * 60 * 12),
-        capacity: 99999,
-        pointsRemain: 99999,
-        pointsAwarded: 5000,
-        published: true
+      name: 'Grocery Bonus Event',
+      description: 'Earn 5000 bonus points when you spend $30 or more on groceries.',
+      location: 'All Participating Stores',
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 1),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2),
+      capacity: 99999,
+      pointsRemain: 99999,
+      pointsAwarded: 5000,
+      published: true
     },
     {
-        name: 'Pharmacy Essentials Promo',
-        description: 'Earn 10x points on over-the-counter medications and wellness products.',
-        location: 'Pharmacy Department',
-        startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 5),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 5 + 1000 * 60 * 60 * 24),
-        capacity: 99999,
-        pointsRemain: 99999,
-        pointsAwarded: 350,
-        published: true
+      name: 'Pharmacy Essentials Promo',
+      description: 'Earn 10x points on over-the-counter medications and wellness products.',
+      location: 'Pharmacy Department',
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 8),
+      capacity: 99999,
+      pointsRemain: 99999,
+      pointsAwarded: 350,
+      published: true
     },
     {
-        name: 'Household Essentials Deal',
-        description: 'Earn 8000 bonus points when you spend $25 on cleaning supplies.',
-        location: 'Household & Home Care',
-        startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 12),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 12 + 1000 * 60 * 60 * 6),
-        capacity: 99999,
-        pointsRemain: 99999,
-        pointsAwarded: 8000,
-        published: false
+      name: 'Household Essentials Deal',
+      description: 'Earn 8000 bonus points when you spend $25 on cleaning supplies.',
+      location: 'Household & Home Care',
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30 + 1000 * 60 * 60 * 6),
+      capacity: 99999,
+      pointsRemain: 99999,
+      pointsAwarded: 8000,
+      published: false
     },
     {
-        name: 'Mystery Bonus Points',
-        description: 'Load the offer to reveal your surprise bonus points. Redeemable once.',
-        location: 'Mobile App',
-        startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 3),
-        endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 3 + 1000 * 60 * 60 * 24),
-        capacity: 99999,
-        pointsRemain: 99999,
-        pointsAwarded: 1000,
-        published: false
+      name: 'Mystery Bonus Points',
+      description: 'Load the offer to reveal your surprise bonus points. Redeemable once.',
+      location: 'Mobile App',
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 45),
+      endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 46),
+      capacity: 99999,
+      pointsRemain: 99999,
+      pointsAwarded: 1000,
+      published: false
     }
     ];
 
@@ -179,6 +182,23 @@ async function seedData() {
     for (const t of txnTypes) {
       for (let i = 0; i < 2; i++) {
         const user = createdUsers[randomInt(0, createdUsers.length - 1)];
+        // ensure adjustments are created by a manager and purchases are created by a cashier
+        let createdByUtorid = user.utorid;
+        let processedByUtorid = user.utorid;
+        if (t === 'adjustment') {
+          if (managerUsers && managerUsers.length > 0) {
+            const m = managerUsers[randomInt(0, managerUsers.length - 1)];
+            createdByUtorid = m.utorid;
+            processedByUtorid = m.utorid;
+          }
+        }
+        if (t === 'purchase') {
+          if (cashierUsers && cashierUsers.length > 0) {
+            const c = cashierUsers[randomInt(0, cashierUsers.length - 1)];
+            createdByUtorid = c.utorid;
+            processedByUtorid = c.utorid;
+          }
+        }
         const base = {
           utorid: user.utorid,
           type: t,
@@ -186,10 +206,10 @@ async function seedData() {
           remark: `${t} transaction sample`,
           amount: t === 'redemption' ? -randomInt(1, 20) : randomInt(1, 200),
           relatedId: null,
-          createdBy: user.utorid,
+          createdBy: createdByUtorid,
           suspicious: false,
           processed: true,
-          processedBy: user.utorid,
+          processedBy: processedByUtorid,
         };
         transactionsToCreate.push(base);
       }
@@ -200,16 +220,34 @@ async function seedData() {
       const t = txnTypes[randomInt(0, txnTypes.length - 1)];
       const spent = t === 'purchase' ? parseFloat((Math.random() * 50 + 0.5).toFixed(2)) : null;
       const amount = t === 'redemption' ? -randomInt(1, 50) : randomInt(1, 300);
+      // ensure adjustments are created by a manager and purchases by a cashier
+      let createdByUtorid = user.utorid;
+      let processedByUtorid = user.utorid;
+      if (t === 'adjustment') {
+        if (managerUsers && managerUsers.length > 0) {
+          const m = managerUsers[randomInt(0, managerUsers.length - 1)];
+          createdByUtorid = m.utorid;
+          processedByUtorid = m.utorid;
+        }
+      }
+      if (t === 'purchase') {
+        if (cashierUsers && cashierUsers.length > 0) {
+          const c = cashierUsers[randomInt(0, cashierUsers.length - 1)];
+          createdByUtorid = c.utorid;
+          processedByUtorid = c.utorid;
+        }
+      }
+
       const tx = {
         utorid: user.utorid,
         type: t,
         spent,
         remark: `Auto ${t} txn`,
         amount,
-        createdBy: user.utorid,
+        createdBy: createdByUtorid,
         suspicious: Math.random() < 0.05,
         processed: Math.random() < 0.9,
-        processedBy: user.utorid,
+        processedBy: processedByUtorid,
       };
       // sometimes associate with an event or promotion
       if (Math.random() < 0.25) {

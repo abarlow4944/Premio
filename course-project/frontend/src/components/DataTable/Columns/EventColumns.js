@@ -19,7 +19,6 @@ function formatDateTime(iso) {
 // regular => cannot see published column 
 // manager/superuser => can see published column
 export function getEventColumns(role) {
-    console.log("my role is", role)
   const isManager = role === 'manager' || role === 'superuser';
   if (!isManager) {
     return [

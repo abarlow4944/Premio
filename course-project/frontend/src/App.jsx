@@ -8,6 +8,7 @@ import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
+import TransactionPage from "./pages/transactions/Transactions";
 import ProfileManagement from "./pages/ProfileManagement";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import ResetPassword from "./pages/forgotPassword/ResetPassword";
@@ -77,7 +78,16 @@ function App() {
             </ProtectedRoute>
           }>
         </Route>
-
+        
+        {/* Transaction Page */}
+        <Route path="/transactions" element={
+          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
+            <Layout/>
+          </ProtectedRoute>
+        }>
+          <Route index element={<TransactionPage />} />
+        </Route>
+        
       </Routes>
     </BrowserRouter>
   </UserProvider>

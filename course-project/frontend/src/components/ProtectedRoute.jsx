@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContexts";
+import { useEffect } from "react";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
     const { role } = useUser();

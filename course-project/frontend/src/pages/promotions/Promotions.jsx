@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable/DataTable";
 import { getPromoColumns } from "../../components/DataTable/Columns/PromoColumns";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 import { useUser } from "../../contexts/UserContexts";
+import Message from "@/components/Message";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -10,6 +11,10 @@ export default function Promotions() {
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [globalMaxes, setGlobalMaxes] = useState(null);
+
+    const[error, setError] = useState("")
+    const[success, setSuccess] = useState("")
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
@@ -31,6 +36,14 @@ export default function Promotions() {
 
                 // add necessary params to the URL
                 if(query.name) params.append("name", query.name);
+                if(query.description) params.append("description", query.description);
+                if (query.type !== undefined && query.type !== '') params.append("type", query.type);
+                if (query.minSpendingMin !== undefined && query.minSpendingMin !== '') params.append("minSpendingMin", query.minSpendingMin);
+                if (query.minSpendingMax !== undefined && query.minSpendingMax !== '') params.append("minSpendingMax", query.minSpendingMax);
+                if (query.rateMin !== undefined && query.rateMin !== '') params.append("rateMin", query.rateMin);
+                if (query.rateMax !== undefined && query.rateMax !== '') params.append("rateMax", query.rateMax);
+                if (query.pointsMin !== undefined && query.pointsMin !== '') params.append("pointsMin", query.pointsMin);
+                if (query.pointsMax !== undefined && query.pointsMax !== '') params.append("pointsMax", query.pointsMax);
                 if(query.endTime) params.append("endTime", query.endTime);
                 if(query.sortBy) params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
@@ -62,15 +75,44 @@ export default function Promotions() {
         }
     }, [query]);
 
+    // fetch db maxima once on mount to set initial slider max
+    useEffect(() => {
+        let mounted = true;
+        const fetchStats = async () => {
+            try {
+                const res = await fetch(`${API_URL}/promotions/stats`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                const body = await res.json();
+                if (!res.ok) {
+                    console.warn('Could not fetch promotion stats:', body.error || res.status);
+                    return;
+                }
+                if (!mounted) return;
+                setGlobalMaxes({
+                    minSpending: Number(body.maxMinSpending ?? 0),
+                    rate: Number(body.maxRate ?? 0),
+                    points: Number(body.maxPoints ?? 0),
+                });
+            } catch (err) {
+                console.warn('Error fetching promotion stats:', err);
+            }
+        };
+        fetchStats();
+        return () => { mounted = false };
+    }, []);
+
     const role = user?.role || 'regular';
     const columns = useMemo(() => getPromoColumns(role), [role]);
-    const selectionEnabled = role === 'manager';
+    const selectionEnabled = role === 'manager' || role === 'superuser';
     const [selectedPromos, setSelectedPromos] = useState([]);
     const [pendingDelete, setPendingDelete] = useState(null);
 
     const performDeletion = async (rows) => {
+        setError("")
+        setSuccess("")
         if (!selectionEnabled || !rows || rows.length === 0) return;
-        const failures = [];
         for (const r of rows) {
             try {
                 const res = await fetch(`${API_URL}/promotions/${r.id}`, {
@@ -80,15 +122,18 @@ export default function Promotions() {
                 if (!res.ok && res.status !== 204) {
                     let body = {};
                     try { body = await res.json(); } catch {}
-                    failures.push({ id: r.id, error: body.error || `Status ${res.status}` });
+                    setError(`Could not complete deletion: ${body.error}` || "Could not complete deletion")
+                    setPendingDelete(null);
+                    return;
                 }
             } catch (err) {
-                failures.push({ id: r.id, error: err.message });
+                setError(err.message || "Could not complete deletion")
             }
         }
         setQuery(q => ({ ...q }));
         setSelectedPromos([]);
         setPendingDelete(null);
+        setSuccess("Successfully completed deletion")
     };
 
     const handleDeleteSelected = (rows) => {
@@ -105,6 +150,7 @@ export default function Promotions() {
                 View and manage all available promotions.
                 </p>
             </div>
+
             {/* Deletion Confirmation Modal */}
             {pendingDelete && (
                 <div
@@ -150,23 +196,30 @@ export default function Promotions() {
                     </Card>
                 </div>
             )}
-            <DataTable
-                data={data}
-                columns={columns}
-                count={totalCount} // total number of rows
-                query={query} // the filters we are applying
-                setQuery={setQuery}
-                selectionEnabled={selectionEnabled}
-                onSelectionChange={setSelectedPromos}
-                onDeleteSelected={handleDeleteSelected}
-                onCreate={() => {
-                    // placeholder for creating a new promotion
-                }}
-            />
+
+            {globalMaxes && (
+                <DataTable
+                    data={data}
+                    columns={columns}
+                    count={totalCount} // total number of rows
+                    query={query} // the filters we are applying
+                    setQuery={setQuery}
+                    initialStableMax={globalMaxes}
+                    selectionEnabled={selectionEnabled}
+                    onSelectionChange={setSelectedPromos}
+                    onDeleteSelected={handleDeleteSelected}
+                    onCreate={role == "manager" ? () => {
+                        // placeholder for creating a new promotion
+                    } : undefined}
+                    error={error}
+                    success={success}
+                />
+            )}
+
+            {/* _ promotion(s) selected message */}
             {selectionEnabled && selectedPromos.length > 0 && (
                 <div className="text-xs mt-2 text-gray-600">{selectedPromos.length} promotion(s) selected</div>
             )}
-        
         </div>
 
     )

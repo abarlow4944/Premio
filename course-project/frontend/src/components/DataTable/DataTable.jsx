@@ -50,7 +50,7 @@ export default function DataTable({
                     <Checkbox
                         aria-label="Select all rows"
                         checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-                        onCheckedChange={(val) => table.toggleAllPageRowsSelected(!!val)}
+                        onCheckedChange={(val) => table.toggleAllPageRowsSelected(val)}
                         className="translate-y-[1px]"
                     />
                 ),
@@ -58,7 +58,7 @@ export default function DataTable({
                     <Checkbox
                         aria-label={`Select row ${row.id}`}
                         checked={row.getIsSelected()}
-                        onCheckedChange={(val) => row.toggleSelected(!!val)}
+                        onCheckedChange={(val) => row.toggleSelected(val)}
                         className="translate-y-[1px]"
                     />
                 ),
@@ -129,7 +129,15 @@ export default function DataTable({
                 }
             }
         });
-        setColumnFilters(initial);
+        // avoid overwriting if no change
+        setColumnFilters((prev) => {
+            const prevKeys = Object.keys(prev);
+            const initKeys = Object.keys(initial);
+            if (prevKeys.length === initKeys.length && initKeys.every(k => String(prev[k] || '') === String(initial[k] || ''))) {
+                return prev;
+            }
+            return initial;
+        });
     }, [query, computedColumns]);
 
     // lets filtering update the query after a debounce

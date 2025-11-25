@@ -212,7 +212,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
-        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page, limit } = req.query;
+        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page, limit, sortBy: sortByRaw, sortOrder: sortOrderRaw } = req.query;
 
         // typecasted field values
         let suspiciousBool;
@@ -312,17 +312,51 @@ router.get("/", async (req, res) => {
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
         if (amountNum !== undefined) where.amount = { [operator]: amountNum };
 
+        // determine ordering
+        const allowedSorts = ['id', 'utorid', 'createdBy', 'promotionId', 'type', 'amount', 'spent', 'relatedId', 'suspicious', 'processed', 'processedBy', 'eventId'];
+        let orderBy = { id: 'desc' };
+        if (sortByRaw) {
+            const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
+            if (allowedSorts.includes(String(sortByRaw))) {
+                orderBy = { [String(sortByRaw)]: dir };
+            }
+        }
+
         // query database
         const count = await prisma.transaction.count({ where });
         const skip = (pageNum - 1) * limitNum;
 
-        const transactions = await prisma.transaction.findMany({
-            where,
-            skip,
-            take: limitNum,
-            orderBy: { id: 'desc' },
-            include: { promotions: { select: { id: true } } },
-        });
+        let transactions = [];
+        if (String(sortByRaw) === 'promotionId') {
+            const all = await prisma.transaction.findMany({
+                where,
+                include: { promotions: { select: { id: true } } },
+            });
+
+            const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? -1 : 1;
+
+            const minId = (proms) => {
+                if (!proms || proms.length === 0) return dir === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+                return Math.min(...proms.map(p => p.id));
+            };
+
+            all.sort((a, b) => {
+                const ma = minId(a.promotions);
+                const mb = minId(b.promotions);
+                if (ma === mb) return 0;
+                return ma < mb ? -1 * dir : 1 * dir;
+            });
+
+            transactions = all.slice(skip, skip + limitNum);
+        } else {
+            transactions = await prisma.transaction.findMany({
+                where,
+                skip,
+                take: limitNum,
+                orderBy,
+                include: { promotions: { select: { id: true } } },
+            });
+        }
 
         // format response
         const results = transactions.map(t => ({

@@ -11,6 +11,7 @@ export default function Promotions() {
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [globalMaxes, setGlobalMaxes] = useState(null);
 
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
@@ -35,6 +36,14 @@ export default function Promotions() {
 
                 // add necessary params to the URL
                 if(query.name) params.append("name", query.name);
+                if(query.description) params.append("description", query.description);
+                if (query.type !== undefined && query.type !== '') params.append("type", query.type);
+                if (query.minSpendingMin !== undefined && query.minSpendingMin !== '') params.append("minSpendingMin", query.minSpendingMin);
+                if (query.minSpendingMax !== undefined && query.minSpendingMax !== '') params.append("minSpendingMax", query.minSpendingMax);
+                if (query.rateMin !== undefined && query.rateMin !== '') params.append("rateMin", query.rateMin);
+                if (query.rateMax !== undefined && query.rateMax !== '') params.append("rateMax", query.rateMax);
+                if (query.pointsMin !== undefined && query.pointsMin !== '') params.append("pointsMin", query.pointsMin);
+                if (query.pointsMax !== undefined && query.pointsMax !== '') params.append("pointsMax", query.pointsMax);
                 if(query.endTime) params.append("endTime", query.endTime);
                 if(query.sortBy) params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
@@ -65,6 +74,34 @@ export default function Promotions() {
             console.log("Error:", error)
         }
     }, [query]);
+
+    // fetch db maxima once on mount to set initial slider max
+    useEffect(() => {
+        let mounted = true;
+        const fetchStats = async () => {
+            try {
+                const res = await fetch(`${API_URL}/promotions/stats`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                const body = await res.json();
+                if (!res.ok) {
+                    console.warn('Could not fetch promotion stats:', body.error || res.status);
+                    return;
+                }
+                if (!mounted) return;
+                setGlobalMaxes({
+                    minSpending: Number(body.maxMinSpending ?? 0),
+                    rate: Number(body.maxRate ?? 0),
+                    points: Number(body.maxPoints ?? 0),
+                });
+            } catch (err) {
+                console.warn('Error fetching promotion stats:', err);
+            }
+        };
+        fetchStats();
+        return () => { mounted = false };
+    }, []);
 
     const role = user?.role || 'regular';
     const columns = useMemo(() => getPromoColumns(role), [role]);
@@ -166,12 +203,13 @@ export default function Promotions() {
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
                 setQuery={setQuery}
+                initialStableMax={globalMaxes}
                 selectionEnabled={selectionEnabled}
                 onSelectionChange={setSelectedPromos}
                 onDeleteSelected={handleDeleteSelected}
-                onCreate={() => {
+                onCreate={role == "manager" ? () => {
                     // placeholder for creating a new promotion
-                }}
+                } : undefined}
                 error={error}
                 success={success}
             />

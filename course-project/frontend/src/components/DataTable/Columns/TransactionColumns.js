@@ -6,7 +6,7 @@ const TransactionColumns = [
   },
   {
     accessorKey: "utorid",
-    header: "Name",
+    header: "UTORid",
   },
   {
     accessorKey: "createdBy",

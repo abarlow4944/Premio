@@ -23,7 +23,7 @@ export default function TransactionPage() {
         type: "",
         amount: "",
         relatedId: "",
-        promotionIds: "",
+        promotionId: "",
         remark: "",
         page: 1,
         limit: 10,
@@ -173,7 +173,7 @@ export default function TransactionPage() {
                 columns={TransactionColumns}
                 count={totalCount}
                 query={query}
-                setQuery={q => ({ ...q})}
+                setQuery={setQuery}
             />
         </div>
     );

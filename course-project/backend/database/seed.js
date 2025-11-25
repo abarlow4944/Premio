@@ -130,7 +130,7 @@ async function seedData() {
         capacity: 99999,
         pointsRemain: 99999,
         pointsAwarded: 8000,
-        published: true
+        published: false
     },
     {
         name: 'Mystery Bonus Points',
@@ -141,7 +141,7 @@ async function seedData() {
         capacity: 99999,
         pointsRemain: 99999,
         pointsAwarded: 1000,
-        published: true
+        published: false
     }
     ];
 

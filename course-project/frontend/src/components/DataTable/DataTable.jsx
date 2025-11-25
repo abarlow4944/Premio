@@ -6,6 +6,7 @@ import { DualRangeSlider } from '@/components/ui/dual-range-slider';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { CheckIcon } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
+import Message from '../Message';
 
 export default function DataTable({
     data,
@@ -19,6 +20,8 @@ export default function DataTable({
     onEditSelected,
     onDeleteSelected,
     onCreate,
+    error,
+    success
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
@@ -168,7 +171,7 @@ export default function DataTable({
             <div>
             {/* Action Bar */}
             {(onCreate || selectionEnabled) && (
-                <div className="mb-2 h-8 flex items-center justify-between gap-2">
+                <div className="mb-4 h-8 flex items-center justify-between gap-2">
                     {/* Left side: create button */}
                     <div className="flex items-center gap-2">
                         {onCreate && (
@@ -183,6 +186,19 @@ export default function DataTable({
                             </Button>
                         )}
                     </div>
+                    
+                    {/* Middle: Error/success messages */}
+                    <div className="flex flex-col justify-center -mt-4">
+                        {error && (
+                            <Message message={error} status="error"/>
+                        )}
+                
+                        {success && (
+                            <Message message={success} status="success"/>
+                        )}
+
+                    </div>
+
                     {/* Right side: selection actions */}
                     <div className="flex items-center gap-2">
                         {selectionEnabled && selectedCount === 1 && (
@@ -210,8 +226,10 @@ export default function DataTable({
                     </div>
                 </div>
             )}
+
             {/* Table */}
             <div className="rounded-xl shadow-sm overflow-hidden">
+
             {/* Header */}
             <table className="w-full table-auto">
                 <thead className="bg-strawberry-red-500 text-left ">
@@ -358,7 +376,6 @@ export default function DataTable({
         </div>
 
         {/* Pagination */}
-
         {/* choosing number of items per page */}
         <div className="flex flex-col sm:flex-row justify-between items-center mt-4 text-sm text-space-indigo-500">
             <div className="flex items-center mb-4 sm:mb-0">

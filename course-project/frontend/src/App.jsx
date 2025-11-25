@@ -8,11 +8,13 @@ import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
+import TransactionPage from "./pages/transactions/Transactions";
 import ProfileManagement from "./pages/ProfileManagement";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import ResetPassword from "./pages/forgotPassword/ResetPassword";
 import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
-import Promotions from "./pages/Promotions";
+import Promotions from "./pages/promotions/Promotions";
+import Events from "./pages/events/Events";
 
 function App() {
 
@@ -63,11 +65,29 @@ function App() {
         <Route path="/promotions" element={
             <ProtectedRoute>
               <Layout />
+              <Promotions />
             </ProtectedRoute>
           }>
-          <Route index element={<Promotions />} />
         </Route>
 
+        {/* Events Page */}
+        <Route path="/events" element={
+            <ProtectedRoute>
+              <Layout />
+              <Events />
+            </ProtectedRoute>
+          }>
+        </Route>
+        
+        {/* Transaction Page */}
+        <Route path="/transactions" element={
+          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
+            <Layout/>
+          </ProtectedRoute>
+        }>
+          <Route index element={<TransactionPage />} />
+        </Route>
+        
       </Routes>
     </BrowserRouter>
   </UserProvider>

@@ -108,7 +108,7 @@ router.get("/", async(req, res) => {
     }
 
     try{
-        const {name, location, started, ended, showFull = false, page = 1, limit = 10, published} = req.query;
+        const {name, location, started, ended, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw,} = req.query;
         const where = {};
 
         const pageNum = Number(page);
@@ -157,13 +157,21 @@ router.get("/", async(req, res) => {
                 where.published = published === 'true';
             }
         }
-
-        const take = limit;
+        
+        const take = limitNum;
         const skip = (pageNum - 1) * take;
 
         const count = await prisma.event.count({
             where,
         });
+
+        // apply sorting
+        const allowedSorts = ['name','description','location','startTime','endTime','capacity', 'published'];
+        let orderBy = { id: 'asc' }; // default
+        if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
+            const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+            orderBy = { [String(sortByRaw)]: dir };
+        }
 
         const events = await prisma.event.findMany({
             skip: skip,
@@ -189,7 +197,7 @@ router.get("/", async(req, res) => {
                     },
                 },
             },
-            orderBy: { startTime: 'asc'},
+            orderBy,
         });
 
         const flatten_guestlist = events.map(event => ({

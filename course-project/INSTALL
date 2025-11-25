@@ -12,6 +12,9 @@ To install Nodemon: npm install --save-dev nodemon
 To install cookie-parser: npm install cookie-parser
 To install TanStack Table: npm install @tanstack/react-table
 To install React QR Code: npm install react-qr-code
+To install icons-material: npm install @mui/icons-material
+To install mui/material, emotion/react and emotion/styled: npm install @mui/material @emotion/react @emotion/styled
+To install class-variance-authority: npm install class-variance-authority
 To install nodemailer: npm install express nodemailer body-parser
 To install dotenv: npm install dotenv
 

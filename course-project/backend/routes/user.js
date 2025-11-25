@@ -149,7 +149,7 @@ router.get("/", async(req, res) => {
         });
 
         //apply filter with pagination
-        const allowedSorts = ['id','utorid','name','birthday','role','points','createdAt','lastLogin','verified'];
+        const allowedSorts = ['id','utorid','name','birthday','role','points','createdAt','lastLogin'];
         let orderBy = { id: 'asc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
             const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -347,9 +347,6 @@ router.patch("/me/password", async (req, res) =>{
 
     try{
         const { old, new: newPassword } = req.body;
-        console.log(req.body)
-        console.log(typeof(old))
-        console.log(typeof(newPassword))
         // check if the user has proper clearance (must be cashier or higher)
         if (!["regular", "cashier", "manager", "superuser"].includes(req.user.role)) {
             return res.status(403).json({ error: "Not authorized" });

@@ -98,7 +98,7 @@ export default function Login() {
                     Password
                     </label>
                     <div className="text-sm">
-                    <a href="#" className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400">
+                    <a onClick={() => navigate("/forgot-password")} className="font-semibold text-strawberry-red-500 hover:text-strawberry-red-400 hover:cursor-pointer">
                         Forgot password?
                     </a>
                     </div>

@@ -100,6 +100,8 @@ router.get("/", async(req, res) => {
             activated: activatedRaw,
             page: pageRaw = '1',
             limit: limitRaw = '10',
+            sortBy: sortByRaw,
+            sortOrder: sortOrderRaw,
         } = req.query;
 
         // check if user has proper clearance (manager or higher)
@@ -147,6 +149,13 @@ router.get("/", async(req, res) => {
         });
 
         //apply filter with pagination
+        const allowedSorts = ['id','utorid','name','birthday','role','points','createdAt','lastLogin'];
+        let orderBy = { id: 'asc' }; // default
+        if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
+            const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+            orderBy = { [String(sortByRaw)]: dir };
+        }
+
         const users = await prisma.user.findMany({
             skip: skip,
             take: take,
@@ -163,6 +172,7 @@ router.get("/", async(req, res) => {
                 verified: true,
                 avatarUrl: true,
             },
+            orderBy,
         });
 
         return res.status(200).json({

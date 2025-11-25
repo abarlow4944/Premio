@@ -123,8 +123,8 @@ export default function Regular() {
                 }}
               >
                 <CardHeader className="flex flex-row items-start gap-4">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-strawberry-red-600 text-white shadow-sm">
-                    <feature.icon aria-hidden="true" className="size-6" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-strawberry-red-600 text-white shadow-sm">
+                    <feature.icon className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
                   </div>
                   <div className="space-y-1">
                     <CardTitle className="text-lg font-semibold text-flag-red-500">{feature.name}</CardTitle>
@@ -160,9 +160,12 @@ export default function Regular() {
             >
               <XMarkIcon className="size-5 transition-transform duration-150 group-hover/button:rotate-90" />
             </button>
-            <CardHeader className="flex flex-col gap-2 pt-6 pr-12">
-              <CardTitle id="popup-title" className="flex items-center gap-3 text-lg">
-                <selected.icon className="size-6 text-strawberry-500" /> {selected.name}
+            <CardHeader className="flex flex-row items-start gap-4 pt-6 pr-12">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-strawberry-red-600 text-white shadow-sm">
+                <selected.icon className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
+              </div>
+              <CardTitle id="popup-title" className="text-lg mt-1">
+                {selected.name}
               </CardTitle>
             </CardHeader>
             <CardContent>

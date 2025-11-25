@@ -197,22 +197,24 @@ export default function Promotions() {
                 </div>
             )}
 
-            <DataTable
-                data={data}
-                columns={columns}
-                count={totalCount} // total number of rows
-                query={query} // the filters we are applying
-                setQuery={setQuery}
-                initialStableMax={globalMaxes}
-                selectionEnabled={selectionEnabled}
-                onSelectionChange={setSelectedPromos}
-                onDeleteSelected={handleDeleteSelected}
-                onCreate={role == "manager" ? () => {
-                    // placeholder for creating a new promotion
-                } : undefined}
-                error={error}
-                success={success}
-            />
+            {globalMaxes && (
+                <DataTable
+                    data={data}
+                    columns={columns}
+                    count={totalCount} // total number of rows
+                    query={query} // the filters we are applying
+                    setQuery={setQuery}
+                    initialStableMax={globalMaxes}
+                    selectionEnabled={selectionEnabled}
+                    onSelectionChange={setSelectedPromos}
+                    onDeleteSelected={handleDeleteSelected}
+                    onCreate={role == "manager" ? () => {
+                        // placeholder for creating a new promotion
+                    } : undefined}
+                    error={error}
+                    success={success}
+                />
+            )}
 
             {/* _ promotion(s) selected message */}
             {selectionEnabled && selectedPromos.length > 0 && (

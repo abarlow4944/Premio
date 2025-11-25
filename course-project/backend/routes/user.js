@@ -347,9 +347,6 @@ router.patch("/me/password", async (req, res) =>{
 
     try{
         const { old, new: newPassword } = req.body;
-        console.log(req.body)
-        console.log(typeof(old))
-        console.log(typeof(newPassword))
         // check if the user has proper clearance (must be cashier or higher)
         if (!["regular", "cashier", "manager", "superuser"].includes(req.user.role)) {
             return res.status(403).json({ error: "Not authorized" });

@@ -6,7 +6,7 @@ import Message from "@/components/Message";
 
 export default function ProfileManagement() {
     const { user } = useUser();
-    console.log(user)
+
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
 
@@ -179,7 +179,7 @@ export default function ProfileManagement() {
         )}
 
         {success && (
-            <Message message={success} status="success" onClose={() => setError(null)}/>
+            <Message message={success} status="success" onClose={() => setSuccess(null)}/>
         )}
 
         </div>

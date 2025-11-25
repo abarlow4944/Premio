@@ -460,9 +460,10 @@ router.delete('/:promotionId', async (req, res) => {
 
 		const now = new Date();
 		const start = new Date(promo.startTime);
+		const end = new Date(promo.endTime);
 
 		// cannot delete if already started
-		if (start <= now) {
+		if (start <= now && end >= now) {
 			return res.status(403).json({ error: 'Cannot delete a promotion that has already started' });
 		}
 

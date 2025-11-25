@@ -86,6 +86,8 @@ export default function Promotions() {
                     let body = {};
                     try { body = await res.json(); } catch {}
                     setError(`Could not complete deletion: ${body.error}` || "Could not complete deletion")
+                    setPendingDelete(null);
+                    return;
                 }
             } catch (err) {
                 setError(err.message || "Could not complete deletion")

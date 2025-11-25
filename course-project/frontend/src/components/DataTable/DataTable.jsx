@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
-import { Button } from '@headlessui/react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DualRangeSlider } from '@/components/ui/dual-range-slider';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { CheckIcon } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function DataTable({
@@ -10,6 +13,7 @@ export default function DataTable({
     count,
     query,
     setQuery,
+    initialStableMax,
     selectionEnabled = false,
     onSelectionChange,
     onEditSelected,
@@ -18,6 +22,21 @@ export default function DataTable({
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
+    const [columnFilters, setColumnFilters] = useState({});
+    const stableMaxRef = useRef({});
+
+    // set stableMaxRef from provided initial maxima
+    useEffect(() => {
+        if (!initialStableMax) return;
+        const next = { ...stableMaxRef.current };
+        Object.keys(initialStableMax).forEach(k => {
+            const v = Number(initialStableMax[k]);
+            if (!Number.isNaN(v)) {
+                next[k] = Math.max(next[k] || 0, v);
+            }
+        });
+        stableMaxRef.current = next;
+    }, [initialStableMax]);
 
     const computedColumns = useMemo(() => {
         if (!selectionEnabled) return columns;
@@ -85,6 +104,54 @@ export default function DataTable({
         onSelectionChange(selected);
     }, [rowSelection, selectionEnabled, onSelectionChange, table]);
 
+    useEffect(() => {
+        const initial = {};
+        computedColumns.forEach((col) => {
+            const key = col.accessorKey;
+            if (!key) return;
+
+            // range filters store separate min/max keys on the query
+            if (col.filterType === 'range') {
+                const minKey = `${key}Min`;
+                const maxKey = `${key}Max`;
+                if (query[minKey] !== undefined && query[minKey] !== null && query[minKey] !== '') {
+                    initial[minKey] = String(query[minKey]);
+                }
+                if (query[maxKey] !== undefined && query[maxKey] !== null && query[maxKey] !== '') {
+                    initial[maxKey] = String(query[maxKey]);
+                }
+            } else {
+                if (query[key] !== undefined && query[key] !== null && query[key] !== '') {
+                    initial[key] = String(query[key]);
+                }
+            }
+        });
+        setColumnFilters(initial);
+    }, [query, computedColumns]);
+
+    // lets filtering update the query after a debounce
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const keys = Object.keys(columnFilters);
+            const nonEmpty = {};
+            keys.forEach((k) => {
+                const v = columnFilters[k];
+                if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    nonEmpty[k] = v;
+                }
+            });
+
+            setQuery((q) => {
+                const next = { ...q, page: 1 };
+                keys.forEach((k) => {
+                    if (k in next) delete next[k];
+                });
+                return { ...next, ...nonEmpty };
+            });
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [columnFilters, setQuery]);
+
     const handleSort = (accessorKey, sortable) => {
         if (!sortable || !accessorKey) return;
         setQuery(q => {
@@ -105,37 +172,40 @@ export default function DataTable({
                     {/* Left side: create button */}
                     <div className="flex items-center gap-2">
                         {onCreate && (
-                            <button
-                                type="button"
+                            <Button
                                 onClick={() => onCreate()}
                                 className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
                                 aria-label="Create new item"
+                                variant="outline"
+                                size="sm"
                             >
                                 <PlusIcon className="size-6" /> Create
-                            </button>
+                            </Button>
                         )}
                     </div>
                     {/* Right side: selection actions */}
                     <div className="flex items-center gap-2">
                         {selectionEnabled && selectedCount === 1 && (
-                            <button
-                                type="button"
+                            <Button
                                 onClick={() => onEditSelected && onEditSelected(selectedRowObjects)}
                                 className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
                                 aria-label="Edit selected row"
+                                variant="outline"
+                                size="sm"
                             >
                                 <PencilSquareIcon className="size-6" /> Edit
-                            </button>
+                            </Button>
                         )}
                         {selectionEnabled && selectedCount >= 1 && (
-                            <button
-                                type="button"
+                            <Button
                                 onClick={() => onDeleteSelected && onDeleteSelected(selectedRowObjects)}
                                 className="inline-flex items-center gap-1 rounded-md border border-red-600 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-600 hover:text-white transition"
                                 aria-label="Delete selected row(s)"
+                                variant="outline"
+                                size="sm"
                             >
                                 <TrashIcon className="size-6" /> Delete
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -155,11 +225,12 @@ export default function DataTable({
                             const order = isActive ? (query.sortOrder || 'asc') : null;
                             return (
                                 <th key={header.id} className="px-4 py-3 text-sm font-semibold text-platinum-500 border-b">
-                                    {sortable ? (
-                                        <button
-                                            type="button"
+                                        {sortable ? (
+                                        <Button
                                             onClick={() => handleSort(accessorKey, sortable)}
                                             className="inline-flex items-center gap-1 select-none hover:opacity-90"
+                                            variant="ghost"
+                                            size="sm"
                                         >
                                             {flexRender(def.header, header.getContext())}
                                             {isActive && order === 'asc' && (
@@ -168,15 +239,107 @@ export default function DataTable({
                                             {isActive && order === 'desc' && (
                                                 <ChevronDownIcon className="size-3.5" />
                                             )}
-                                        </button>
+                                        </Button>
                                     ) : (
                                         flexRender(def.header, header.getContext())
                                     )}
                                 </th>
                             );
                         })}
-                        </tr>
+                            </tr>
                     ))}
+                        {table.getHeaderGroups().map((hg) => (
+                            <tr key={`${hg.id}-filters`}>
+                            {hg.headers.map((header) => {
+                                const def = header.column.columnDef;
+                                const accessorKey = def.accessorKey;
+                                const hasSearch = accessorKey && (def.enableSearch || def.enableFilter || def.filterType === 'select' || def.filterType === 'range');
+                                return (
+                                    <th key={header.id} className="px-4 py-2 text-sm font-medium text-platinum-500 border-b">
+                                        {hasSearch ? (
+                                            def.filterType === 'select' && Array.isArray(def.filterOptions) ? (
+                                                (() => {
+                                                    const currentVal = columnFilters[accessorKey] || '';
+                                                    const selectedOpt = def.filterOptions.find(o => (typeof o === 'string' ? o : o.value) === currentVal);
+                                                    const displayLabel = selectedOpt ? (typeof selectedOpt === 'string' ? selectedOpt : selectedOpt.label) : 'All';
+                                                    return (
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button className="w-full flex items-center justify-between rounded-md p-2 text-sm text-left border-2 bg-strawberry-red-500 border-strawberry-red-600 text-white">
+                                                                    <span className="text-white font-medium">{displayLabel}</span>
+                                                                    <ChevronDownIcon className="size-4 text-white" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent className="w-full p-1">
+                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
+                                                                    <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500'}>All</span>
+                                                                    {currentVal === '' && <CheckIcon className="size-4 text-white" />}
+                                                                </DropdownMenuItem>
+                                                                {def.filterOptions.map((opt) => {
+                                                                    const val = typeof opt === 'string' ? opt : opt.value;
+                                                                    const lbl = typeof opt === 'string' ? opt : opt.label;
+                                                                    const selected = currentVal === val;
+                                                                    return (
+                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
+                                                                            <span className={selected ? 'font-medium text-white' : 'text-space-indigo-500'}>{lbl}</span>
+                                                                            {selected && <CheckIcon className="size-4 text-white" />}
+                                                                        </DropdownMenuItem>
+                                                                    )
+                                                                })}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    )
+                                                })()
+                                            ) : def.filterType === 'range' ? (
+                                                (() => {
+                                                    const keyMin = `${accessorKey}Min`;
+                                                    const keyMax = `${accessorKey}Max`;
+                                                    // compute max value from current page data (column max)
+                                                    const nums = data.map(d => Number(d?.[accessorKey]) ).filter(n => !Number.isNaN(n));
+                                                    const computedMax = nums.length ? Math.max(...nums, 1) : (def.filterMax ?? 100);
+
+                                                    stableMaxRef.current[accessorKey] = Math.max(stableMaxRef.current[accessorKey] || 0, computedMax);
+                                                    const trackMax = stableMaxRef.current[accessorKey];
+
+                                                    const step = def.filterStep ?? (Number.isInteger(trackMax) ? 1 : Math.max( (trackMax / 100) , 1));
+                                                    const currentMin = columnFilters[keyMin] !== undefined ? Number(columnFilters[keyMin]) : 0;
+                                                    const currentMax = columnFilters[keyMax] !== undefined ? Number(columnFilters[keyMax]) : trackMax;
+                                                    return (
+                                                        <div className="space-y-2">
+                                                            <DualRangeSlider
+                                                                label={(v) => v}
+                                                                value={[currentMin, Math.min(currentMax, trackMax)]}
+                                                                onValueCommit={(vals) => {
+                                                                    const precision = (String(step).includes('.') ? String(step).split('.')[1].length : 0);
+                                                                    const format = (v) => precision > 0 ? Number(Number(v).toFixed(precision)) : Math.round(v);
+                                                                    const [vMinRaw, vMaxRaw] = vals;
+                                                                    const vMin = format(vMinRaw);
+                                                                    const vMax = format(vMaxRaw);
+                                                                    setColumnFilters(prev => ({ ...prev, [keyMin]: String(vMin), [keyMax]: String(vMax) }));
+                                                                }}
+                                                                min={0}
+                                                                max={trackMax}
+                                                                step={step}
+                                                            />
+                                                        </div>
+                                                    )
+                                                })()
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search..."
+                                                    aria-label={`Search ${accessorKey}`}
+                                                    value={columnFilters[accessorKey] || ''}
+                                                    onChange={(e) => setColumnFilters(prev => ({ ...prev, [accessorKey]: e.target.value }))}
+                                                    className="w-full rounded-md border-2 border-strawberry-red-600 bg-strawberry-red-500 text-white placeholder-strawberry-red-100 p-2 text-sm"
+                                                />
+                                            )
+                                        ) : null}
+                                    </th>
+                                )
+                            })}
+                            </tr>
+                        ))}
                 </thead>
 
             {/* Body */}

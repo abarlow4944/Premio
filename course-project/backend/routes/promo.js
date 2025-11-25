@@ -10,6 +10,32 @@ router.use(authenticateToken);
 
 require('dotenv').config();
 
+// GET /promotions/stats: Return column-wise maxima for numeric promotion fields
+router.get('/stats', async (req, res) => {
+	try {
+		const agg = await prisma.promotion.aggregate({
+			_max: {
+				minSpending: true,
+				rate: true,
+				points: true,
+			}
+		});
+
+		const maxMinSpending = agg._max.minSpending ?? 0;
+		const maxRate = agg._max.rate ?? 0;
+		const maxPoints = agg._max.points ?? 0;
+
+		return res.status(200).json({
+			maxMinSpending,
+			maxRate,
+			maxPoints,
+		});
+	} catch (err) {
+		console.error('Error computing promotion stats:', err);
+		return res.status(500).json({ error: 'Internal server error' });
+	}
+});
+
 // POST /promotions: Create a new promotion
 router.post('/', async (req, res) => {
 	try {
@@ -99,7 +125,6 @@ router.post('/', async (req, res) => {
 	}
 });
 
-
 // GET /promotions: Retrieve a list of promotions
 router.get('/', async (req, res) => {
 	try {
@@ -109,6 +134,12 @@ router.get('/', async (req, res) => {
 			name: nameFilter,
 			description: descriptionFilter,
 			type: typeFilter,
+			minSpendingMin: minSpendingMinRaw,
+			minSpendingMax: minSpendingMaxRaw,
+			rateMin: rateMinRaw,
+			rateMax: rateMaxRaw,
+			pointsMin: pointsMinRaw,
+			pointsMax: pointsMaxRaw,
 			page: pageRaw = '1',
 			limit: limitRaw = '10',
 			started: startedRaw,
@@ -137,6 +168,45 @@ router.get('/', async (req, res) => {
 			if (normalized === 'one-time') normalized = 'onetime';
 			if (!['automatic', 'onetime'].includes(normalized)) return res.status(400).json({ error: 'Invalid type filter' });
 			where.type = normalized;
+		}
+
+		// numeric range filters
+		const parseNum = (v) => {
+			if (v === undefined) return undefined;
+			const n = Number(v);
+			return Number.isNaN(n) ? undefined : n;
+		};
+		const msMin = parseNum(minSpendingMinRaw);
+		const msMax = parseNum(minSpendingMaxRaw);
+		const rMin = parseNum(rateMinRaw);
+		const rMax = parseNum(rateMaxRaw);
+		const pMin = parseNum(pointsMinRaw);
+		const pMax = parseNum(pointsMaxRaw);
+
+		const buildNumericFilter = (fieldName, minV, maxV) => {
+			if (minV === undefined && maxV === undefined) return undefined;
+			const cond = {};
+			if (minV !== undefined) cond.gte = minV;
+			if (maxV !== undefined) cond.lte = maxV;
+
+			// include nulls if 0 is inside the requested range
+			const includeNull = (minV === undefined || minV <= 0) && (maxV === undefined || maxV >= 0);
+			if (includeNull) {
+				return { OR: [ { [fieldName]: cond }, { [fieldName]: null } ] };
+			}
+			return { [fieldName]: cond };
+		};
+
+		const numericFilters = [];
+		const msFilter = buildNumericFilter('minSpending', msMin, msMax);
+		if (msFilter) numericFilters.push(msFilter);
+		const rFilter = buildNumericFilter('rate', rMin, rMax);
+		if (rFilter) numericFilters.push(rFilter);
+		const pFilter = buildNumericFilter('points', pMin, pMax);
+		if (pFilter) numericFilters.push(pFilter);
+
+		if (numericFilters.length > 0) {
+			where.AND = (where.AND || []).concat(numericFilters);
 		}
 
 		const now = new Date();
@@ -182,7 +252,6 @@ router.get('/', async (req, res) => {
 			rate: true,
 			points: true,
 		};
-
 
 		// sorting
 		const allowedSorts = isManager

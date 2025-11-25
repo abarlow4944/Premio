@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable/DataTable";
 import { eventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { useUser } from "@/contexts/UserContexts";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 
 
 export default function Events() {
@@ -13,6 +14,11 @@ export default function Events() {
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const selectionEnabled = role === 'manager' || role === 'superuser';
+    const [selectedEvents, setSelectedEvents] = useState([]);
+    const [pendingDelete, setPendingDelete] = useState(null);
+    const[error, setError] = useState("")
+    const[success, setSuccess] = useState("")
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
@@ -77,6 +83,39 @@ export default function Events() {
         }
     }, [query]);
 
+    // deleting an event
+    const performDeletion = async (rows) => {
+        setError("")
+        setSuccess("")
+        if (!selectionEnabled || !rows || rows.length === 0) return;
+        for (const r of rows) {
+            try {
+                const res = await fetch(`${API_URL}/events/${r.id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                if (!res.ok && res.status !== 204) {
+                    let body = {};
+                    try { body = await res.json(); } catch {}
+                    setError(`Could not complete deletion: ${body.error}` || "Could not complete deletion")
+                    setPendingDelete(null);
+                    return;
+                }
+            } catch (err) {
+                setError(err.message || "Could not complete deletion")
+            }
+        }
+        setQuery(q => ({ ...q }));
+        setSelectedEvents([]);
+        setPendingDelete(null);
+        setSuccess("Successfully completed deletion")
+    };
+
+    const handleDeleteSelected = (rows) => {
+        if (!selectionEnabled || !rows || rows.length === 0) return;
+        setPendingDelete(rows);
+    };
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -86,14 +125,71 @@ export default function Events() {
                 View and manage all events in the system.
                 </p>
             </div>
+
+            {/* Deletion Confirmation Modal */}
+            {pendingDelete && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-title"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                >
+                    <div
+                        className="absolute inset-0 bg-black/40"
+                        aria-hidden="true"
+                        onClick={() => setPendingDelete(null)}
+                    />
+                    <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl">
+                        <CardHeader className="pr-12">
+                            <CardTitle id="delete-title">Confirm Deletion</CardTitle>
+                            <CardDescription>
+                                You are about to delete {pendingDelete.length} event{pendingDelete.length > 1 ? 's' : ''}. This action cannot be undone. Events that have been published will not be affected.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="list-disc list-inside text-md text-space-indigo-500 max-h-48 overflow-auto pr-2">
+                                {pendingDelete.slice(0,15).map(p => (
+                                    <li key={p.name}>{p.name}</li>
+                                ))}
+                                {pendingDelete.length > 15 && (
+                                    <li className="italic">...and {pendingDelete.length - 15} more</li>
+                                )}
+                            </ul>
+                        </CardContent>
+                        <CardFooter className="justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPendingDelete(null)}
+                                className="rounded-md px-3 py-1 text-md font-medium border border-platinum-500 text-space-indigo-500 hover:bg-platinum-200 transition"
+                            >Cancel</button>
+                            <button
+                                type="button"
+                                onClick={() => performDeletion(pendingDelete)}
+                                className="rounded-md px-3 py-1 text-md font-medium border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition"
+                            >Delete</button>
+                        </CardFooter>
+                    </Card>
+                </div>
+            )}
+
+            {/* Table */}
             <DataTable
                 data={data}
                 columns={getEventColumns(role)}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
+                selectionEnabled={selectionEnabled}
+                onSelectionChange={setSelectedEvents}
+                onDeleteSelected={handleDeleteSelected}
                 setQuery={setQuery}
+                error={error}
+                success={success}
             />
         
+            {/* _ event(s) selected message */}
+            {selectionEnabled && selectedEvents.length > 0 && (
+                <div className="text-xs mt-2 text-gray-600">{selectedEvents.length} event(s) selected</div>
+            )}
         </div>
 
     )

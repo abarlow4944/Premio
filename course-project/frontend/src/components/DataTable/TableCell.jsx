@@ -34,7 +34,6 @@ export default function TableCell({ row, column, table }) {
         case "text":
             if(columnData.accessorKey === "startTime" || columnData.accessorKey === "endTime"){ // if the field is for start/end times
                 var formattedDate = formatDateTime(value)
-                console.log("type of:", typeof(formattedDate))
             }
             return (
                 <InputDefault
@@ -55,51 +54,21 @@ export default function TableCell({ row, column, table }) {
         case "select":
             const options = columnData.filterOptions // get a list of the dropdown options
 
-            return(
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button className="w-full flex items-center justify-between block mt-2 rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6">
-                            {value ? options.find(o => o.value === value)?.label : "Select..."}
-                            <ChevronDownIcon className="size-4 text-space-indigo-500"/>
-                        </button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent>
-                        {options.map((o) => {
-                            const selected = value === o.value; // check if the option is the currently selected one
-                            return (
-                                <DropdownMenuItem
-                                    key={o.value}
-                                    className={`
-                                        flex items-center justify-between px-3 py-2
-                                        ${selected 
-                                            ? "bg-strawberry-red-500 text-white" 
-                                            : "hover:bg-strawberry-red-100"}
-                                    `}
-                                    onSelect={() => {
-                                        setValue(o.value);
-                                        commit(o.value);
-                                    }}
-                                >
-                                    <span
-                                        className={`
-                                            ${selected 
-                                                ? "font-medium text-white" 
-                                                : "text-space-indigo-500"}
-                                        `}
-                                    >
-                                        {o.label}
-                                    </span>
-
-                                    {selected && (
-                                        <CheckIcon className="size-4 text-white" />
-                                    )}
-                                </DropdownMenuItem>
-                            );
-                        })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
+            return (
+               <select
+                    className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
+                    value={value}
+                    onChange={e => { 
+                        setValue(e.target.value)
+                    }}
+                    onBlur={onBlur}
+                    >
+                    {options.map((o) => (
+                        <option key={o.label} value={o.value}>
+                            {o.value}
+                        </option>
+                    ))}
+                </select>
             )
 
     }

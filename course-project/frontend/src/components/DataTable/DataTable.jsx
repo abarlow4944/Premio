@@ -41,6 +41,7 @@ export default function DataTable({
     function startEditingRow(row) {
         setEditingRowId(row.id) // table row ID
         setEditingRowBackup(row.original); // backup original data for cancel
+        console.log(editingRowBackup)
     }
 
     function cancelEditingRow(){
@@ -98,7 +99,6 @@ export default function DataTable({
         setEditingRowId(null);
         setEditingRowBackup(null);
     }
-
 
     // set stableMaxRef from provided initial maxima
     useEffect(() => {

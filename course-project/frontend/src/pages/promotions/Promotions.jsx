@@ -28,6 +28,9 @@ export default function Promotions() {
 
     // call fetchData each time query changes
     useEffect(() => {
+        setError("")
+        setSuccess("")
+
         // retrieve the promotions data by making a HTTP request
         try {
             const fetchData = async () => {
@@ -59,6 +62,7 @@ export default function Promotions() {
                 const data = await res.json(); // response from endpoint
                 
                 if(!res.ok){ // handle error
+                    setError(`Could not retrieve promotions data: ${data.error}` || "Could not retrieve promotions data")
                     console.log("Error:", data.error)
                     return
                 }
@@ -76,6 +80,8 @@ export default function Promotions() {
 
     // fetch db maxima once on mount to set initial slider max
     useEffect(() => {
+        setError("")
+        setSuccess("")
         let mounted = true;
         const fetchStats = async () => {
             try {
@@ -85,6 +91,7 @@ export default function Promotions() {
                 });
                 const body = await res.json();
                 if (!res.ok) {
+                    setError(`Could not fetch promotion stats: ${body.error}` || "Could not fetch promotion stats")
                     console.warn('Could not fetch promotion stats:', body.error || res.status);
                     return;
                 }
@@ -95,6 +102,7 @@ export default function Promotions() {
                     points: Number(body.maxPoints ?? 0),
                 });
             } catch (err) {
+                setError(`Could not fetch promotion stats: ${body.error}` || "Could not fetch promotion stats")
                 console.warn('Error fetching promotion stats:', err);
             }
         };
@@ -108,6 +116,7 @@ export default function Promotions() {
     const [selectedPromos, setSelectedPromos] = useState([]);
     const [pendingDelete, setPendingDelete] = useState(null);
 
+    // deleting promotion
     const performDeletion = async (rows) => {
         setError("")
         setSuccess("")
@@ -140,10 +149,12 @@ export default function Promotions() {
         setPendingDelete(rows);
     };
 
+    // saving updated data
     const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
-        // add to payload
-        console.log("updated info is", updatedRow)
+        setError("")
+        setSuccess("")
 
+        // send PATCH request
         const res = await fetch(`${API_URL}/promotions/${updatedRow.id}`, {
             method: 'PATCH',
             credentials: 'include',
@@ -153,12 +164,13 @@ export default function Promotions() {
             body: JSON.stringify(updatedRow)
         });
 
-        console.log("res is:", res)
         const data = await res.json();
         if (!res.ok) {
+            setError(`Could not update promotion: ${data.error}` || "Could not update promotion")
             console.warn('Could not update promotion:', data.error || res.status);
-            return;
+            throw new Error('Could not update promotion');
         }
+        setSuccess("Successfully updated promotion")
     }
 
     return (

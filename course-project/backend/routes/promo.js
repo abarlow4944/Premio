@@ -352,7 +352,6 @@ router.get('/:promotionId', async (req, res) => {
 
 // PATCH /promotions/:promotionId: Update an existing promotion
 router.patch('/:promotionId', async (req, res) => {
-	console.log("REACHED")
     try {
         const user = req.user;
 
@@ -363,7 +362,7 @@ router.patch('/:promotionId', async (req, res) => {
 
         const id = Number(req.params.promotionId);
         if (!Number.isInteger(id) || id < 1) {
-            return res.status(400).json({ error: 'Invalid promotionId' });
+            return res.status(400).json({ error: 'Invalid promotion id' });
         }
 
 	const promo = await prisma.promotion.findUnique({ where: { id } });
@@ -384,8 +383,6 @@ router.patch('/:promotionId', async (req, res) => {
             points,
         } = req.body || {};
 
-		console.log("THIS IS BEING SENT TO API:", req.body)
-
         // If no updatable fields provided
         const providedFields = ['name','description','type','startTime','endTime','minSpending','rate','points'].filter(f => Object.prototype.hasOwnProperty.call(req.body || {}, f));
 		if (providedFields.length === 0) return res.status(400).json({ error: 'No fields to update' });
@@ -402,26 +399,26 @@ router.patch('/:promotionId', async (req, res) => {
 
         // No updates allowed to endTime after promotion has ended
         if (now > origEnd && Object.prototype.hasOwnProperty.call(req.body || {}, 'endTime') && req.body.endTime !== null) {
-            return res.status(400).json({ error: 'Cannot update endTime after promotion has ended' });
+            return res.status(400).json({ error: 'Cannot update end time after promotion has ended' });
         }
 
         let newStart = undefined;
         let newEnd = undefined;
         if (startTimeRaw !== undefined && startTimeRaw !== null) {
             newStart = new Date(startTimeRaw);
-            if (isNaN(newStart.getTime())) return res.status(400).json({ error: 'Invalid startTime' });
-            if (newStart < now) return res.status(400).json({ error: 'startTime must not be in the past' });
+            if (isNaN(newStart.getTime())) return res.status(400).json({ error: 'Invalid start time' });
+            if (newStart < now) return res.status(400).json({ error: 'start time must not be in the past' });
         }
         if (endTimeRaw !== undefined && endTimeRaw !== null) {
             newEnd = new Date(endTimeRaw);
             if (isNaN(newEnd.getTime())) return res.status(400).json({ error: 'Invalid endTime' });
-            if (newEnd < now) return res.status(400).json({ error: 'endTime must not be in the past' });
+            if (newEnd < now) return res.status(400).json({ error: 'end time must not be in the past' });
         }
 
         // Validate that endTime is after startTime
         const effectiveStart = newStart !== undefined ? newStart : new Date(promo.startTime);
         const effectiveEnd = newEnd !== undefined ? newEnd : new Date(promo.endTime);
-        if (effectiveEnd <= effectiveStart) return res.status(400).json({ error: 'endTime must be after startTime' });
+        if (effectiveEnd <= effectiveStart) return res.status(400).json({ error: 'end time must be after start time' });
 
 		const updateData = {};
 		if (Object.prototype.hasOwnProperty.call(req.body || {}, 'name')) {

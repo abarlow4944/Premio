@@ -36,7 +36,6 @@ export default function DataTable({
     const [editingRowBackup, setEditingRowBackup] = useState(null) // to store original info in case user cancels edits
 
     useEffect(() => { //keep in sync
-        console.log("changing to:", data)
         setInternalData(data);
     }, [data]);
 
@@ -59,28 +58,44 @@ export default function DataTable({
         setEditingRowBackup(null);
     }
 
-    function saveEditingRow(row){
-        const original = editingRowBackup; // get original version
+    async function saveEditingRow(row) {
+        const original = editingRowBackup; // the original data prior to edits
+        let changed = null; // capture changed data outside setInternalData
 
-        // update internal data state with edited row
         setInternalData((prev) => {
-            const updated = prev.find((r) => String(r.id) === String(row.original.id)); // find a row with matching id
-            if (!updated) return prev;
+            const updated = prev.find(
+                (r) => String(r.id) === String(row.original.id)
+            ); // find row that was edited
 
-            const changed = { id: updated.id }; // changed fields
-
-            Object.keys(updated).forEach((key) => { // compare updated and original to get changed fields
-                if (original && updated[key] !== original[key]) {
-                    changed[key] = updated[key];
+            // compute changed fields
+            const diff = { id: updated.id }; // the id of the row that was edited
+            Object.keys(updated).forEach((key) => { // go through each field/column and check if they changed
+                if (original && updated[key] !== original[key]) { // add the field to the dictionary if it changed
+                    diff[key] = updated[key];
                 }
             });
 
-            onRowSave(changed); // send the updated data to the page
-
-            return prev;
+            changed = diff; // save for async call
+            return prev; // don't modify internalData here
         });
 
-        // clear edit mode
+        // wait for React to apply the state update
+        await Promise.resolve();
+
+        // try saving to backend
+        try {
+            await onRowSave(changed); // if it's a success, do nothing
+        } catch (err) { // if there was an error, revert setInternalData to previous data
+            if (original) {
+                setInternalData((prev) =>
+                    prev.map((r) => // for every row
+                        String(r.id) === String(original.id) ? original : r
+                    )
+                );
+            }
+        }
+
+        // clear edit mode no matter what
         setEditingRowId(null);
         setEditingRowBackup(null);
     }
@@ -439,8 +454,8 @@ export default function DataTable({
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="w-full p-1">
-                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
-                                                                    <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500'}>All</span>
+                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
+                                                                    <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500  hover:bg-strawberry-red-100'}>All</span>
                                                                     {currentVal === '' && <CheckIcon className="size-4 text-white" />}
                                                                 </DropdownMenuItem>
                                                                 {def.filterOptions.map((opt) => {
@@ -448,7 +463,7 @@ export default function DataTable({
                                                                     const lbl = typeof opt === 'string' ? opt : opt.label;
                                                                     const selected = currentVal === val;
                                                                     return (
-                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
+                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ' hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
                                                                             <span className={selected ? 'font-medium text-white' : 'text-space-indigo-500'}>{lbl}</span>
                                                                             {selected && <CheckIcon className="size-4 text-white" />}
                                                                         </DropdownMenuItem>
@@ -520,7 +535,7 @@ export default function DataTable({
                             const isEditableCell = isRowEditing && EditableComp;
 
                             return (
-                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
+                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-500">
                                     {isEditableCell ? (
                                         <EditableComp {...cell.getContext()} />): cell.column.columnDef.cell ? (
                                             flexRender( // use custom formatting (dates etc)

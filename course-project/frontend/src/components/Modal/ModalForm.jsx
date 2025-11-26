@@ -74,6 +74,18 @@ export default function ModalForm({ modalType, fields = [], open, setOpen, onSub
 
     const handleClose = () => setOpen(false);
 
+    // close on Escape
+    useEffect(() => {
+        if (!open) return;
+        function onKey(e) {
+            if (e.key === 'Escape') handleClose();
+        }
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [open]);
+
+    if (!open) return null;
+
     return (
         <div>
         {/* <Button onClick={() => setOpen(true)}>Open {modalType}</Button> */}

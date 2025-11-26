@@ -16,16 +16,16 @@ const features = [
     icon: QrCodeIcon,
   },
   {
-    name: 'Pending Redemptions',
-    description:
-      'Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.',
-    icon: ArrowPathIcon,
-  },
-  {
     name: 'Transfer Points',
     description:
       'Transfer points to another user.',
     icon: ArrowsRightLeftIcon,
+  },
+  {
+    name: 'Pending Redemptions',
+    description:
+      'Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.',
+    icon: ArrowPathIcon,
   },
   {
     name: 'Redeem Points',

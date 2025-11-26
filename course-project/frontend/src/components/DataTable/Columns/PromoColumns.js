@@ -32,17 +32,62 @@ export function getPromoColumns(role) {
     ];
   }
   return [
-  { accessorKey: 'name', header: 'Name', enableSorting: true, enableSearch: true, editableCell: TableCell },
-  { accessorKey: 'description', header: 'Description', enableSorting: true, enableSearch: true, editableCell: TableCell },
-    { accessorKey: 'type', header: 'Type', enableSorting: true, filterType: 'select', filterOptions: [
-    { label: 'Automatic', value: 'automatic' },
-    { label: 'One-time', value: 'onetime' },
-  ] },
-    { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime), editableCell: TableCell },
-    { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime), editableCell: TableCell },
-    { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.minSpending ?? '—', editableCell: TableCell },
-    { accessorKey: 'rate', header: 'Rate', enableSorting: true, filterType: 'range', filterStep: 0.01, cell: ({ row }) => row.original.rate ?? '—', editableCell: TableCell },
-    { accessorKey: 'points', header: 'Points', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.points ?? 0, editableCell: TableCell },
+    { 
+      accessorKey: 'name', 
+      header: 'Name', 
+      enableSorting: true, 
+      enableSearch: true, 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'description', 
+      header: 'Description', 
+      enableSorting: true, 
+      enableSearch: true, 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'type', 
+      header: 'Type', 
+      enableSorting: true, 
+      filterType: 'select', 
+      filterOptions: [
+        { label: 'Automatic', value: 'automatic' },
+        { label: 'One-time', value: 'onetime' },
+      ] 
+    },
+    { accessorKey: 'startTime', 
+      header: 'Start Time', 
+      enableSorting: true, 
+      cell: ({ row }) => formatDateTime(row.original.startTime), 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'endTime', 
+      header: 'End Time', 
+      enableSorting: true, 
+      cell: ({ row }) => formatDateTime(row.original.endTime), 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'minSpending', 
+      header: 'Min Spending', 
+      enableSorting: true, 
+      filterType: 'range', 
+      cell: ({ row }) => row.original.minSpending ?? '—', 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'rate', 
+      header: 'Rate', 
+      enableSorting: true, 
+      filterType: 'range', 
+      filterStep: 0.01, 
+      cell: ({ row }) => row.original.rate ?? '—', 
+      editableCell: TableCell 
+    },
+    { accessorKey: 'points', 
+      header: 'Points', 
+      enableSorting: true, 
+      filterType: 'range', 
+      cell: ({ row }) => row.original.points ?? 0, 
+      editableCell: TableCell 
+    },
   ];
 }
 

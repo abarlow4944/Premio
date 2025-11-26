@@ -529,7 +529,7 @@ export default function DataTable({
                             const isEditableCell = isRowEditing && EditableComp;
 
                             return (
-                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
+                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-500">
                                     {isEditableCell ? (
                                         <EditableComp {...cell.getContext()} />): cell.column.columnDef.cell ? (
                                             flexRender( // use custom formatting (dates etc)

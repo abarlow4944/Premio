@@ -58,31 +58,48 @@ export default function DataTable({
         setEditingRowBackup(null);
     }
 
-    function saveEditingRow(row){
-        const original = editingRowBackup; // get original version
+    async function saveEditingRow(row) {
+        const original = editingRowBackup; // the original data prior to edits
+        let changed = null; // capture changed data outside setInternalData
 
-        // update internal data state with edited row
         setInternalData((prev) => {
-            const updated = prev.find((r) => String(r.id) === String(row.original.id)); // find a row with matching id
-            if (!updated) return prev;
+            const updated = prev.find(
+                (r) => String(r.id) === String(row.original.id)
+            ); // find row that was edited
 
-            const changed = { id: updated.id }; // changed fields
-
-            Object.keys(updated).forEach((key) => { // compare updated and original to get changed fields
-                if (original && updated[key] !== original[key]) {
-                    changed[key] = updated[key];
+            // compute changed fields
+            const diff = { id: updated.id }; // the id of the row that was edited
+            Object.keys(updated).forEach((key) => { // go through each field/column and check if they changed
+                if (original && updated[key] !== original[key]) { // add the field to the dictionary if it changed
+                    diff[key] = updated[key];
                 }
             });
 
-            onRowSave(changed); // send the updated data to the page
-
-            return prev;
+            changed = diff; // save for async call
+            return prev; // don't modify internalData here
         });
 
-        // clear edit mode
+        // wait for React to apply the state update
+        await Promise.resolve();
+
+        // try saving to backend
+        try {
+            await onRowSave(changed); // if it's a success, do nothing
+        } catch (err) { // if there was an error, revert setInternalData to previous data
+            if (original) {
+                setInternalData((prev) =>
+                    prev.map((r) => // for every row
+                        String(r.id) === String(original.id) ? original : r
+                    )
+                );
+            }
+        }
+
+        // clear edit mode no matter what
         setEditingRowId(null);
         setEditingRowBackup(null);
     }
+
 
     // set stableMaxRef from provided initial maxima
     useEffect(() => {

@@ -1,7 +1,7 @@
 // columns for the Promotion table
 import TableCell from "../TableCell";
 
-function formatDateTime(iso) {
+export function formatDateTime(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d)) return '—';
@@ -37,56 +37,72 @@ export function getPromoColumns(role) {
       header: 'Name', 
       enableSorting: true, 
       enableSearch: true, 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text" 
     },
-    { accessorKey: 'description', 
+    { 
+      accessorKey: 'description', 
       header: 'Description', 
       enableSorting: true, 
       enableSearch: true, 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text"
     },
-    { accessorKey: 'type', 
+    { 
+      accessorKey: 'type', 
       header: 'Type', 
       enableSorting: true, 
       filterType: 'select', 
       filterOptions: [
         { label: 'Automatic', value: 'automatic' },
         { label: 'One-time', value: 'onetime' },
-      ] 
+      ],
+      editableCell: TableCell,
+      editType: "select"
     },
-    { accessorKey: 'startTime', 
+    { 
+      accessorKey: 'startTime', 
       header: 'Start Time', 
       enableSorting: true, 
       cell: ({ row }) => formatDateTime(row.original.startTime), 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text" 
     },
-    { accessorKey: 'endTime', 
+    { 
+      accessorKey: 'endTime', 
       header: 'End Time', 
       enableSorting: true, 
       cell: ({ row }) => formatDateTime(row.original.endTime), 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text" 
     },
-    { accessorKey: 'minSpending', 
+    { 
+      accessorKey: 'minSpending', 
       header: 'Min Spending', 
       enableSorting: true, 
       filterType: 'range', 
       cell: ({ row }) => row.original.minSpending ?? '—', 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text"
     },
-    { accessorKey: 'rate', 
+    { 
+      accessorKey: 'rate', 
       header: 'Rate', 
       enableSorting: true, 
       filterType: 'range', 
       filterStep: 0.01, 
       cell: ({ row }) => row.original.rate ?? '—', 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text" 
     },
-    { accessorKey: 'points', 
+    { 
+      accessorKey: 'points', 
       header: 'Points', 
       enableSorting: true, 
       filterType: 'range', 
       cell: ({ row }) => row.original.points ?? 0, 
-      editableCell: TableCell 
+      editableCell: TableCell,
+      editType: "text" 
     },
   ];
 }

@@ -1,3 +1,5 @@
+import TableCell from "../TableCell";
+
 // columns for the User table
 export function  getTransactionColumns(role) {
   const isManager = role === 'manager' || role === 'superuser';
@@ -52,7 +54,7 @@ export function  getTransactionColumns(role) {
             { label: 'Event', value: 'event' },
             { label: 'Redemption', value: 'redemption' },
             { label: 'Transfer', value: 'transfer' },
-          ]
+          ], 
         },
         {
           accessorKey: "amount",

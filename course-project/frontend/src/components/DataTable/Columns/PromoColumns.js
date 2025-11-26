@@ -26,6 +26,7 @@ export function getPromoColumns(role) {
       { accessorKey: 'description', header: 'Description', enableSorting: true, enableSearch: true },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
       { accessorKey: 'minSpending', header: 'Min Spending', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.minSpending ?? '—' },
+      { accessorKey: 'rate', header: 'Rate', enableSorting: true, filterType: 'range', filterStep: 0.01, cell: ({ row }) => row.original.rate ?? '—' },
       { accessorKey: 'points', header: 'Points', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.points ?? 0 },
     ];
   }

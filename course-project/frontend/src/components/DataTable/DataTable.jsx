@@ -3,7 +3,7 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { CheckIcon } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import Message from '../Message';
@@ -21,12 +21,68 @@ export default function DataTable({
     onDeleteSelected,
     onCreate,
     error,
-    success
+    success,
+    onRowSave // for saving edited row
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState({});
     const stableMaxRef = useRef({});
+
+    // for editable rows
+    const [internalData, setInternalData] = useState(data);
+    const [editingRowId, setEditingRowId] = useState(null); //which row is being edited
+    const [editingRowBackup, setEditingRowBackup] = useState(null) // to store original info in case user cancels edits
+
+    useEffect(() => { //keep in sync
+        console.log("changing to:", data)
+        setInternalData(data);
+    }, [data]);
+
+    function startEditingRow(row) {
+        setEditingRowId(row.id) // table row ID
+        setEditingRowBackup(row.original); // backup original data for cancel
+    }
+
+    function cancelEditingRow(){
+        if(editingRowId !== null && editingRowBackup){
+            setInternalData(old => // change the data back to the original
+                old.map(row =>
+                    String(row.id) === String(editingRowBackup.id) ? editingRowBackup : row
+                )
+            )
+        }
+
+        //clear edit mode
+        setEditingRowId(null);
+        setEditingRowBackup(null);
+    }
+
+    function saveEditingRow(row){
+        const original = editingRowBackup; // get original version
+
+        // update internal data state with edited row
+        setInternalData((prev) => {
+            const updated = prev.find((r) => String(r.id) === String(row.original.id)); // find a row with matching id
+            if (!updated) return prev;
+
+            const changed = { id: updated.id }; // changed fields
+
+            Object.keys(updated).forEach((key) => { // compare updated and original to get changed fields
+                if (original && updated[key] !== original[key]) {
+                    changed[key] = updated[key];
+                }
+            });
+
+            onRowSave(changed); // send the updated data to the page
+
+            return prev;
+        });
+
+        // clear edit mode
+        setEditingRowId(null);
+        setEditingRowBackup(null);
+    }
 
     // set stableMaxRef from provided initial maxima
     useEffect(() => {
@@ -42,35 +98,96 @@ export default function DataTable({
     }, [initialStableMax]);
 
     const computedColumns = useMemo(() => {
-        if (!selectionEnabled) return columns;
-        return [
-            {
-                id: '__select',
-                header: ({ table }) => (
-                    <Checkbox
-                        aria-label="Select all rows"
-                        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-                        onCheckedChange={(val) => table.toggleAllPageRowsSelected(val)}
-                        className="translate-y-[1px]"
-                    />
-                ),
-                cell: ({ row }) => (
-                    <Checkbox
-                        aria-label={`Select row ${row.id}`}
-                        checked={row.getIsSelected()}
-                        onCheckedChange={(val) => row.toggleSelected(val)}
-                        className="translate-y-[1px]"
-                    />
-                ),
-                enableSorting: false,
-                size: 32,
-            },
-            ...columns,
-        ];
-    }, [columns, selectionEnabled]);
+    let cols = columns;
+
+    // If selection is enabled, add the checkbox column at the start
+    if (selectionEnabled) {
+        const selectCol = {
+        id: '__select',
+        header: ({ table }) => (
+            <Checkbox
+            aria-label="Select all rows"
+            checked={
+                table.getIsAllPageRowsSelected() ||
+                (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(val) =>
+                table.toggleAllPageRowsSelected(!!val)
+            }
+            className="translate-y-[1px]"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+            aria-label={`Select row ${row.id}`}
+            checked={row.getIsSelected()}
+            onCheckedChange={(val) => row.toggleSelected(!!val)}
+            className="translate-y-[1px]"
+            />
+        ),
+        enableSorting: false,
+        size: 32,
+        };
+
+        cols = [selectCol, ...cols];
+    }
+
+    // Add Actions column at the END
+    const actionsCol = {
+        id: '__actions',
+        header: 'Actions',
+        enableSorting: false,
+        cell: ({ row }) => {
+        const isEditing = editingRowId === row.id;
+
+        return (
+            <div className="flex items-center gap-2">
+            {isEditing ? (
+                <>
+                {/* Save */}
+                <button
+                    type="button"
+                    onClick={() => saveEditingRow(row)}
+                    className="text-green-600 hover:text-green-800"
+                    aria-label="Save row"
+                >
+                    <CheckCircleIcon className="size-5" />
+                </button>
+
+                {/* Cancel */}
+                <button
+                    type="button"
+                    onClick={cancelEditingRow}
+                    className="text-red-600 hover:text-red-800"
+                    aria-label="Cancel edit"
+                >
+                    <XCircleIcon className="size-5" />
+                </button>
+                </>
+            ) : (
+                <>
+                {/* Edit */}
+                <button
+                    type="button"
+                    onClick={() => startEditingRow(row)}
+                    className="text-blue-600 hover:text-blue-800"
+                    aria-label="Edit row"
+                >
+                    <PencilSquareIcon className="size-5" />
+                </button>
+                </>
+            )}
+            </div>
+        );
+        },
+    };
+
+    return [...cols, actionsCol];
+    }, [columns, selectionEnabled, editingRowId]);
+
 
     const table = useReactTable({
-        data,
+        data: internalData,
         columns: computedColumns,
         pageCount: Math.ceil(count / query.limit), // number of pages
         manualPagination: true, // true bc we handle pagination ourselves
@@ -99,8 +216,24 @@ export default function DataTable({
         enableRowSelection: selectionEnabled,
         onRowSelectionChange: setRowSelection,
         getRowId: (original, index) => original.id !== undefined ? String(original.id) : String(index),
+        meta: { // for editable rows
+            updateData: (rowIndex, columnId, value) => {
+                setInternalData((old) =>
+                    old.map((row, index) => {
+                        if (index === rowIndex) {
+                            return {
+                                ...old[rowIndex],
+                                [columnId]: value,
+                            };
+                        }
+                        return row;
+                    })
+                )
+            }
+        }
     });
 
+    // for checkboxes
     useEffect(() => {
         if (!selectionEnabled || !onSelectionChange) return;
         const selected = table.getSelectedRowModel().flatRows.map(r => r.original);
@@ -163,6 +296,7 @@ export default function DataTable({
         return () => clearTimeout(timer);
     }, [columnFilters, setQuery]);
 
+    // for sorting
     const handleSort = (accessorKey, sortable) => {
         if (!sortable || !accessorKey) return;
         setQuery(q => {
@@ -175,7 +309,7 @@ export default function DataTable({
     const selectedRowObjects = selectionEnabled ? table.getSelectedRowModel().flatRows.map(r => r.original) : [];
     const selectedCount = selectedRowObjects.length;
 
-        return ( 
+    return ( 
             <div>
             {/* Action Bar */}
             {(onCreate || selectionEnabled) && (
@@ -236,7 +370,7 @@ export default function DataTable({
             )}
 
             {/* Table */}
-            <div className="rounded-xl shadow-sm overflow-hidden">
+            <div className="rounded-xl shadow-sm overflow-auto">
 
             {/* Header */}
             <table className="w-full table-auto">
@@ -372,11 +506,24 @@ export default function DataTable({
                 <tbody>
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id} className="hover:bg-gray-50">
-                        {row.getVisibleCells().map((cell) => (
-                            <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </td>
-                        ))}
+                        {row.getVisibleCells().map((cell) => {
+                            const isRowEditing = editingRowId === row.id;
+                            const EditableComp = cell.column.columnDef.editableCell;
+                            const isEditableCell = isRowEditing && EditableComp;
+
+                            return (
+                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
+                                    {isEditableCell ? (
+                                        <EditableComp {...cell.getContext()} />): cell.column.columnDef.cell ? (
+                                            flexRender( // use custom formatting (dates etc)
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )
+                                        ) : ( cell.getValue() ) }
+                                </td>
+                            )
+                            
+                        })}
                         </tr>
                     ))}
                 </tbody>

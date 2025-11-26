@@ -342,6 +342,23 @@ router.get('/me/qr', async (req, res) => {
     }
 });
 
+// lookup user accessible to regular users - returns minimal info
+router.get('/lookup/:utorid', async (req, res) => {
+    try {
+        const utorid = req.params.utorid;
+        if (!utorid || typeof utorid !== 'string') return res.status(400).json({ error: 'Invalid utorid' });
+
+        // allow regular users to lookup by utorid
+        const user = await prisma.user.findUnique({ where: { utorid } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        return res.status(200).json({ id: user.id, utorid: user.utorid, name: user.name });
+    } catch (err) {
+        console.error('Error looking up user:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 /////////////////////////////// /USERS/ME/PASSWORD
 router.patch("/me/password", async (req, res) =>{
 

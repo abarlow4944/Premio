@@ -25,8 +25,10 @@ export default function TransactionPage() {
         relatedId: "",
         promotionIds: "",
         remark: "",
+        sortBy: "",
+        sortOrder: "asc",
         page: 1,
-        limit: 10,
+        limit: 10
     });
 
     // Fetch table data
@@ -48,6 +50,7 @@ export default function TransactionPage() {
                 let data;
                 try {
                     data = JSON.parse(text);
+                    console.log("GOT: ", data);
                 } catch {
                     console.error("Not JSON:", text);
                     return;
@@ -173,7 +176,7 @@ export default function TransactionPage() {
                 columns={TransactionColumns}
                 count={totalCount}
                 query={query}
-                setQuery={q => ({ ...q})}
+                setQuery={setQuery}
             />
         </div>
     );

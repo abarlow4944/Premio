@@ -1,7 +1,8 @@
 // columns for the Promotion table
 import TableCell from "../TableCell";
 
-export function formatDateTime(iso) {
+// convert from string to ISO
+export function formatDateTime(iso) { 
   if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d)) return '—';
@@ -66,7 +67,7 @@ export function getPromoColumns(role) {
       enableSorting: true, 
       cell: ({ row }) => formatDateTime(row.original.startTime), 
       editableCell: TableCell,
-      editType: "text" 
+      editType: "date" 
     },
     { 
       accessorKey: 'endTime', 
@@ -74,7 +75,7 @@ export function getPromoColumns(role) {
       enableSorting: true, 
       cell: ({ row }) => formatDateTime(row.original.endTime), 
       editableCell: TableCell,
-      editType: "text" 
+      editType: "date" 
     },
     { 
       accessorKey: 'minSpending', 

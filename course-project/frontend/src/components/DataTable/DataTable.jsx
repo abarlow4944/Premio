@@ -35,13 +35,13 @@ export default function DataTable({
     const [editingRowBackup, setEditingRowBackup] = useState(null) // to store original info in case user cancels edits
 
     useEffect(() => { //keep in sync
-        console.log("changing to:", data)
         setInternalData(data);
     }, [data]);
 
     function startEditingRow(row) {
         setEditingRowId(row.id) // table row ID
         setEditingRowBackup(row.original); // backup original data for cancel
+        console.log(editingRowBackup)
     }
 
     function cancelEditingRow(){
@@ -99,7 +99,6 @@ export default function DataTable({
         setEditingRowId(null);
         setEditingRowBackup(null);
     }
-
 
     // set stableMaxRef from provided initial maxima
     useEffect(() => {
@@ -448,8 +447,8 @@ export default function DataTable({
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="w-full p-1">
-                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
-                                                                    <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500'}>All</span>
+                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
+                                                                    <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500  hover:bg-strawberry-red-100'}>All</span>
                                                                     {currentVal === '' && <CheckIcon className="size-4 text-white" />}
                                                                 </DropdownMenuItem>
                                                                 {def.filterOptions.map((opt) => {
@@ -457,7 +456,7 @@ export default function DataTable({
                                                                     const lbl = typeof opt === 'string' ? opt : opt.label;
                                                                     const selected = currentVal === val;
                                                                     return (
-                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ''}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
+                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ' hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
                                                                             <span className={selected ? 'font-medium text-white' : 'text-space-indigo-500'}>{lbl}</span>
                                                                             {selected && <CheckIcon className="size-4 text-white" />}
                                                                         </DropdownMenuItem>
@@ -529,7 +528,7 @@ export default function DataTable({
                             const isEditableCell = isRowEditing && EditableComp;
 
                             return (
-                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-5000">
+                                <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-500">
                                     {isEditableCell ? (
                                         <EditableComp {...cell.getContext()} />): cell.column.columnDef.cell ? (
                                             flexRender( // use custom formatting (dates etc)

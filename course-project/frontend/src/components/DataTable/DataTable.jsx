@@ -59,19 +59,25 @@ export default function DataTable({
     }
 
     function saveEditingRow(row){
-        const original = editingRowBackup // get original version
-        const updated = internalData.find((r) => String(r.id) === String(row.original.id)); // find a row with matching id
-        const changed = { id: updated.id }; // changed fields
-        console.log(updated)
+        const original = editingRowBackup; // get original version
 
-        Object.keys(updated).forEach(key => { // compare updated and original to get changed fields
-            
-            if (updated[key] !== original[key]) {
-                changed[key] = updated[key];
-            }
+        // update internal data state with edited row
+        setInternalData((prev) => {
+            const updated = prev.find((r) => String(r.id) === String(row.original.id)); // find a row with matching id
+            if (!updated) return prev;
+
+            const changed = { id: updated.id }; // changed fields
+
+            Object.keys(updated).forEach((key) => { // compare updated and original to get changed fields
+                if (original && updated[key] !== original[key]) {
+                    changed[key] = updated[key];
+                }
+            });
+
+            onRowSave(changed); // send the updated data to the page
+
+            return prev;
         });
-
-        onRowSave(changed); // send the updated data to the page
 
         // clear edit mode
         setEditingRowId(null);

@@ -14,10 +14,6 @@ export default function TransactionPage() {
     const [modalMode, setModalMode] = useState(null);
     const API_URL = import.meta.env.VITE_API_URL;
 
-    // const formFields = ;
-    const canCreate = ["cashier", "manager", "superuser"].includes(role);
-    const canAdjust = ["manager", "superuser"].includes(role);
-
     const [query, setQuery] = useState({
         utorid: "",
         type: "",
@@ -85,8 +81,8 @@ export default function TransactionPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-center mt-6 gap-3">
-                {canCreate && (
+            <div className="flex justify-end mt-6 gap-3">
+                {(
                 <Button
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
@@ -98,7 +94,7 @@ export default function TransactionPage() {
                 </Button>
                 )}
 
-                {canAdjust && (
+                {(
                 <Button
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
@@ -177,6 +173,8 @@ export default function TransactionPage() {
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}
+                enableEditing={true}
+                selectionEnabled={true}
             />
         </div>
     );

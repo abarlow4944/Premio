@@ -22,11 +22,11 @@ export function  getTransactionColumns(role) {
           enableSearch: true
         },
         {
-          accessorKey: "Related ID",
-          header: "relatedId",
+          accessorKey: "relatedId",
+          header: "Reference ID",
           enableSorting: true,
           enableSearch: true,
-          cell: ({ row }) => row.original.relatedId ?? 'N/A' 
+          cell: ({ row }) => row.original.relatedId ?? '-' 
         },
         {
           accessorKey: "promotionId",
@@ -55,8 +55,22 @@ export function  getTransactionColumns(role) {
           ]
         },
         {
+          accessorKey: "spent",
+          header: "Price",
+          cell: ({ row }) => row.original.spent ?? '-',
+        },
+        {
           accessorKey: "amount",
           header: "Points",
+        },
+        {
+          accessorKey: "suspicious",
+          header: "Suspricious",
+          filterType: 'select', 
+          filterOptions: [
+            { label: 'True', value: 'true' },
+            { label: 'False', value: 'false' },
+          ]
         },
     ];
   }

@@ -1,22 +1,24 @@
 import { useState, useEffect } from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import IconButton from '@mui/material/IconButton';
+import {
+  Box,
+  Button,
+  Typography,
+  Modal,
+  IconButton,
+  Card,
+  CardContent
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 420,
+  outline: 'none',
 };
+
 
 export default function ModalForm({ modalType, fields = [], open, setOpen, onSubmit }) {
     const [errors, setErrors] = useState({});
@@ -77,48 +79,56 @@ export default function ModalForm({ modalType, fields = [], open, setOpen, onSub
         {/* <Button onClick={() => setOpen(true)}>Open {modalType}</Button> */}
         <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle}>
-                {/* Close button */}
-                <IconButton
-                    onClick={handleClose}
-                    sx={{ position: 'absolute', top: 8, right: 8 }}
-                >
-                    <CloseIcon />
-                </IconButton>
+                <Card sx={{ borderRadius: 3, boxShadow: 6 }}>
+                    <CardContent sx={{ p: 3, position: "relative" }}>
+                        
+                        {/* Close Button */}
+                        <IconButton
+                            onClick={() => setOpen(false)}
+                            sx={{ position: 'absolute', right: 12, top: 12 }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
 
-                <Typography variant="h6" component="h2">
-                    Enter {modalType} details
-                </Typography>
+                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                            Enter {modalType} Details
+                        </Typography>
 
-                <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-                    {fields.map(f => (
-                        <div key={f.name} style={{ marginBottom: "12px" }}>
-                            <label style={{ display: "block", marginBottom: 4 }}>
-                                {f.label}{f.required ? " *" : ""}
-                            </label>
-                            <input
-                                type={f.type || "text"}
-                                name={f.name}
-                                value={formData[f.name]}
-                                onChange={handleChange}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    border: errors[f.name] ? "1px solid red" : "1px solid #ccc",
-                                    borderRadius: "4px",
-                                }}
-                            />
-                            {errors[f.name] && (
-                                <span style={{ color: "red", fontSize: "0.8rem" }}>
-                                    {errors[f.name]}
-                                </span>
-                            )}
-                        </div>
-                    ))}
+                        <form onSubmit={handleSubmit}>
+                            {fields.map(f => (
+                                <div key={f.name} style={{ marginBottom: 16 }}>
+                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                        {f.label}{f.required ? " *" : ""}
+                                    </Typography>
 
-                    <Button type="submit" variant="contained">
-                        Submit
-                    </Button>
-                </form>
+                                    <input
+                                        type={f.type || "text"}
+                                        name={f.name}
+                                        value={formData[f.name]}
+                                        onChange={handleChange}
+                                        style={{
+                                            width: "100%",
+                                            padding: "10px",
+                                            borderRadius: "8px",
+                                            border: errors[f.name] ? "1px solid red" : "1px solid #ccc",
+                                        }}
+                                    />
+
+                                    {errors[f.name] && (
+                                        <Typography color="error" variant="caption">
+                                            {errors[f.name]}
+                                        </Typography>
+                                    )}
+                                </div>
+                            ))}
+
+                            <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
+                                Submit
+                            </Button>
+                        </form>
+
+                    </CardContent>
+                </Card>
             </Box>
         </Modal>
         </div>

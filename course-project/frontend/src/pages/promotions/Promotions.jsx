@@ -140,6 +140,27 @@ export default function Promotions() {
         setPendingDelete(rows);
     };
 
+    const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
+        // add to payload
+        console.log("updated info is", updatedRow)
+
+        const res = await fetch(`${API_URL}/promotions/${updatedRow.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedRow)
+        });
+
+        console.log("res is:", res)
+        const data = await res.json();
+        if (!res.ok) {
+            console.warn('Could not update promotion:', data.error || res.status);
+            return;
+        }
+    }
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -212,6 +233,7 @@ export default function Promotions() {
                     } : undefined}
                     error={error}
                     success={success}
+                    onRowSave={handleRowSaved} // for editing rows
                 />
             )}
 

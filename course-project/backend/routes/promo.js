@@ -352,6 +352,7 @@ router.get('/:promotionId', async (req, res) => {
 
 // PATCH /promotions/:promotionId: Update an existing promotion
 router.patch('/:promotionId', async (req, res) => {
+	console.log("REACHED")
     try {
         const user = req.user;
 
@@ -383,13 +384,15 @@ router.patch('/:promotionId', async (req, res) => {
             points,
         } = req.body || {};
 
+		console.log("THIS IS BEING SENT TO API:", req.body)
+
         // If no updatable fields provided
         const providedFields = ['name','description','type','startTime','endTime','minSpending','rate','points'].filter(f => Object.prototype.hasOwnProperty.call(req.body || {}, f));
-        if (providedFields.length === 0) return res.status(400).json({ error: 'No fields to update' });
+		if (providedFields.length === 0) return res.status(400).json({ error: 'No fields to update' });
 
         // No updates allowed after promotion has started
         const disallowedAfterStart = ['name','description','type','startTime','minSpending','rate','points'];
-        if (now > origStart) {
+        if (now > origStart && origEnd > now) {
             for (const f of disallowedAfterStart) {
                 if (Object.prototype.hasOwnProperty.call(req.body || {}, f) && req.body[f] !== null) {
                     return res.status(400).json({ error: `Cannot update ${f} after promotion has started` });

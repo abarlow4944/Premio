@@ -1,6 +1,6 @@
 import ModalForm from "../../components/Modal/ModalForm";
 import DataTable from "../../components/DataTable/DataTable";
-import TransactionColumns from "../../components/DataTable/Columns/TransactionColumnsReg"
+import TransactionColumns from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";

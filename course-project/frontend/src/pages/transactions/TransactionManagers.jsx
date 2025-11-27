@@ -1,6 +1,6 @@
 import ModalForm from "../../components/Modal/ModalForm";
 import DataTable from "../../components/DataTable/DataTable";
-import TransactionColumns from "../../components/DataTable/Columns/TransactionColumns"
+import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
@@ -199,7 +199,7 @@ export default function TransactionPage() {
             {/* Table */}
             <DataTable
                 data={rows}
-                columns={TransactionColumns}
+                columns={getTransactionColumns(role)}
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}

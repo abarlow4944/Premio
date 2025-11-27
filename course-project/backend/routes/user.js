@@ -591,17 +591,34 @@ router.get("/me/transactions", async (req, res) => {
             skip,
             take: limitNum,
             orderBy: { id: 'desc' },
-            include: { promotions: { select: { id: true } } },
+            include: { promotions: { select: { id: true, name: true } } },
         });
+
+        // batch-resolve related transaction utorids
+        const relatedIds = Array.from(new Set(transactions.map(t => t.relatedId).filter(Boolean)));
+        let relatedMap = {};
+        if (relatedIds.length > 0) {
+            const relatedTxs = await prisma.transaction.findMany({
+                where: { id: { in: relatedIds } },
+                select: { id: true, utorid: true }
+            });
+            relatedMap = relatedTxs.reduce((acc, rt) => {
+                acc[rt.id] = rt.utorid;
+                return acc;
+            }, {});
+        }
 
         // format response
         const results = transactions.map(t => ({
             id: t.id,
+            utorid: t.utorid,
             type: t.type,
             spent: t.spent ?? undefined,
             relatedId: t.relatedId ?? undefined,
+            relatedUtorid: t.relatedId ? relatedMap[t.relatedId] : undefined,
             amount: t.amount,
             promotionIds: t.promotions.map(p => p.id),
+            promotionNames: t.promotions.map(p => p.name),
             remark: t.remark || "",
             createdBy: t.createdBy
         }));
@@ -865,26 +882,33 @@ router.post("/:userId/transactions", async (req, res) => {
                 utorid: sender.utorid,
                 remark: remark || "",
                 amount: amount,
-                relatedId: recipient.id,
                 processed: false,
                 createdBy: req.user.utorid,
             }
         });
 
+        // create the recipient transaction with relatedId pointing to sender transaction id
         const receiveTransaction = await prisma.transaction.create({
             data: {
                 type: type,
                 utorid: recipient.utorid,
                 remark: remark,
                 amount: amount,
-                relatedId: sender.id,
+                relatedId: sendTransaction.id,
                 processed: false,
                 createdBy: req.user.utorid,
             }
-        })
+        });
+
+        // update the sender transaction to point to the receive transaction id
+        await prisma.transaction.update({
+            where: { id: sendTransaction.id },
+            data: { relatedId: receiveTransaction.id },
+        });
 
         return res.status(201).json({
             id: sendTransaction.id,
+            relatedId: receiveTransaction.id,
             sender: req.user.utorid,
             recipient: recipient.utorid,
             type: "transfer",

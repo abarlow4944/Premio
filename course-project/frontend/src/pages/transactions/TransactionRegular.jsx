@@ -1,6 +1,6 @@
 import ModalForm from "../../components/Modal/ModalForm";
 import DataTable from "../../components/DataTable/DataTable";
-import TransactionColumns from "../../components/DataTable/Columns/TransactionColumns"
+import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
@@ -71,12 +71,12 @@ export default function TransactionPage() {
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div className="mb-[10vh]">
+            <div className="mb-[5vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
                     Transaction History
                 </h1>
                 <p className="text-center text-sm text-space-indigo-500">
-                    View all previous transactions.
+                    View your transaction history.
                 </p>
             </div>
 
@@ -157,10 +157,10 @@ export default function TransactionPage() {
             {/* Table */}
             <DataTable
                 data={rows}
-                columns={TransactionColumns}
+                columns={getTransactionColumns(role)}
                 count={totalCount}
                 query={query}
-                setQuery={q => ({ ...q})}
+                setQuery={setQuery}
             />
         </div>
     );

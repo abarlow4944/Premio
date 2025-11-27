@@ -37,9 +37,10 @@ const features = [
 
 export default function Regular() {
   const API_URL = import.meta.env.VITE_API_URL; // API base URL
-  const { user, loadingUser, reloadProfile } = useUser()
+  const { user, loadingUser, reloadProfile, role } = useUser()
   const nameDisplay = loadingUser ? 'Loading...' : user ? user.name : '(FirstName), (LastName)'
   const pointsDisplay = loadingUser ? '...' : user ? user.points : '(##)'
+  const roleDisplay = loadingUser ? 'Loading...' : role === 'regular' ? 'regular user' : role ? role : 'N/A'
 
   const [selected, setSelected] = useState(null)
   const [qrValue, setQrValue] = useState(null)
@@ -170,7 +171,10 @@ export default function Regular() {
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-flag-red-500 sm:text-5xl lg:text-balance">
             {nameDisplay}
           </p>
-          <p className="mt-6 text-lg/8 text-gray-700">
+          <p className="mt-4 text-lg/8 text-gray-700">
+            You are a: <span className="font-semibold text-space-indigo-500">{roleDisplay}</span>
+          </p>
+          <p className="mt-2 text-lg/8 text-gray-700">
             You currently have {pointsDisplay} points.
           </p>
         </div>

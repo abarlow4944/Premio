@@ -6,7 +6,7 @@ import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
 
 export default function Users() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
-    const { user } = useUser();
+    const { user, visualRole } = useUser();
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -24,7 +24,7 @@ export default function Users() {
 
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
-    const role = user?.role || 'regular';
+    const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
 
     // call fetchData each time query changes

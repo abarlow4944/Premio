@@ -94,10 +94,13 @@ router.post("/", async (req, res) => {
 router.get("/", async(req, res) => {
     try{
         const {
+            utorid: utoridFilter,
             name: nameFilter,
             role: roleFilter,
+            email: emailFilter,
             verified: verifiedRaw,
             activated: activatedRaw,
+            suspicious: suspiciousRaw,
             page: pageRaw = '1',
             limit: limitRaw = '10',
             sortBy: sortByRaw,
@@ -130,13 +133,23 @@ router.get("/", async(req, res) => {
             else if (a === 'false') activated = false;
             else return res.status(400).json({ error: 'Incorrect type for fields' });
         }
+        let suspicious;
+        if (suspiciousRaw !== undefined) {
+            const a = String(suspiciousRaw).toLowerCase();
+            if (a === 'true') suspicious = true;
+            else if (a === 'false') suspicious = false;
+            else return res.status(400).json({ error: 'Incorrect type for fields' });
+        }
 
         // extract filter data
         const where = {};
-        if (nameFilter) where.name = nameFilter;
+        if (utoridFilter) where.utorid = {contains: utoridFilter};
+        if (nameFilter) where.name = {contains: nameFilter};
+        if (emailFilter) where.email = {contains: emailFilter};
         if (roleFilter) where.role = roleFilter;
         if (verified !== undefined) where.verified = verified;
         if (activated !== undefined) where.activated = activated;
+        if (suspicious !== undefined) where.suspicious = suspicious;
 
         const pageNum = page;
         const take = limit;
@@ -165,11 +178,14 @@ router.get("/", async(req, res) => {
                 utorid: true,
                 name: true,
                 birthday: true,
+                email: true,
                 role: true,
                 points: true,
                 createdAt: true,
                 lastLogin: true,
                 verified: true,
+                activated: true,
+                suspicious: true,
                 avatarUrl: true,
             },
             orderBy,

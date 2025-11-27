@@ -108,8 +108,9 @@ router.get("/", async(req, res) => {
     }
 
     try{
-        const {name, location, started, ended, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw,} = req.query;
+        const {name, description, location, startTime, endTime, capacity, points, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw,} = req.query;
         const where = {};
+        console.log(req.query)
 
         const pageNum = Number(page);
         const limitNum = Number(limit);
@@ -120,28 +121,12 @@ router.get("/", async(req, res) => {
             where.name = { contains: name };
         }
 
+        if(description){
+            where.description = { contains: description}
+        }
+
         if (location){
             where.location = { contains: location };
-        }
-
-        if (started !== undefined){
-            const now = new Date()
-
-            if (started === "true") {
-                where.startTime = { lt: now }; // endDate < now
-            } else {
-                where.endTime = { gte: now }; // optionally, not yet ended
-            }
-        }
-
-        if (ended !== undefined){
-            const now = new Date()
-
-            if (ended === "true") {
-                where.endTime = { lt: now }; // endDate < now
-            } else {
-                where.endTime = { gte: now }; // optionally, not yet ended
-            }
         }
 
         if (showFull === 'true') {
@@ -199,6 +184,8 @@ router.get("/", async(req, res) => {
             },
             orderBy,
         });
+
+        console.log(events)
 
         const flatten_guestlist = events.map(event => ({
             ...event,
@@ -292,11 +279,12 @@ router.patch("/:eventId", async(req, res) =>{
         const { name, description, location, startTime, endTime, capacity, points, published} = req.body;
         // update data
         const data = {};
+        
         if (name !== undefined) data.name = name;
         if (description !== undefined) data.description = description;
         if (location !== undefined) data.location = location;
-            if (startTime !== undefined && startTime !== null) data.startTime = new Date(startTime);
-            if (endTime !== undefined && endTime !== null) data.endTime = new Date(endTime);
+        if (startTime !== undefined && startTime !== null) data.startTime = new Date(startTime);
+        if (endTime !== undefined && endTime !== null) data.endTime = new Date(endTime);
         if (capacity !== undefined) data.capacity = capacity;
 
         if (points !== undefined){

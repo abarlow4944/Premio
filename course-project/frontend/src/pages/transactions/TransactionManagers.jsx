@@ -12,6 +12,9 @@ export default function TransactionPage() {
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [modalMode, setModalMode] = useState(null);
+    const[error, setError] = useState("")
+    const[success, setSuccess] = useState("")
+
     const API_URL = import.meta.env.VITE_API_URL;
 
     const [query, setQuery] = useState({
@@ -29,6 +32,9 @@ export default function TransactionPage() {
 
     // Fetch table data
     useEffect(() => {
+        setError("")
+        setSuccess("")
+
         const fetchData = async () => {
             try {
                 const params = new URLSearchParams();
@@ -68,6 +74,30 @@ export default function TransactionPage() {
         fetchData();
     }, [query]);
 
+    // saving updated data
+    const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
+        setError("")
+        setSuccess("")
+        console.log("suspicion :", updatedRow.suspicious);
+        // send PATCH request
+        const res = await fetch(`${API_URL}/transactions/${updatedRow.id}/suspicious`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ suspicious: updatedRow.suspicious})
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            setError(`Could not update transactions: ${data.error}` || "Could not update transactions")
+            console.warn('Could not update transactions:', data.error || res.status);
+            throw new Error('Could not update transactions');
+        }
+        setSuccess("Successfully updated transactions")
+    }
+    
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -173,8 +203,9 @@ export default function TransactionPage() {
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}
-                enableEditing={true}
-                selectionEnabled={true}
+                onRowSave={handleRowSaved}
+                error={error}
+                success={success}
             />
         </div>
     );

@@ -72,7 +72,9 @@ export function  getTransactionColumns(role) {
           filterOptions: [
             { label: 'True', value: 'true' },
             { label: 'False', value: 'false' },
-          ]
+          ],
+          editableCell: TableCell,
+          editType: "select"
         },
     ];
   }

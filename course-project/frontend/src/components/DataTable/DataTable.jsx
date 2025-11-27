@@ -359,7 +359,6 @@ export default function DataTable({
                         {success && (
                             <Message message={success} status="success"/>
                         )}
-
                     </div>
 
                     {/* Right side: selection actions */}
@@ -404,6 +403,7 @@ export default function DataTable({
                             const sortable = def.enableSorting === false ? false : Boolean(accessorKey);
                             const isActive = sortable && query.sortBy === accessorKey;
                             const order = isActive ? (query.sortOrder || 'asc') : null;
+
                             return (
                                 <th key={header.id} className="px-4 py-3 text-sm font-semibold text-platinum-500 border-b">
                                         {sortable ? (
@@ -456,17 +456,19 @@ export default function DataTable({
                                                                     <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500  hover:bg-strawberry-red-100'}>All</span>
                                                                     {currentVal === '' && <CheckIcon className="size-4 text-white" />}
                                                                 </DropdownMenuItem>
-                                                                {def.filterOptions.map((opt) => {
-                                                                    const val = typeof opt === 'string' ? opt : opt.value;
-                                                                    const lbl = typeof opt === 'string' ? opt : opt.label;
-                                                                    const selected = currentVal === val;
-                                                                    return (
-                                                                        <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ' hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
-                                                                            <span className={selected ? 'font-medium text-white' : 'text-space-indigo-500'}>{lbl}</span>
-                                                                            {selected && <CheckIcon className="size-4 text-white" />}
-                                                                        </DropdownMenuItem>
-                                                                    )
-                                                                })}
+                                                                {
+                                                                    def.filterOptions.map((opt) => {
+                                                                        const val = typeof opt === 'string' ? opt : opt.value;
+                                                                        const lbl = typeof opt === 'string' ? opt : opt.label;
+                                                                        const selected = currentVal === val;
+                                                                        return (
+                                                                            <DropdownMenuItem key={val} className={`flex items-center justify-between px-3 py-2 ${selected ? 'bg-strawberry-red-500 text-white' : ' hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: val }))}>
+                                                                                <span className={selected ? 'font-medium text-white' : 'text-space-indigo-500'}>{lbl}</span>
+                                                                                {selected && <CheckIcon className="size-4 text-white" />}
+                                                                            </DropdownMenuItem>
+                                                                        )
+                                                                    })
+                                                                }
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
                                                     )

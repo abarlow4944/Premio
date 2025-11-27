@@ -39,6 +39,7 @@ export default function TableCell({ row, column, table }) {
     const [value, setValue] = useState(raw) // initialize data
     const columnData = column.columnDef;
     const editType = columnData.editType;
+    const dropdownOptions = columnData.editOptions ? columnData.editOptions : columnData.filterOptions;
 
     useEffect(() => {
         setValue(raw)
@@ -78,7 +79,7 @@ export default function TableCell({ row, column, table }) {
             );
         }
         case "select":
-            const options = columnData.filterOptions // get a list of the dropdown options
+            const options = dropdownOptions // get a list of the dropdown options
 
             return (
                <select

@@ -50,22 +50,36 @@ export function getUserColumns(role) {
       enableSearch: true, 
     },
     {
+      accessorKey: "email",
+      header: "Email",
+      enableSorting: true,
+      enableSearch: true, 
+      editableCell: TableCell,
+      editType: "text" 
+    },
+    {
       accessorKey: "role",
       header: "Role",
       enableSorting: true,
       filterType: 'select', 
-      filterOptions: role === "manager"? [
-        { label: 'Regular', value: 'regular' },
-        { label: 'Cashier', value: 'cashier' },
-      ] :
-      [
+      filterOptions: [
         { label: 'Regular', value: 'regular' },
         { label: 'Cashier', value: 'cashier' },
         { label: 'Manager', value: 'manager' },
         { label: 'Superuser', value: 'superuser' },
       ],
+      editOptions: role === "superuser" ? [
+        { label: 'Regular', value: 'regular' },
+        { label: 'Cashier', value: 'cashier' },
+        { label: 'Manager', value: 'manager' },
+        { label: 'Superuser', value: 'superuser' },
+      ] :
+      [
+        { label: 'Regular', value: 'regular' },
+        { label: 'Cashier', value: 'cashier' },
+      ],
       editableCell: TableCell,
-      editType: "date" 
+      editType: "select" 
     },
     {
       accessorKey: "birthday",
@@ -98,7 +112,9 @@ export function getUserColumns(role) {
       filterOptions: [
         { label: 'True', value: 'true' },
         { label: 'False', value: 'false' },
-      ]
+      ],
+      editableCell: TableCell,
+      editType: "select" 
     },
     {
       accessorKey: "activated",
@@ -109,6 +125,18 @@ export function getUserColumns(role) {
         { label: 'True', value: 'true' },
         { label: 'False', value: 'false' },
       ]
+    },
+    {
+      accessorKey: "suspicious",
+      header: "Suspicious",
+      enableSorting: true,
+      filterType: 'select', 
+      filterOptions: [
+        { label: 'True', value: 'true' },
+        { label: 'False', value: 'false' },
+      ],
+      editableCell: TableCell,
+      editType: "select" 
     },
     ];
   }

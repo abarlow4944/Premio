@@ -40,9 +40,11 @@ export default function Users() {
                 // add necessary params to the URL
                 if(query.utorid) params.append("utorid", query.utorid);
                 if(query.name) params.append("name", query.name);
+                if(query.email) params.append("email", query.email);
                 if(query.role) params.append("role", query.role);
                 if(query.verified) params.append("verified", query.verified);
                 if(query.activated) params.append("activated", query.activated);
+                if(query.suspicious) params.append("suspicious", query.suspicious);
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
@@ -60,7 +62,6 @@ export default function Users() {
                 
                 if(!res.ok){ // handle error
                     setError(`Could not retrieve user data: ${data.error}` || "Could not retrieve user data")
-                    console.log("Error:", data.error)
                     console.log("Error:", data.error)
                     return
                 }
@@ -118,6 +119,9 @@ export default function Users() {
                 query={query} // the filters we are applying
                 setQuery={setQuery}
                 error={error}
+                onCreate={role == "manager" ? () => {
+                        // placeholder for creating a new promotion
+                } : undefined}
                 success={success}
                 onRowSave={handleRowSaved} // for editing rows
             />

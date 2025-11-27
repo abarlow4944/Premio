@@ -77,12 +77,6 @@ export function  getTransactionColumns(role) {
           cell: ({ row }) => row.original.relatedId ?? '-' 
         },
         {
-          accessorKey: "remark",
-          header: "Remark",
-          enableSorting: true,
-          enableSearch: true
-        },
-        {
           accessorKey: "promotionId",
           header: "Promotion",
           cell: ({ row }) => {

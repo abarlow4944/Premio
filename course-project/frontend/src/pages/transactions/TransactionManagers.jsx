@@ -249,6 +249,7 @@ export default function TransactionPage() {
                 error={error}
                 success={success}
                 onViewRow={handleViewRow}
+                enableEditing={true}
             />
 
             {/* View Transaction */}

@@ -101,7 +101,7 @@ export default function TransactionPage() {
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div className="mb-[10vh]">
+            <div className="mb-[5vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
                     Transactions
                 </h1>

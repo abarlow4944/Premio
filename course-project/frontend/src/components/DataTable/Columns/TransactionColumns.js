@@ -67,7 +67,7 @@ export function  getTransactionColumns(role) {
         },
         {
           accessorKey: "suspicious",
-          header: "Suspricious",
+          header: "Suspicious",
           filterType: 'select', 
           filterOptions: [
             { label: 'True', value: 'true' },

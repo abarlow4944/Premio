@@ -17,6 +17,7 @@ export default function DataTable({
     initialStableMax,
     selectionEnabled = false,
     onSelectionChange,
+    enableEditing = true,
     onEditSelected,
     onDeleteSelected,
     onCreate,
@@ -147,57 +148,62 @@ export default function DataTable({
         cols = [selectCol, ...cols];
     }
 
-    // Add Actions column at the END
-    const actionsCol = {
-        id: '__actions',
-        header: 'Actions',
-        enableSorting: false,
-        cell: ({ row }) => {
-        const isEditing = editingRowId === row.id;
+    if (enableEditing){
+        // Add Actions column at the END
+        const actionsCol = {
+            id: '__actions',
+            header: 'Actions',
+            enableSorting: false,
+            cell: ({ row }) => {
+            const isEditing = editingRowId === row.id;
+            return (
+                <div className="flex items-center gap-2">
+                {isEditing ? (
+                    <>
+                    {/* Save */}
+                    <button
+                        type="button"
+                        onClick={() => saveEditingRow(row)}
+                        className="text-green-600 hover:text-green-800"
+                        aria-label="Save row"
+                    >
+                        <CheckCircleIcon className="size-5" />
+                    </button>
 
-        return (
-            <div className="flex items-center gap-2">
-            {isEditing ? (
-                <>
-                {/* Save */}
-                <button
-                    type="button"
-                    onClick={() => saveEditingRow(row)}
-                    className="text-green-600 hover:text-green-800"
-                    aria-label="Save row"
-                >
-                    <CheckCircleIcon className="size-5" />
-                </button>
-
-                {/* Cancel */}
-                <button
-                    type="button"
-                    onClick={cancelEditingRow}
-                    className="text-red-600 hover:text-red-800"
-                    aria-label="Cancel edit"
-                >
-                    <XCircleIcon className="size-5" />
-                </button>
-                </>
-            ) : (
-                <>
-                {/* Edit */}
-                <button
-                    type="button"
-                    onClick={() => startEditingRow(row)}
-                    className="text-blue-600 hover:text-blue-800"
-                    aria-label="Edit row"
-                >
-                    <PencilSquareIcon className="size-5" />
-                </button>
-                </>
-            )}
-            </div>
-        );
-        },
-    };
-
-    return [...cols, actionsCol];
+                    {/* Cancel */}
+                    <button
+                        type="button"
+                        onClick={cancelEditingRow}
+                        className="text-red-600 hover:text-red-800"
+                        aria-label="Cancel edit"
+                    >
+                        <XCircleIcon className="size-5" />
+                    </button>
+                    </>
+                ) : (
+                    <>
+                    {/* Edit */}
+                    <button
+                        type="button"
+                        onClick={() => startEditingRow(row)}
+                        className="text-blue-600 hover:text-blue-800"
+                        aria-label="Edit row"
+                    >
+                        <PencilSquareIcon className="size-5" />
+                    </button>
+                    </>
+                )}
+                </div>
+            );
+            },
+        };
+        // console.log(actionsCol);
+        return [...cols, actionsCol];
+    }
+    else{
+        return [...cols];
+    }
+   
     }, [columns, selectionEnabled, editingRowId]);
 
 

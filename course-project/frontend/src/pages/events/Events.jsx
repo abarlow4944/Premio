@@ -121,6 +121,30 @@ export default function Events() {
         setPendingDelete(rows);
     };
 
+    // saving updated data
+    const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
+        setError("")
+        setSuccess("")
+
+        // send PATCH request
+        const res = await fetch(`${API_URL}/events/${updatedRow.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedRow)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            setError(`Could not update event: ${data.error}` || "Could not update event")
+            console.warn('Could not update event:', data.error || res.status);
+            throw new Error('Could not update event');
+        }
+        setSuccess("Successfully updated event")
+    }
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -189,6 +213,7 @@ export default function Events() {
                 setQuery={setQuery}
                 error={error}
                 success={success}
+                onRowSave={handleRowSaved} // for editing rows
             />
         
             {/* _ event(s) selected message */}

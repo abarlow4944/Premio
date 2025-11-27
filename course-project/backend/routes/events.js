@@ -285,7 +285,7 @@ router.patch("/:eventId", async(req, res) =>{
         if (location !== undefined) data.location = location;
         if (startTime !== undefined && startTime !== null) data.startTime = new Date(startTime);
         if (endTime !== undefined && endTime !== null) data.endTime = new Date(endTime);
-        if (capacity !== undefined) data.capacity = capacity;
+        if (capacity !== undefined) data.capacity = Number(capacity);
 
         if (points !== undefined){
             if (user.role === "manager"){
@@ -305,7 +305,7 @@ router.patch("/:eventId", async(req, res) =>{
         } 
 
         if (Object.keys(data).length === 0){
-            return res.status(400).json({ "error": "Nothing updated" });
+            return res.status(400).json({ "error": "No fields to update" });
         }
 
         const event = await prisma.event.findUnique({
@@ -342,15 +342,28 @@ router.patch("/:eventId", async(req, res) =>{
 
         // If this is not a points-only update, enforce the 'no updates after start' rule.
         if (!isPointsOnlyUpdate) {
-            if (event.startTime < now || (providedStart && providedStart < now) || (providedEnd && providedEnd < now)) {
-                return res.status(400).json({ "error": "Invalid event start time." });
+            if (event.startTime < now && event.endTime > now) {
+                return res.status(400).json({ "error": "Cannot edit an event in progress." });
+            }
+            if((providedStart && providedStart < now) || (providedEnd && providedEnd < now)){
+                return res.status(400).json({ "error": "Cannot edit an event start/end time in the past." });
+            }
+            if((providedStart && providedEnd === null) && (providedStart > event.endTime)){
+                console.log("print bruh")
+                return res.status(400).json({ "error": "Event start time cannot be after the end time." });
+            }
+            if((providedEnd && providedStart === null) && (providedEnd < event.startTime)){
+                return res.status(400).json({ "error": "Event end time cannot be before the start time." });
+            }
+            if((providedEnd && providedStart) && (providedEnd < providedStart)){
+                return res.status(400).json({ "error": "Event start time cannot be after the end time." });
             }
         }
 
         // Only validate when capacity is provided and not null.
         if (capacity !== undefined && capacity !== null && capacity < event.capacity && (event.guests.length > capacity)){
             // when reducing capacity below number of confirmed guests
-            return res.status(400).json({ "error": "Invalid event capacity." });
+            return res.status(400).json({ "error": "Invalid event capacity: capacity cannot be below number of confirmed guests)." });
         }
 
         if (points !== undefined) {
@@ -364,9 +377,6 @@ router.patch("/:eventId", async(req, res) =>{
             }
         }
 
-        if ((name !== undefined || description !== undefined || location !== undefined || startTime !== undefined || capacity !== undefined) && ((providedStart && providedStart > event.startTime) || (providedEnd && providedEnd > event.endTime))){
-            return res.status(400).json({ "error": "Bad Request" });
-        }
         // update entries
         const updated = Object.fromEntries(
             Object.entries(data).filter(([key, value]) => event[key] !== value)

@@ -515,8 +515,10 @@ router.get("/me/transactions", async (req, res) => {
         let limitNum = 10;
 
         const allowedTypes = ['purchase', 'redemption', 'adjustment', 'event', 'transfer'];
-
         const {type, relatedId, promotionId, amount, operator, page, limit} = req.query;
+
+        const utorid = req.user.utorid // get utorid of the logged in user
+
         
         // check validity of payload
         if(type && !allowedTypes.includes(type)){
@@ -574,6 +576,7 @@ router.get("/me/transactions", async (req, res) => {
 
         // built filters
         const where = {};
+        where.utorid = utorid
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
         if (type) where.type = type;
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
@@ -602,7 +605,6 @@ router.get("/me/transactions", async (req, res) => {
             remark: t.remark || "",
             createdBy: t.createdBy
         }));
-
         return res.status(200).json({ count, results });
     }
     catch(err) {

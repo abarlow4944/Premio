@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import {
-    Bars3Icon, UserCircleIcon
+    Bars3Icon, UserCircleIcon, ChevronDownIcon
 } from '@heroicons/react/24/outline'
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../contexts/UserContexts";
-
+import Message from "./Message";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from "./ui/dropdown-menu";
 
 // the visible navbar items based on role
 const NAV_ITEMS_BY_ROLE = {
@@ -30,12 +36,28 @@ const NAV_ITEMS_BY_ROLE = {
   ],
 };
 
+// Role hierarchy for switching: higher role can switch to lower roles
+const ROLE_HIERARCHY = ["regular", "cashier", "manager", "superuser"];
+
+// Get available roles to switch to based on current role
+const getAvailableSwitchRoles = (currentRole) => {
+  if (!currentRole) return [];
+  const currentIndex = ROLE_HIERARCHY.indexOf(currentRole);
+  if (currentIndex === -1) return [];
+  // Can switch to current role or any lower role
+  return ROLE_HIERARCHY.slice(0, currentIndex + 1);
+};
+
 
 export default function NavBar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [switchRoleWarning, setSwitchRoleWarning] = useState(null)
     const navigate = useNavigate();
-    const { role, setRole } = useUser();
+    const location = useLocation();
+    const { role, setRole, visualRole, setVisualRole } = useUser();
     const API_URL = import.meta.env.VITE_API_URL; // API base URL
+    
+    const isOnUsersPage = location.pathname === '/users';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -44,10 +66,20 @@ export default function NavBar() {
         });
         
         setRole(null); // clear the role in the context
+        setVisualRole(null);
         navigate("/"); // navigate back to login page
     }
 
-    const navItems = NAV_ITEMS_BY_ROLE[role] ?? [];
+    const handleRoleSwitch = (newRole) => {
+        if (isOnUsersPage) {
+            setSwitchRoleWarning("Role switching is not allowed while on the Users page");
+            return;
+        }
+        setVisualRole(newRole);
+    }
+
+    const availableRoles = getAvailableSwitchRoles(role);
+    const navItems = NAV_ITEMS_BY_ROLE[visualRole || role] ?? [];
 
     return (
         <header className='navigation-bar bg-strawberry-red-100 h-[10vh] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.15)]'>
@@ -93,8 +125,28 @@ export default function NavBar() {
 
         
         <div className="lg:flex lg:flex-1 lg:justify-end gap-4 flex flex-wrap items-center">
-            {/* Role */}
-            <h2 className="text-m font-bold text-space-indigo-500">{role}</h2>
+            {/* Role with Switch Dropdown */}
+            {availableRoles.length > 1 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-m text-space-indigo-500 hover:text-space-indigo-700 hover:cursor-pointer outline-none flex items-center gap-1">
+                  Viewing as: <span className="font-bold">{visualRole || role}</span>
+                  <ChevronDownIcon className="size-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {availableRoles.map((availableRole) => (
+                    <DropdownMenuItem
+                      key={availableRole}
+                      onClick={() => handleRoleSwitch(availableRole)}
+                      className={(visualRole || role) === availableRole ? "bg-flag-red-100 text-flag-red-500 font-semibold" : ""}
+                    >
+                      {availableRole}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              role === 'regular' ? null : <h2 className="text-m font-bold text-space-indigo-500">{visualRole}</h2>
+            )}
             
             {/* Logout */}
             <button
@@ -113,6 +165,16 @@ export default function NavBar() {
         </div>
       </nav>
 
+      {/* Cannot switch roles on Users page */}
+      {switchRoleWarning && (
+        <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+          <Message 
+            status="error" 
+            message={switchRoleWarning}
+            onClose={() => setSwitchRoleWarning(null)}
+          />
+        </div>
+      )}
     </header>
   );
 }

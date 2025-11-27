@@ -7,7 +7,8 @@ import { Button } from "../../components/ui/button";
 import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
 
 export default function TransactionPage() {
-    const { role } = useUser();
+    const { visualRole, role } = useUser();
+    const currentRole = visualRole || role;
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -133,9 +134,9 @@ export default function TransactionPage() {
                 open={open}
                 setOpen={setOpen}
                 modalType="transactions"
-                fields={getTransactionFields(role, modalMode)}
+                fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
-                    const formFields = getTransactionFields(role, modalMode);
+                    const formFields = getTransactionFields(currentRole, modalMode);
                     const payload = {};
 
                     formFields.forEach((f) => {

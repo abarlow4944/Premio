@@ -32,9 +32,10 @@ const features = [
 
 export default function Superuser() {
   const API_URL = import.meta.env.VITE_API_URL; // API base URL
-  const { user, loadingUser } = useUser()
+  const { user, loadingUser, role } = useUser()
   const nameDisplay = loadingUser ? 'Loading...' : user ? user.name : '(FirstName), (LastName)'
   const pointsDisplay = loadingUser ? '...' : user ? user.points : '(##)'
+  const roleDisplay = loadingUser ? 'Loading...' : role ? role : 'N/A'
 
   const [selected, setSelected] = useState(null)
   const [qrValue, setQrValue] = useState(null)
@@ -97,8 +98,8 @@ export default function Superuser() {
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-flag-red-500 sm:text-5xl lg:text-balance">
             {nameDisplay}
           </p>
-          <p className="mt-6 text-lg/8 text-gray-700">
-            You currently have {pointsDisplay} points.
+          <p className="mt-4 text-lg/8 text-gray-700">
+            You are a: <span className="font-semibold text-space-indigo-500">{roleDisplay}</span>
           </p>
         </div>
         <div className="mx-auto mt-12 max-w-2xl sm:mt-12 lg:mt-14 lg:max-w-4xl">

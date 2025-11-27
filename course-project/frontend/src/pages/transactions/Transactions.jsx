@@ -7,10 +7,10 @@ import CashierTransaction from './TransactionsCashier';
 import ManagerTransaction from './TransactionManagers';
 
 export default function Home() {
-    const {role} = useUser();
-    // const role = "cashier"
+    const {visualRole, role} = useUser();
+    const currentRole = visualRole || role;
 
-    if (!role){
+    if (!currentRole){
         console.log("no role");
         return (
             <div>
@@ -19,7 +19,7 @@ export default function Home() {
         );
     }
 
-    switch(role){
+    switch(currentRole){
         case "regular":
             return <RegularTransaction />;
         case "cashier":

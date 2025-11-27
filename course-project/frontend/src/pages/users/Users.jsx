@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
+import { Button } from "@/components/UI/button";
+import ModalForm from "../../components/Modal/ModalForm";
+import ModalView from "../../components/Modal/ModalView";
+import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
 
 
 export default function Users() {
@@ -26,6 +30,11 @@ export default function Users() {
     const[success, setSuccess] = useState("")
     const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
+
+    // modal stuff
+    const[isModalOpen, setIsModalOpen] = useState(false);
+    const[modalText, setModalText] = useState("");
+    const [open, setOpen] = useState(false);
 
     // call fetchData each time query changes
     useEffect(() => {        
@@ -101,6 +110,12 @@ export default function Users() {
         setSuccess("Successfully updated user")
     }
 
+    // modal helper functions
+    function closeModal(){
+        setIsModalOpen(false);
+        setModalText("");
+    }
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -110,6 +125,54 @@ export default function Users() {
                     View and manage all users in the system.
                 </p>
             </div>
+
+            <Button
+                    className="bg-[var(--color-strawberry-red-500)] text-white"
+                    onClick={() => {
+                        setOpen(true);
+                    }}
+                >
+                    Register a User
+            </Button>
+
+            {/* Register a User Modal */}
+                <ModalForm
+                    open={open}
+                    setOpen={setOpen}
+                    formTitle="Register a User"
+                    formDescription="Enter the new user's details"
+                    fields={getRegisterUserFields(role)}
+                    onSubmit={async (data) => {
+                        const formFields = getRegisterUserFields(role);
+                        const payload = {};
+
+                        formFields.forEach((f) => {
+                        });
+
+                        try {
+                            const res = await fetch(`${API_URL}/users`, { // use the register user endpoint
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                credentials: "include",
+                                body: JSON.stringify(payload),
+                            });
+
+                            const result = await res.json();
+
+                            if (!res.ok) {
+                                console.error("Error registering user:", result.error);
+                                return;
+                            }
+
+                            setRows(prev => [{ ...result }, ...prev.map(r => ({ ...r }))]);
+                            setTotalCount(prev => prev + 1);
+                            setOpen(false);
+                        } catch (err) {
+                            console.error("Network error:", err);
+                        }
+                    }}
+                />
+            
 
             {/* Table */}
             <DataTable

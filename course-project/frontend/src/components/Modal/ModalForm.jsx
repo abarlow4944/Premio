@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   Box,
-  Button,
   Typography,
   Modal,
   IconButton,
@@ -9,6 +8,8 @@ import {
   CardContent
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { InputDefault } from '../UI/Input';
+import { Button } from "@/components/UI/button";
 
 const modalStyle = {
   position: 'absolute',
@@ -20,7 +21,8 @@ const modalStyle = {
 };
 
 
-export default function ModalForm({ modalType, fields = [], open, setOpen, onSubmit }) {
+
+export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit }) {
     const [errors, setErrors] = useState({});
 
     const dataFields = Object.fromEntries(
@@ -102,10 +104,25 @@ export default function ModalForm({ modalType, fields = [], open, setOpen, onSub
                             <CloseIcon />
                         </IconButton>
 
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                            Enter {modalType} Details
-                        </Typography>
+                        {modalType &&
+                            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                                Enter {modalType} Details
+                            </Typography>
+                        }
 
+                        {/* Form title and description */}
+                        {formTitle &&
+                            <h2 className="text-center text-lg font-semibold text-flag-red-500">
+                                {formTitle}
+                            </h2>
+                        }
+
+                        {formDescription &&
+                            <h2 className="text-center text-sm text-space-indigo-500">
+                                {formDescription}
+                            </h2>
+                        }
+                        
                         <form onSubmit={handleSubmit}>
                             {fields.map(f => (
                                 <div key={f.name} style={{ marginBottom: 16 }}>
@@ -113,17 +130,12 @@ export default function ModalForm({ modalType, fields = [], open, setOpen, onSub
                                         {f.label}{f.required ? " *" : ""}
                                     </Typography>
 
-                                    <input
+                                    <InputDefault
                                         type={f.type || "text"}
                                         name={f.name}
                                         value={formData[f.name]}
                                         onChange={handleChange}
-                                        style={{
-                                            width: "100%",
-                                            padding: "10px",
-                                            borderRadius: "8px",
-                                            border: errors[f.name] ? "1px solid red" : "1px solid #ccc",
-                                        }}
+                                        
                                     />
 
                                     {errors[f.name] && (

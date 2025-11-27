@@ -1,4 +1,5 @@
 import ModalForm from "../../components/Modal/ModalForm";
+import ModalView from "../../components/Modal/ModalView";
 import DataTable from "../../components/DataTable/DataTable";
 import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect } from "react";
@@ -15,7 +16,9 @@ export default function TransactionPage() {
     const [modalMode, setModalMode] = useState(null);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
-
+    const[isModalOpen, setIsModalOpen] = useState(false);
+    const[modalText, setModalText] = useState("");
+    
     const API_URL = import.meta.env.VITE_API_URL;
 
     const [query, setQuery] = useState({
@@ -106,6 +109,11 @@ export default function TransactionPage() {
         fetchStats();
     }, []);
 
+    function closeModal(){
+        setIsModalOpen(false);
+        setModalText("");
+    }
+
     // saving updated data
     const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
         setError("")
@@ -130,6 +138,39 @@ export default function TransactionPage() {
         setSuccess("Successfully updated transactions")
     }
     
+    // view row
+    const handleViewRow = async (row) => {
+        setError("");
+        setSuccess("");
+        setModalText("Retrieving...");
+        setIsModalOpen(true);
+
+        try {
+            const res = await fetch(`${API_URL}/transactions/${row.id}`, {
+                method: 'GET',
+                credentials: 'include'  // ok
+                // no body
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                setError(`Could not get transaction: ${errData.error || res.statusText}`);
+                setModalText("Error loading transaction.");
+                return;
+            }
+
+            const data = await res.json();
+            console.log("DATA: ", data);
+            setModalText(JSON.stringify(data, null, 2));
+            setSuccess("Successfully fetched transaction");
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to fetch transaction");
+            setModalText("Error loading transaction.");
+        }
+    };
+        
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -239,6 +280,15 @@ export default function TransactionPage() {
                 onRowSave={handleRowSaved}
                 error={error}
                 success={success}
+                onViewRow={handleViewRow}
+                enableEditing={true}
+            />
+
+            {/* View Transaction */}
+            <ModalView
+                open={isModalOpen}
+                onClose={closeModal}
+                text={modalText}
             />
         </div>
     );

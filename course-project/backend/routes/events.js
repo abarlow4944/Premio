@@ -110,7 +110,6 @@ router.get("/", async(req, res) => {
     try{
         const {name, description, location, startTime, endTime, capacity, points, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw,} = req.query;
         const where = {};
-        console.log(req.query)
 
         const pageNum = Number(page);
         const limitNum = Number(limit);
@@ -185,7 +184,6 @@ router.get("/", async(req, res) => {
             orderBy,
         });
 
-        console.log(events)
 
         const flatten_guestlist = events.map(event => ({
             ...event,

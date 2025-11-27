@@ -94,6 +94,7 @@ router.post("/", async (req, res) => {
 router.get("/", async(req, res) => {
     try{
         const {
+            utorid: utoridFilter,
             name: nameFilter,
             role: roleFilter,
             verified: verifiedRaw,
@@ -133,7 +134,8 @@ router.get("/", async(req, res) => {
 
         // extract filter data
         const where = {};
-        if (nameFilter) where.name = nameFilter;
+        if (utoridFilter) where.utorid = {contains: utoridFilter};
+        if (nameFilter) where.name = {contains: nameFilter};
         if (roleFilter) where.role = roleFilter;
         if (verified !== undefined) where.verified = verified;
         if (activated !== undefined) where.activated = activated;
@@ -170,6 +172,7 @@ router.get("/", async(req, res) => {
                 createdAt: true,
                 lastLogin: true,
                 verified: true,
+                activated: true,
                 avatarUrl: true,
             },
             orderBy,

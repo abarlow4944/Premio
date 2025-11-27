@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import DataTable from "../../components/DataTable/DataTable";
-import { userColumns } from "@/components/DataTable/Columns/UserColumns";
+import { useUser } from "@/contexts/UserContexts";
+import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
 
 
 export default function Users() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
+    const { user } = useUser();
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -20,14 +22,23 @@ export default function Users() {
         limit: 10
     })
 
+    const[error, setError] = useState("")
+    const[success, setSuccess] = useState("")
+    const role = user?.role || 'regular';
+    const columns = useMemo(() => getUserColumns(role), [role]);
+
     // call fetchData each time query changes
-    useEffect(() => {
+    useEffect(() => {        
+        setError("")
+        setSuccess("")
+
         // retrieve the user data by making a HTTP request
         try {
             const fetchData = async () => {
                 const params = new URLSearchParams();
 
                 // add necessary params to the URL
+                if(query.utorid) params.append("utorid", query.utorid);
                 if(query.name) params.append("name", query.name);
                 if(query.role) params.append("role", query.role);
                 if(query.verified) params.append("verified", query.verified);
@@ -48,6 +59,8 @@ export default function Users() {
                 const data = await res.json(); // response from endpoint
                 
                 if(!res.ok){ // handle error
+                    setError(`Could not retrieve user data: ${data.error}` || "Could not retrieve user data")
+                    console.log("Error:", data.error)
                     console.log("Error:", data.error)
                     return
                 }
@@ -63,6 +76,30 @@ export default function Users() {
         }
     }, [query]);
 
+    // saving updated data
+    const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
+        setError("")
+        setSuccess("")
+
+        // send PATCH request
+        const res = await fetch(`${API_URL}/users/${updatedRow.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedRow)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            setError(`Could not update user: ${data.error}` || "Could not update user")
+            console.warn('Could not update user:', data.error || res.status);
+            throw new Error('Could not update user');
+        }
+        setSuccess("Successfully updated user")
+    }
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -72,14 +109,18 @@ export default function Users() {
                     View and manage all users in the system.
                 </p>
             </div>
+
+            {/* Table */}
             <DataTable
                 data={data}
-                columns={userColumns}
+                columns={columns}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
                 setQuery={setQuery}
+                error={error}
+                success={success}
+                onRowSave={handleRowSaved} // for editing rows
             />
-        
         </div>
 
     )

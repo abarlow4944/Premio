@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import DataTable from "../../components/DataTable/DataTable";
-import { eventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { useUser } from "@/contexts/UserContexts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
@@ -35,6 +34,8 @@ export default function Events() {
 
     // call fetchData each time query changes
     useEffect(() => {
+        setError("")
+        setSuccess("")
         // retrieve the user data by making a HTTP request
         try {
             const fetchData = async () => {
@@ -42,11 +43,15 @@ export default function Events() {
 
                 // add necessary params to the URL
                 if(query.name) params.append("name", query.name);
-                if(query.role) params.append("location", query.location);
-                if(query.verified) params.append("started", query.started);
-                if(query.activated) params.append("ended", query.ended);
-                if(query.activated) params.append("showFull", query.showFull);
-                if(query.activated) params.append("published", query.published);
+                if(query.description) params.append("description", query.description);
+                if(query.location) params.append("location", query.location);
+                if(query.startTime) params.append("startTime", query.startTime);
+                if(query.endTime) params.append("endTime", query.endTime);
+                if(query.capacity) params.append("capacity", query.capacity);
+                if(query.points) params.append("points", query.points);
+                if(query.published) params.append("published", query.published);
+                if(query.sortBy) params.append("sortBy", query.sortBy);
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
 
                 // regular users can only see published events
                 if(role === "regular") params.append("published", true)
@@ -58,7 +63,6 @@ export default function Events() {
                 if(query.sortBy) params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
               
-
                 // retrieve users
                 const res = await fetch(`${API_URL}/events?${params}`, {
                     method: "GET",
@@ -68,6 +72,7 @@ export default function Events() {
                 const data = await res.json(); // response from endpoint
                 
                 if(!res.ok){ // handle error
+                    setError(`Could not retrieve promotions data: ${data.error}` || "Could not retrieve promotions data")
                     console.log("Error:", data.error)
                     return
                 }
@@ -115,6 +120,30 @@ export default function Events() {
         if (!selectionEnabled || !rows || rows.length === 0) return;
         setPendingDelete(rows);
     };
+
+    // saving updated data
+    const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
+        setError("")
+        setSuccess("")
+
+        // send PATCH request
+        const res = await fetch(`${API_URL}/events/${updatedRow.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedRow)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            setError(`Could not update event: ${data.error}` || "Could not update event")
+            console.warn('Could not update event:', data.error || res.status);
+            throw new Error('Could not update event');
+        }
+        setSuccess("Successfully updated event")
+    }
 
     return (
         <div className="p-6 space-y-4">
@@ -184,6 +213,7 @@ export default function Events() {
                 setQuery={setQuery}
                 error={error}
                 success={success}
+                onRowSave={handleRowSaved} // for editing rows
             />
         
             {/* _ event(s) selected message */}

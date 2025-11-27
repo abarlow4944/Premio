@@ -528,26 +528,51 @@ export default function DataTable({
             {/* Body */}
                 <tbody>
                     {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50">
-                        {row.getVisibleCells().map((cell) => {
+                        (() => {
+                            // custom colored row styling based on transaction type
+                            const txType = row.original?.type;
+                            const typeStyles = {
+                                purchase: { rowClass: 'border-l-4 border-green-500 bg-green-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-green-100' },
+                                adjustment: { rowClass: 'border-l-4 border-yellow-500 bg-yellow-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-yellow-100' },
+                                event: { rowClass: 'border-l-4 border-blue-500 bg-blue-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-blue-100' },
+                                redemption: { rowClass: 'border-l-4 border-red-500 bg-red-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-red-100' },
+                                transfer: { rowClass: 'border-l-4 border-purple-500 bg-purple-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-purple-100' },
+                            };
+                            const styleForType = typeStyles[String(txType)] || {};
+
+                            return (
+                                <tr key={row.id} className={`hover:bg-gray-50 ${styleForType.rowClass ?? ''}`}>
+                                {row.getVisibleCells().map((cell) => {
                             const isRowEditing = editingRowId === row.id;
                             const EditableComp = cell.column.columnDef.editableCell;
                             const isEditableCell = isRowEditing && EditableComp;
+                            const accessorKey = cell.column.columnDef.accessorKey;
+                            let content;
+                            if (isEditableCell) {
+                                content = <EditableComp {...cell.getContext()} />;
+                            } else if (cell.column.columnDef.cell) {
+                                content = flexRender(cell.column.columnDef.cell, cell.getContext());
+                            } else {
+                                const raw = cell.getValue();
+                                if (accessorKey === 'type') {
+                                    content = (
+                                        <span>{String(raw ?? '-')}</span>
+                                    );
+                                } else {
+                                    content = raw;
+                                }
+                            }
 
                             return (
                                 <td key={cell.id} className="px-4 py-3 text-sm text-space-indigo-500">
-                                    {isEditableCell ? (
-                                        <EditableComp {...cell.getContext()} />): cell.column.columnDef.cell ? (
-                                            flexRender( // use custom formatting (dates etc)
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )
-                                        ) : ( cell.getValue() ) }
+                                    {content}
                                 </td>
                             )
                             
                         })}
                         </tr>
+                            )
+                        })()
                     ))}
                 </tbody>
             </table>    

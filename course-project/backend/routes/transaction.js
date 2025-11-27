@@ -330,7 +330,7 @@ router.get("/", async (req, res) => {
         if (String(sortByRaw) === 'promotionId') {
             const all = await prisma.transaction.findMany({
                 where,
-                include: { promotions: { select: { id: true } } },
+                include: { promotions: { select: { id: true, name: true } } },
             });
 
             const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? -1 : 1;
@@ -354,8 +354,22 @@ router.get("/", async (req, res) => {
                 skip,
                 take: limitNum,
                 orderBy,
-                include: { promotions: { select: { id: true } } },
+                include: { promotions: { select: { id: true, name: true } } },
             });
+        }
+
+        // resolve related transaction utorids in batch
+        const relatedIds = Array.from(new Set(transactions.map(t => t.relatedId).filter(Boolean)));
+        let relatedMap = {};
+        if (relatedIds.length > 0) {
+            const relatedTxs = await prisma.transaction.findMany({
+                where: { id: { in: relatedIds } },
+                select: { id: true, utorid: true }
+            });
+            relatedMap = relatedTxs.reduce((acc, rt) => {
+                acc[rt.id] = rt.utorid;
+                return acc;
+            }, {});
         }
 
         // format response
@@ -366,10 +380,12 @@ router.get("/", async (req, res) => {
             type: t.type,
             spent: t.spent ?? undefined,
             promotionIds: t.promotions.map(p => p.id),
+            promotionNames: t.promotions.map(p => p.name),
             suspicious: t.suspicious ?? false,
             remark: t.remark || "",
             createdBy: t.createdBy,
             relatedId: t.relatedId ?? undefined,
+            relatedUtorid: t.relatedId ? relatedMap[t.relatedId] : undefined,
         }));
 
         return res.status(200).json({ count, results });
@@ -410,15 +426,24 @@ router.get("/:transactionId", async(req, res) =>{
             return res.status(404).json({error: "Transaction not found"})
         }
 
+        // if the transaction has a relatedId, resolve that transaction's utorid so frontend can display sender/receiver
+        let relatedUtorid;
+        if (transaction.relatedId) {
+            const relatedTx = await prisma.transaction.findUnique({ where: { id: transaction.relatedId }, select: { utorid: true } });
+            if (relatedTx) relatedUtorid = relatedTx.utorid;
+        }
+
         return res.status(200).json({
             id: transactionId,
             utorid: transaction.utorid,
             type: transaction.type,
             spent: transaction.spent,
             amount: transaction.amount,
-            promotionIds: transaction.promotions,
+            promotionIds: transaction.promotions.map(p => p.id),
+            promotionNames: transaction.promotions.map(p => p.name),
             suspicious: transaction.suspicious,
             relatedId: transaction.relatedId,
+            relatedUtorid: relatedUtorid,
             remark: transaction.remark || "",
             createdBy: transaction.createdBy
         })
@@ -470,7 +495,7 @@ router.patch("/:transactionId/suspicious", async (req, res) => {
             },
             include: {
                 promotions: {
-                    select: {id: true},
+                    select: { id: true, name: true },
                 }
             }
         });
@@ -481,7 +506,8 @@ router.patch("/:transactionId/suspicious", async (req, res) => {
             type: updatedTransaction.type,
             spent: updatedTransaction.spent,
             amount: updatedTransaction.amount,
-            promotionIds: updatedTransaction.promotions,
+            promotionIds: updatedTransaction.promotions.map(p => p.id),
+            promotionNames: updatedTransaction.promotions.map(p => p.name),
             suspicious: updatedTransaction.suspicious,
             remark: updatedTransaction.remark || "",
             createdBy: updatedTransaction.createdBy

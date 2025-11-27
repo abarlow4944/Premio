@@ -120,8 +120,7 @@ export function  getTransactionColumns(role) {
         {
           accessorKey: "amount",
           header: "Points",
-          enableSorting: true,
-          filterType: 'range',
+          enableSorting: true
         },
         {
           accessorKey: "suspicious",
@@ -203,8 +202,7 @@ export function  getTransactionColumns(role) {
     {
       accessorKey: "amount",
       header: "Points",
-      enableSorting: true,
-      filterType: 'range',
+      enableSorting: true
     },
   ];
 }

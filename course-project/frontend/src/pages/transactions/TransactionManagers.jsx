@@ -11,6 +11,7 @@ export default function TransactionPage() {
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [globalMaxes, setGlobalMaxes] = useState(null);
     const [modalMode, setModalMode] = useState(null);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
@@ -73,6 +74,37 @@ export default function TransactionPage() {
 
         fetchData();
     }, [query]);
+
+    // Fetch transaction stats (max values for filters)
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch(`${API_URL}/transactions/stats/maxes`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!res.ok) {
+                    console.warn('Could not fetch transaction stats:', res.status);
+                    return;
+                }
+
+                const body = await res.json();
+                if (body.error) {
+                    console.warn('Could not fetch transaction stats:', body.error);
+                    return;
+                }
+
+                setGlobalMaxes({
+                    amount: Number(body.maxAmount ?? 0),
+                    spent: Number(body.maxSpent ?? 0),
+                });
+            } catch (err) {
+                console.error('Error fetching transaction stats:', err);
+            }
+        };
+        fetchStats();
+    }, []);
 
     // saving updated data
     const handleRowSaved = async (updatedRow) => { // called when an edit to the row is saved
@@ -203,6 +235,7 @@ export default function TransactionPage() {
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}
+                initialStableMax={globalMaxes}
                 onRowSave={handleRowSaved}
                 error={error}
                 success={success}

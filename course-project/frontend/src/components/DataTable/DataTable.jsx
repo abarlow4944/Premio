@@ -477,12 +477,18 @@ export default function DataTable({
                                                 (() => {
                                                     const keyMin = `${accessorKey}Min`;
                                                     const keyMax = `${accessorKey}Max`;
-                                                    // compute max value from current page data (column max)
-                                                    const nums = data.map(d => Number(d?.[accessorKey]) ).filter(n => !Number.isNaN(n));
+                                                    // compute max value from current page data (column max), treating "-" as null
+                                                    const nums = data.map(d => {
+                                                        const val = d?.[accessorKey];
+                                                        if (val === "-" || val === null || val === undefined) return NaN;
+                                                        const num = Number(val);
+                                                        return Number.isNaN(num) ? NaN : num;
+                                                    }).filter(n => !Number.isNaN(n));
                                                     const computedMax = nums.length ? Math.max(...nums, 1) : (def.filterMax ?? 100);
 
                                                     stableMaxRef.current[accessorKey] = Math.max(stableMaxRef.current[accessorKey] || 0, computedMax);
-                                                    const trackMax = stableMaxRef.current[accessorKey];
+                                                    // Round to nearest 10
+                                                    const trackMax = Math.ceil(stableMaxRef.current[accessorKey] / 10) * 10;
 
                                                     const step = def.filterStep ?? (Number.isInteger(trackMax) ? 1 : Math.max( (trackMax / 100) , 1));
                                                     const currentMin = columnFilters[keyMin] !== undefined ? Number(columnFilters[keyMin]) : 0;
@@ -532,11 +538,11 @@ export default function DataTable({
                             // custom colored row styling based on transaction type
                             const txType = row.original?.type;
                             const typeStyles = {
-                                purchase: { rowClass: 'border-l-4 border-green-500 bg-green-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-green-100' },
-                                adjustment: { rowClass: 'border-l-4 border-yellow-500 bg-yellow-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-yellow-100' },
-                                event: { rowClass: 'border-l-4 border-blue-500 bg-blue-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-blue-100' },
-                                redemption: { rowClass: 'border-l-4 border-red-500 bg-red-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-red-100' },
-                                transfer: { rowClass: 'border-l-4 border-purple-500 bg-purple-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-purple-100' },
+                                purchase: { rowClass: 'border-l-2 border-green-500 bg-green-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-green-100' },
+                                adjustment: { rowClass: 'border-l-2 border-yellow-500 bg-yellow-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-yellow-100' },
+                                event: { rowClass: 'border-l-2 border-blue-500 bg-blue-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-blue-100' },
+                                redemption: { rowClass: 'border-l-2 border-red-500 bg-red-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-red-100' },
+                                transfer: { rowClass: 'border-l-2 border-purple-500 bg-purple-100', badgeClass: 'inline-block px-2 py-0.5 rounded-full text-xs bg-purple-100' },
                             };
                             const styleForType = typeStyles[String(txType)] || {};
 

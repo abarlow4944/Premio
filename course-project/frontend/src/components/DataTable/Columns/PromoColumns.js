@@ -90,9 +90,7 @@ export function getPromoColumns(role) {
     { 
       accessorKey: 'rate', 
       header: 'Rate', 
-      enableSorting: true, 
-      filterType: 'range', 
-      filterStep: 0.01, 
+      enableSorting: true,
       cell: ({ row }) => row.original.rate ?? '—', 
       editableCell: TableCell,
       editType: "text" 

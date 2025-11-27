@@ -150,14 +150,12 @@ export default function DataTable({
 
     if (enableEditing){
         // Add Actions column at the END
-        console.log("editing enabled");
         const actionsCol = {
             id: '__actions',
             header: 'Actions',
             enableSorting: false,
             cell: ({ row }) => {
             const isEditing = editingRowId === row.id;
-            console.log("edit is " + isEditing)
             return (
                 <div className="flex items-center gap-2">
                 {isEditing ? (

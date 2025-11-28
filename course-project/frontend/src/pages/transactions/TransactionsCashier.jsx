@@ -81,7 +81,7 @@ export default function TransactionPage() {
                     Create any transactions in the system.
                 </p>
 
-                <div className="flex flex-col justify-center mb-4 mx-auto w-[40vw] block">
+                <div className="flex flex-col justify-center mb-4 mx-auto w-[40vw] block min-h-[7vh]">
                     {error && (
                         <Message message={error} status="error"/>
                     )}
@@ -93,7 +93,7 @@ export default function TransactionPage() {
             </div>
 
 
-            {/* Transactions */}
+            {/* Create transactions form*/}
             <Card sx={{ borderRadius: 3, boxShadow: 6 }} className="w-[40vw] mx-auto rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10">
                 <CardContent sx={{ p: 3, position: "relative" }}>
 

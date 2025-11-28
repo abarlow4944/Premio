@@ -20,7 +20,8 @@ const NAV_ITEMS_BY_ROLE = {
     { label: "Events", path: "/events" },
   ],
   cashier: [
-    { label: "Transactions", path: "/transactions" },
+    { label: "Users", path: "/users" },
+    { label: "Transactions", path: "/transactions" }
   ],
   manager: [
     { label: "Users", path: "/users" },

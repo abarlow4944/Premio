@@ -120,8 +120,6 @@ export default function Users() {
     const handleUserRegistration = async (formData) => {
         setError("")
         setSuccess("")
-        console.log("form data is", formData)
-        // get data from the form
 
         // register user
         const res = await fetch(`${API_URL}/users`, {
@@ -141,8 +139,44 @@ export default function Users() {
             return
         }
 
+        // atttempt to send activation email
+        try{
+            await handleActivationEmail(data.utorid)
+        }
+        catch(e){
+            setError(`Could not send activation email: ${e}` || "Could not send activation email")
+            console.log("Error:", e)
+            return
+        }
+
         setSuccess(`Successfully registered user ${formData.utorid}`)
     };
+
+    // activation email
+    const handleActivationEmail = async(utorid) =>{
+        setError("")
+        setSuccess("")
+
+        const res = await fetch(`${API_URL}/auth/activate`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-type": "application/json",
+            },
+            body: JSON.stringify({utorid}), // convert a JS value into a JSON-formatted string
+        });
+
+        const data = await res.json(); // get reset token from backend
+
+        if(!res.ok){ // handle email error
+            setError(data.error || "Unable to send activation email")
+            return;
+        }
+        else{ // email was sent
+            console.log("Successfully sent activation email")
+        }
+    }
+
 
     return (
         <div className="p-6 space-y-4">

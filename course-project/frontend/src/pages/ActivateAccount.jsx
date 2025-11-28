@@ -1,46 +1,48 @@
 import { useState } from "react";
-import { useUser } from "../../contexts/UserContexts";
+import { useUser } from "../contexts/UserContexts";
 import { useNavigate } from "react-router-dom";
 import Message from "@/components/Message";
 
-
-
 export default function ResetPassword() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL
-    const[newPassword, setNewPassword] = useState("")
+    const[password, setPassword] = useState("")
     const[confirmPassword, setConfirmPassword] = useState("")
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
     const navigate = useNavigate();
 
-    const handleResetPassword = async() =>{
+    const params = new URLSearchParams(window.location.search); // get the URL
+    const utorid = params.get("utorid")
+
+    const handleAccountActivation = async() =>{
         const params = new URLSearchParams(window.location.search); // get the URL
         const resetToken = params.get("token")
         const utorid = params.get("utorid")
 
         // check if passwords match
-        if(newPassword !== confirmPassword){
+        if(password !== confirmPassword){
             setError("Passwords do not match")
             return;
         }
 
-        const res = await fetch(`${API_URL}/auth/resets/${resetToken}`, {
+        const res = await fetch(`${API_URL}/auth/activate/${resetToken}`, {
             method: "POST",
             credentials: "include",
             headers: {
                 "Content-type": "application/json",
             },
-            body: JSON.stringify({ "utorid": utorid, "password": newPassword }), // convert a JS value into a JSON-formatted string
+            body: JSON.stringify({ "utorid": utorid, "password": password }), // convert a JS value into a JSON-formatted string
         });
 
         const data = await res.json(); // get reset token from backend
         
-        if(!res.ok){ // handle password reset
-            setError(data.error || "Failed to reset password")
+        if(!res.ok){
+            setError(data.error || "Failed to activate account")
             return;
         }
         else{
-            setSuccess("Successfully reset password")
+            setSuccess("Successfully activated account")
+            console.log("Successfully activated account")
             // wait 2 seconds before navigating to show success message
             setTimeout(() => {
                 navigate("/");
@@ -58,27 +60,45 @@ export default function ResetPassword() {
                 className="mx-auto h-25 w-auto"
             />
             <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-flag-red-500">
-                Reset your password
+                Activate Your Account
             </h2>
-            <p className="mt-6 text-sm text-center text-gray-700">Enter a new password to reset your account's password.</p>
+            <p className="mt-6 text-sm text-center text-gray-700">Enter your details to activate your account.</p>
             </div>
 
             <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <div className="space-y-6">
                 <div className="flex flex-col gap-4">
-                {/* New password */}
+
+                {/* UTORid */}
                 <div>
-                    <label htmlFor="newPassword" className="block text-sm/6 font-medium text-gray-900 text-left">
-                        New password
+                    <label htmlFor="utorid" className="block text-sm/6 font-medium text-gray-900 text-left">
+                        UTORid
                     </label>
                     <div className="mt-2">
                         <input
-                        id="newPassword"
-                        name="newPassword"
+                        id="utorid"
+                        name="utorid"
+                        value={utorid}
+                        readOnly={true}
+                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-platinum-700 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6"
+                        />
+                    </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                    <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900 text-left">
+                        Password
+                    </label>
+                    <div className="mt-2">
+                        <input
+                        id="password"
+                        name="password"
                         type="password"
-                        autoComplete="newPassword"
+                        required
+                        autoComplete="password"
                         className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                 </div>
@@ -86,7 +106,7 @@ export default function ResetPassword() {
                 {/* Confirm password */}
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm/6 font-medium text-gray-900 text-left">
-                        Confirm new password
+                        Confirm password
                     </label>
                     <div className="mt-2">
                         <input
@@ -94,6 +114,7 @@ export default function ResetPassword() {
                         name="confirmPassword"
                         type="password"
                         autoComplete="confirmPassword"
+                        required
                         className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         />
@@ -103,17 +124,10 @@ export default function ResetPassword() {
                 </div>
                 <div className="flex flex-row gap-2">
                     <button
-                        onClick={handleResetPassword}
+                        onClick={handleAccountActivation}
                         className="flex w-full justify-center rounded-md bg-strawberry-red-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-strawberry-red-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strawberry-red-500 hover:cursor-pointer"
                     >
-                        Reset password
-                    </button>
-
-                    <button
-                        onClick={() => navigate("/")}
-                        className="flex w-full justify-center rounded-md bg-strawberry-red-500 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-strawberry-red-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-strawberry-red-500 hover:cursor-pointer"
-                    >
-                        Back to login
+                        Activate account
                     </button>
                 </div>
                 
@@ -128,9 +142,6 @@ export default function ResetPassword() {
             )}
             
             </div>
-
-
-
 
         </div>
     </>

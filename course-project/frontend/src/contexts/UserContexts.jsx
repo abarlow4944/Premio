@@ -25,17 +25,22 @@ export function UserProvider({ children }) {
                 setUser(null);
                 setRole(null);
                 setVisualRole(null);
+                localStorage.removeItem('visualRole');
                 return;
             }
             const profile = await res.json();
             setUser(profile);
             setRole(profile.role);
-            setVisualRole(profile.role);
+            
+            // Restore visual role from localStorage, or default to actual role
+            const savedVisualRole = localStorage.getItem('visualRole');
+            setVisualRole(savedVisualRole || profile.role);
         } catch (e) {
             setUserError(`Network error: ${e}`);
             setUser(null);
             setRole(null);
             setVisualRole(null);
+            localStorage.removeItem('visualRole');
         }
     }, [API_URL]);
 

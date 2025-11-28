@@ -10,6 +10,12 @@ const features = [
     description:
       'View and manage transactions.',
     icon: CreditCardIcon,
+  },
+  {
+    name: 'Users',
+    description:
+      'Register new users.',
+    icon: UsersIcon,
   }
 ]
 
@@ -72,7 +78,6 @@ export default function Cashier() {
                 aria-label={`Open details for ${feature.name}`}
                 onClick={(e) => openFeature(feature, e.currentTarget)}
                 onKeyDown={(e) => {
-                  console.log(e.currentTarget)
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
                     openFeature(feature, e.currentTarget)
@@ -93,6 +98,7 @@ export default function Cashier() {
           </div>
         </div>
       </div>
+
       {selected && (
         <div
           role="dialog"

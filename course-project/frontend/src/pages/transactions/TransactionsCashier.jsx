@@ -1,103 +1,138 @@
-import ModalForm from "../../components/Modal/ModalForm";
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
 import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
+import { Card } from "@/components/UI/Card";
+import Message from "@/components/Message";
+import { CardContent } from "@/components/UI/Card";
+import { Typography } from "@mui/material";
+import { InputDefault } from "@/components/UI/Input";
 
 export default function TransactionPage() {
-    const { role } = useUser();
-    const [open, setOpen] = useState(false);
-    const [modalMode, setModalMode] = useState(null);
+    
     const API_URL = import.meta.env.VITE_API_URL;
+    const { role } = useUser();
+    const [error, setError] = useState("")
+    const [success, setSuccess] = useState("")
+    const fields = getTransactionFields(role, "create")
 
-    // const formFields = ;
-    const canCreate = ["cashier", "manager", "superuser"].includes(role);
+    
+    const dataFields = Object.fromEntries(
+        fields.map(f => [f.name, ""])
+    );
 
+    const [formData, setFormData] = useState(dataFields);
+
+    useEffect(() => {
+        const initData = Object.fromEntries(fields.map(f => [f.name, f.value ?? ""]));
+        setFormData(initData);
+    }, [fields]);
+
+    const handleChange = (e) => {
+        setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
+    };
+
+    // handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        setError("")
+        setSuccess("")
+        let promotionIdsArray = [];
+
+        if (formData.promotionIds){ // extract numbers from promotionIds input and turn it into an array
+            promotionIdsArray = formData.promotionIds.match(/\d+/g).map(Number);
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/transactions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({"utorid": formData.utorid, "type": "purchase", "spent": Number(formData.spent), "promotionIds": promotionIdsArray, "remark": formData.remark})
+            })
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                setError(`Could not create transaction: ${result.error}` || "Could not create transaction")
+                console.log("Error creating transaction:", result.error);
+                return;
+            }
+        } 
+        catch (err) {
+            setError(`Could not create transaction: ${err}` || "Could not create transaction")
+            console.log("Network error:", err);
+            return
+        }
+
+        setSuccess("Successfully created transaction")
+    }
+
+    
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div className="mb-[10vh]">
+            <div className="mb-[2vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
                     Transactions
                 </h1>
                 <p className="text-center text-sm text-space-indigo-500">
                     Create any transactions in the system.
                 </p>
+
+                <div className="flex flex-col justify-center mb-4 mx-auto w-[40vw] block">
+                    {error && (
+                        <Message message={error} status="error"/>
+                    )}
+            
+                    {success && (
+                        <Message message={success} status="success"/>
+                    )}
+                </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-center mt-6 gap-3">
-                {canCreate && (
-                <Button
-                    className="bg-[var(--color-strawberry-red-500)] text-white"
-                    onClick={() => {
-                    setModalMode("create"); 
-                    setOpen(true);
-                    }}
-                >
-                    New Transaction
-                </Button>
-                )}
-            </div>
 
-            {/* Modal */}
-            {modalMode && (
-            <ModalForm
-                open={open}
-                setOpen={setOpen}
-                modalType="transactions"
-                fields={getTransactionFields(role, modalMode)}
-                onSubmit={async (data) => {
-                    const formFields = getTransactionFields(role, modalMode);
-                    const payload = {};
-
-                    formFields.forEach((f) => {
-                        let value = data[f.name];
-
-                        if (f.multiNumber) {
-                            const str = typeof value === "string" ? value.trim() : "";
-                            payload[f.name] = str === ""
-                                ? [] // empty input → empty array
-                                : str.split(/[\s,]+/)
-                                    .map(Number)
-                                    .filter(n => !isNaN(n));
-                        }
-                        else if (f.type === "number") {
-                            payload[f.name] = value ? Number(value) : 0; // or null if you prefer
-                        }
-                        else {
-                            payload[f.name] = value ?? "";
-                        }
+            {/* Transactions */}
+            <Card sx={{ borderRadius: 3, boxShadow: 6 }} className="w-[40vw] mx-auto rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10">
+                <CardContent sx={{ p: 3, position: "relative" }}>
 
 
-                    });
+                    {/* Form title and description */}
+                    <h2 className="text-center text-lg font-semibold text-flag-red-500">
+                        Enter Transaction Details
+                    </h2>
 
-                    try {
-                        const res = await fetch(`${API_URL}/transactions`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            credentials: "include",
-                            body: JSON.stringify(payload),
-                        });
+                    <h2 className="text-center text-sm text-space-indigo-500 mb-5">
+                        Enter transaction details to create a purchase transaction.
+                    </h2>
+                    
+                    
+                    <form onSubmit={handleSubmit}>
+                        {fields.map(f => (
+                            <div key={f.name} style={{ marginBottom: 16 }}>
+                                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                    {f.label}{f.required ? " *" : ""}
+                                </Typography>
 
-                        const result = await res.json();
-                        console.log("RAW: ", JSON.stringify(result))
+                                <InputDefault
+                                    type={f.type || "text"}
+                                    name={f.name}
+                                    value={formData[f.name]}
+                                    onChange={handleChange}
+                                    required={f.required}
+                                />
 
-                        if (!res.ok) {
-                            console.error("Error creating transaction:", result.error);
-                            return;
-                        }
+                            </div>
+                        ))}
 
-                        setRows(prev => [{ ...result }, ...prev.map(r => ({ ...r }))]);
-                        setTotalCount(prev => prev + 1);
-                        setOpen(false);
-                        setModalMode(null); // reset after closing
-                    } catch (err) {
-                        console.error("Network error:", err);
-                    }
-                }}
-            />
-            )}
+                        <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
+                            Submit
+                        </Button>
+                    </form>
+
+                </CardContent>
+            </Card>
 
         </div>
     );

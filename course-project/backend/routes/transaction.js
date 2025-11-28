@@ -15,7 +15,6 @@ router.post("/", async (req, res) => {
     try {
         if(req.body.type === "purchase"){
             const { utorid, type, spent, promotionIds, remark } = req.body;
-            console.log("received promo is", promotionIds)
 
             // check if the user has proper clearance (must be cashier or higher)
             if (!["cashier", "manager", "superuser"].includes(req.user.role)) {
@@ -611,7 +610,6 @@ router.patch("/:transactionId/processed", async(req, res) => {
 
 //////////////////////////////// HELPER FUNCTIONS
 async function arePromotionIdsValid(promotionIds, utorid, spent, type="purchase"){
-    console.log(promotionIds)
     for(const id of promotionIds){
         if(typeof id !== "number" || id < 0 || !Number.isInteger(id)){
             return false;

@@ -54,8 +54,7 @@ export function  getTransactionColumns(role) {
         {
           accessorKey: "id",
           header: "Transaction ID",
-          enableSorting: true,
-          enableSearch: true 
+          enableSorting: true
         },
         {
           accessorKey: "utorid",
@@ -73,7 +72,6 @@ export function  getTransactionColumns(role) {
           accessorKey: "relatedId",
           header: "Reference ID",
           enableSorting: true,
-          enableSearch: true,
           cell: ({ row }) => row.original.relatedId ?? '-' 
         },
         {
@@ -116,17 +114,6 @@ export function  getTransactionColumns(role) {
           header: "Points",
           enableSorting: true
         },
-        {
-          accessorKey: "suspicious",
-          header: "Suspicious",
-          filterType: 'select', 
-          filterOptions: [
-            { label: 'True', value: 'true' },
-            { label: 'False', value: 'false' },
-          ],
-          editableCell: TableCell,
-          editType: "select"
-        },
     ];
   }
   
@@ -148,8 +135,8 @@ export function  getTransactionColumns(role) {
       accessorKey: "senderReceiver",
       header: "Transfer Details",
       cell: ({ row }) => React.createElement(SenderReceiverCell, { row }),
-      enableSorting: true,
-      enableSearch: true
+      enableSorting: false,
+      enableSearch: false
     },
     {
       accessorKey: "remark",

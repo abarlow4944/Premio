@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { useUser } from "@/contexts/UserContexts";
@@ -18,6 +18,7 @@ export default function Events() {
     const [pendingDelete, setPendingDelete] = useState(null);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
+    const columns = useMemo(() => getEventColumns(role), [role]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
         name: "",
@@ -52,6 +53,8 @@ export default function Events() {
                 if(query.published) params.append("published", query.published);
                 if(query.sortBy) params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
+                if(query.sortBy) params.append("sortBy", query.sortBy);
+                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
 
                 // regular users can only see published events
                 if(role === "regular") params.append("published", true)
@@ -59,10 +62,6 @@ export default function Events() {
                 params.append("page", query.page)
                 params.append("limit", query.limit)
 
-                // sorting
-                if(query.sortBy) params.append("sortBy", query.sortBy);
-                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
-              
                 // retrieve users
                 const res = await fetch(`${API_URL}/events?${params}`, {
                     method: "GET",
@@ -204,7 +203,7 @@ export default function Events() {
             {/* Table */}
             <DataTable
                 data={data}
-                columns={getEventColumns(role)}
+                columns={columns}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
                 selectionEnabled={selectionEnabled}

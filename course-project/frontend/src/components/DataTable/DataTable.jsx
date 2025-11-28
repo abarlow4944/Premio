@@ -3,8 +3,8 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
-import { CheckIcon } from '@heroicons/react/24/solid'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, ArrowTopRightOnSquareIcon, FlagIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import Message from '../Message';
 
@@ -26,6 +26,8 @@ export default function DataTable({
     success,
     onRowSave, // for saving edited row
     onViewRow,
+    showSuspiciousFlag = false,
+    onSuspiciousFlagToggle,
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
@@ -118,6 +120,30 @@ export default function DataTable({
 
     const computedColumns = useMemo(() => {
     let cols = columns;
+
+    // If suspicious flag is enabled, add the flag column at the start
+    if (showSuspiciousFlag) {
+        const flagCol = {
+        id: '__suspicious',
+        accessorKey: 'suspicious',
+        header: <FlagIconSolid className="size-4" />,
+        enableSorting: true,
+        size: 40,
+        cell: ({ row }) => (
+            <button
+            type="button"
+            onClick={() => onSuspiciousFlagToggle && onSuspiciousFlagToggle(row.original)}
+            className={`hover:scale-125 transition-transform cursor-pointer ${row.original.suspicious ? 'text-red-600 opacity-100' : 'text-gray-300 hover:text-red-400 opacity-60 hover:opacity-100'}`}
+            title={row.original.suspicious ? 'Mark as not suspicious' : 'Mark as suspicious'}
+            aria-label={`Toggle suspicious flag for row ${row.id}`}
+            >
+                <FlagIconSolid className="size-5" />
+            </button>
+        ),
+        };
+
+        cols = [flagCol, ...cols];
+    }
 
     // If selection is enabled, add the checkbox column at the start
     if (selectionEnabled) {
@@ -438,7 +464,7 @@ export default function DataTable({
                                         {sortable ? (
                                         <Button
                                             onClick={() => handleSort(accessorKey, sortable)}
-                                            className="inline-flex items-center gap-1 select-none hover:opacity-90"
+                                            className="inline-flex items-center gap-1 select-none hover:bg-strawberry-red-600 hover:text-white hover:rounded-md transition duration-200 ease-in-out cursor-pointer px-2 py-1"
                                             variant="ghost"
                                             size="sm"
                                         >
@@ -448,6 +474,11 @@ export default function DataTable({
                                             )}
                                             {isActive && order === 'desc' && (
                                                 <ChevronDownIcon className="size-3.5" />
+                                            )}
+                                            {!isActive && (
+                                                <div className="size-3.5 opacity-0 group-hover:opacity-50 transition-opacity">
+                                                    ⇅
+                                                </div>
                                             )}
                                         </Button>
                                     ) : (

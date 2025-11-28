@@ -2,10 +2,12 @@ import ModalForm from "../../components/Modal/ModalForm";
 import ModalView from "../../components/Modal/ModalView";
 import DataTable from "../../components/DataTable/DataTable";
 import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
 import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
+import { FlagIcon } from "@heroicons/react/24/solid";
+import Message from "../../components/Message";
 
 export default function TransactionPage() {
     const { visualRole, role } = useUser();
@@ -19,6 +21,7 @@ export default function TransactionPage() {
     const[success, setSuccess] = useState("")
     const[isModalOpen, setIsModalOpen] = useState(false);
     const[modalText, setModalText] = useState("");
+    const columns = useMemo(() => getTransactionColumns(role), [role]);
     
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -29,8 +32,8 @@ export default function TransactionPage() {
         relatedId: "",
         promotionIds: "",
         remark: "",
-        sortBy: "",
-        sortOrder: "asc",
+        sortBy: "suspicious",
+        sortOrder: "desc",
         page: 1,
         limit: 10
     });
@@ -171,6 +174,39 @@ export default function TransactionPage() {
             setModalText("Error loading transaction.");
         }
     };
+
+    // Toggle suspicious flag
+    const handleSuspiciousFlagToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/transactions/${row.id}/suspicious`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ suspicious: !row.suspicious })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update suspicious status: ${data.error}` || "Could not update suspicious status");
+                console.warn('Could not update suspicious status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setRows(prev => prev.map(r => 
+                r.id === row.id ? { ...r, suspicious: !r.suspicious } : r
+            ));
+            setSuccess("Successfully updated suspicious status");
+        } catch (err) {
+            setError(err.message || "Could not update suspicious status");
+            console.error("Error:", err);
+        }
+    };
         
     return (
         <div className="p-6 space-y-4">
@@ -182,7 +218,24 @@ export default function TransactionPage() {
                 <p className="text-center text-sm text-space-indigo-500">
                     View and manage all transactions in the system.
                 </p>
+                <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
+                    <span>Suspicious transactions are marked with a</span>
+                    <FlagIcon className="size-4 text-red-600" />
+                </p>
             </div>
+
+            {/* Success/Error Messages Overlay */}
+            {error && (
+                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
+                    <Message message={error} status="error" onClose={() => setError("")}/>
+                </div>
+            )}
+            
+            {success && (
+                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
+                    <Message message={success} status="success" onClose={() => setSuccess("")}/>
+                </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex justify-end mt-6 gap-3">
@@ -226,9 +279,7 @@ export default function TransactionPage() {
                         let value = data[f.name];
 
                         if (f.multiNumber) {
-                            payload[f.name] =  Array.isArray(value) ? value : [];
-                            console.log("data type: ", value);
-                            console.log("PAYLOAD " + payload[f.name] );
+                            payload[f.name] = value ? value : [];
                         }
                         else if (f.type === "number") {
                             payload[f.name] = value ? Number(value) : 0; // or null if you prefer
@@ -270,7 +321,7 @@ export default function TransactionPage() {
             {/* Table */}
             <DataTable
                 data={rows}
-                columns={getTransactionColumns(role)}
+                columns={columns}
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}
@@ -279,7 +330,9 @@ export default function TransactionPage() {
                 error={error}
                 success={success}
                 onViewRow={handleViewRow}
-                enableEditing={true}
+                enableEditing={false}
+                showSuspiciousFlag={true}
+                onSuspiciousFlagToggle={handleSuspiciousFlagToggle}
             />
 
             {/* View Transaction */}

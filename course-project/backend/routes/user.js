@@ -17,7 +17,6 @@ require('dotenv').config();
 ///////////////////////////////// /USERS
 router.post("/", async (req, res) => {
     try{
-        console.log("THIS WS RECEIVED:", req.body)
         const { utorid, name, email } = req.body;
         
 
@@ -517,7 +516,7 @@ router.get("/me/transactions", async (req, res) => {
         let limitNum = 10;
 
     const allowedTypes = ['purchase', 'redemption', 'adjustment', 'event', 'transfer'];
-    const {type, relatedId, promotionId, amount, operator, amountMin, amountMax, spentMin, spentMax, page, limit} = req.query;
+    const {type, relatedId, promotionId, amount, operator, amountMin, amountMax, spentMin, spentMax, page, limit, createdBy, remark, sortBy: sortByRaw, sortOrder: sortOrderRaw} = req.query;
 
         const utorid = req.user.utorid // get utorid of the logged in user
 
@@ -525,6 +524,11 @@ router.get("/me/transactions", async (req, res) => {
         // check validity of payload
         if(type && !allowedTypes.includes(type)){
             return res.status(400).json({error: "Invalid type"})
+        }
+        
+        // validate string fields
+        if ((createdBy && typeof createdBy !== 'string') || (remark && typeof remark !== 'string')) {
+            return res.status(400).json({ error: "Incorrect type for fields" });
         }
 
         // type & relatedId
@@ -607,6 +611,8 @@ router.get("/me/transactions", async (req, res) => {
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
         if (type) where.type = type;
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
+        if (createdBy) where.createdBy = { contains: createdBy };
+        if (remark) where.remark = { contains: remark };
         if (amountNum !== undefined) {
             where.amount = { [operator]: amountNum };
         } else {
@@ -627,11 +633,19 @@ router.get("/me/transactions", async (req, res) => {
         const count = await prisma.transaction.count({ where });
         const skip = (pageNum - 1) * limitNum;
 
+        // determine ordering
+        const allowedSorts = ['id', 'utorid', 'createdBy', 'type', 'amount', 'spent', 'relatedId'];
+        let orderBy = { id: 'desc' }; // default
+        if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
+            const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
+            orderBy = { [String(sortByRaw)]: dir };
+        }
+
         const transactions = await prisma.transaction.findMany({
             where,
             skip,
             take: limitNum,
-            orderBy: { id: 'desc' },
+            orderBy,
             include: { promotions: { select: { id: true, name: true } } },
         });
 

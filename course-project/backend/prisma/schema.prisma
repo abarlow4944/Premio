@@ -34,8 +34,8 @@ model User {
   email      String      @unique
   role       RoleType    @default(regular)
   verified   Boolean?
-  activated  Boolean?
-  suspicious Boolean?
+  activated  Boolean     @default(false)
+  suspicious Boolean?    @default(false)
   birthday   String?
   avatarUrl  String? // stores file path
   password   String?
@@ -56,7 +56,7 @@ model Transaction {
   spent       Float?
   promotions  Promotion[]     @relation("PromotionTransactions")
   remark      String?
-  amount      Int
+  amount      Int             @default(0)
   relatedId   Int?
   createdBy   String?
   suspicious  Boolean         @default(false)

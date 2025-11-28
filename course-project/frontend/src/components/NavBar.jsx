@@ -67,6 +67,7 @@ export default function NavBar() {
         
         setRole(null); // clear the role in the context
         setVisualRole(null);
+        localStorage.removeItem('visualRole');
         navigate("/"); // navigate back to login page
     }
 
@@ -76,6 +77,7 @@ export default function NavBar() {
             return;
         }
         setVisualRole(newRole);
+        localStorage.setItem('visualRole', newRole);
     }
 
     const availableRoles = getAvailableSwitchRoles(role);
@@ -128,16 +130,16 @@ export default function NavBar() {
             {/* Role with Switch Dropdown */}
             {availableRoles.length > 1 ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="text-m text-space-indigo-500 hover:text-space-indigo-700 hover:cursor-pointer outline-none flex items-center gap-1">
-                  Viewing as: <span className="font-bold">{visualRole || role}</span>
+                <DropdownMenuTrigger className="text-m text-white hover:text-gray-100 hover:cursor-pointer outline-none flex items-center gap-1 bg-strawberry-red-500 px-4 py-2 rounded-lg hover:bg-strawberry-red-600 transition-colors">
+                  Viewing as: <span className="font-bold">{(visualRole || role).toUpperCase()}</span>
                   <ChevronDownIcon className="size-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-strawberry-red-500 border-strawberry-red-600">
                   {availableRoles.map((availableRole) => (
                     <DropdownMenuItem
                       key={availableRole}
                       onClick={() => handleRoleSwitch(availableRole)}
-                      className={(visualRole || role) === availableRole ? "bg-flag-red-100 text-flag-red-500 font-semibold" : ""}
+                      className={(visualRole || role) === availableRole ? "bg-strawberry-red-600 text-white font-semibold cursor-pointer" : "text-white hover:bg-strawberry-red-600 cursor-pointer"}
                     >
                       {availableRole}
                     </DropdownMenuItem>

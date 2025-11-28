@@ -85,7 +85,7 @@ function App() {
         
         {/* Transaction Page */}
         <Route path="/transactions" element={
-          <ProtectedRoute /*allowedRoles={["manager", "superuser"]} */>
+          <ProtectedRoute>
             <Layout/>
           </ProtectedRoute>
         }>

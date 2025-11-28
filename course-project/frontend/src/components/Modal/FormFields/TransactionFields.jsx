@@ -1,7 +1,7 @@
 export const TransactionFieldSets = {
     cashier: {
         create: [
-            { name: "utorid", label: "UtorID", required: true },
+            { name: "utorid", label: "UTORid", required: true },
             { name: "type", label: "Type", required: true, value: "purchase", disabled: true },
             { name: "spent", label: "Price", type: "number", required: true },
             { name: "promotionIds", label: "Promotion ID", multiNumber: true },
@@ -10,14 +10,14 @@ export const TransactionFieldSets = {
     },
     manager: {
         create: [
-            { name: "utorid", label: "UtorID", required: true },
+            { name: "utorid", label: "UTORid", required: true },
             { name: "type", label: "Type", required: true, value: "purchase", disabled: true },
             { name: "spent", label: "Price", type: "number", required: true },
             { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark" }
         ],
         adjust: [
-            { name: "utorid", label: "UtorID", required: true },
+            { name: "utorid", label: "UTORid", required: true },
             { name: "type", label: "Type", required: true, value: "adjustment", disabled: true },
             { name: "amount", label: "Points", type: "number", required: true },
             { name: "relatedId", label: "Transaction ID", type: "number", required: true },
@@ -27,14 +27,14 @@ export const TransactionFieldSets = {
     },
     superuser: {
         create: [
-            { name: "utorid", label: "UtorID", required: true },
+            { name: "utorid", label: "UTORid", required: true },
             { name: "type", label: "Type", required: true, value: "purchase", disabled: true },
             { name: "spent", label: "Price", type: "number", required: true },
             { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark" }
         ],
         adjust: [
-            { name: "utorid", label: "UtorID", required: true },
+            { name: "utorid", label: "UTORid", required: true },
             { name: "type", label: "Type", required: true, value: "adjustment", disabled: true },
             { name: "amount", label: "Points", type: "number", required: true },
             { name: "relatedId", label: "Transaction ID", type: "number", required: true },

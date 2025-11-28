@@ -15,7 +15,6 @@ router.post("/", async (req, res) => {
     try {
         if(req.body.type === "purchase"){
             const { utorid, type, spent, promotionIds, remark } = req.body;
-            console.log("received promo is", promotionIds)
 
             // check if the user has proper clearance (must be cashier or higher)
             if (!["cashier", "manager", "superuser"].includes(req.user.role)) {

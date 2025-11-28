@@ -56,7 +56,7 @@ model Transaction {
   spent       Float?
   promotions  Promotion[]     @relation("PromotionTransactions")
   remark      String?
-  amount      Int
+  amount      Int             @default(0)
   relatedId   Int?
   createdBy   String?
   suspicious  Boolean         @default(false)

@@ -6,6 +6,7 @@ import { Button } from "@/components/UI/button";
 import ModalForm from "../../components/Modal/ModalForm";
 import ModalView from "../../components/Modal/ModalView";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
+import CashierUser from "./UserCashier"
 
 
 export default function Users() {
@@ -30,6 +31,11 @@ export default function Users() {
     const[success, setSuccess] = useState("")
     const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
+
+    // go to the cashier's User page if the user is a cashier
+    if(role === "cashier"){
+        return <CashierUser />;
+    }
 
     // modal stuff
     const[isModalOpen, setIsModalOpen] = useState(false);

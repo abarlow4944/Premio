@@ -10,14 +10,12 @@ export default function Home() {
     const currentRole = visualRole || role;
 
     if (!currentRole){
-        console.log("no role");
         return (
             <div>
                 Loading...
             </div>
         );
     }
-    console.log("role is " + currentRole); 
 
     switch(currentRole){
         case "regular":

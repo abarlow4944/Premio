@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
         
 
         // check if the user has proper clearance (must be cashier or higher)
-        if (!["manager", "superuser"].includes(req.user.role)) {
+        if (!["cashier", "manager", "superuser"].includes(req.user.role)) {
             return res.status(403).json({ error: "Not authorized" });
         }
 

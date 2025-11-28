@@ -8,7 +8,7 @@ const features = [
   {
     name: 'Transactions',
     description:
-      'View and manage transactions.',
+      'Create transactions.',
     icon: CreditCardIcon,
   },
   {

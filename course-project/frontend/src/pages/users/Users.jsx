@@ -116,6 +116,34 @@ export default function Users() {
         setModalText("");
     }
 
+    // user registration
+    const handleUserRegistration = async (formData) => {
+        setError("")
+        setSuccess("")
+        console.log("form data is", formData)
+        // get data from the form
+
+        // register user
+        const res = await fetch(`${API_URL}/users`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await res.json(); // response from endpoint
+        
+        if(!res.ok){ // handle error
+            setError(`Could not register user: ${data.error}` || "Could not register user")
+            console.log("Error:", data.error)
+            return
+        }
+
+        setSuccess(`Successfully registered user ${formData.utorid}`)
+    };
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -142,35 +170,7 @@ export default function Users() {
                     formTitle="Register a User"
                     formDescription="Enter the new user's details"
                     fields={getRegisterUserFields(role)}
-                    onSubmit={async (data) => {
-                        const formFields = getRegisterUserFields(role);
-                        const payload = {};
-
-                        formFields.forEach((f) => {
-                        });
-
-                        try {
-                            const res = await fetch(`${API_URL}/users`, { // use the register user endpoint
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                credentials: "include",
-                                body: JSON.stringify(payload),
-                            });
-
-                            const result = await res.json();
-
-                            if (!res.ok) {
-                                console.error("Error registering user:", result.error);
-                                return;
-                            }
-
-                            setRows(prev => [{ ...result }, ...prev.map(r => ({ ...r }))]);
-                            setTotalCount(prev => prev + 1);
-                            setOpen(false);
-                        } catch (err) {
-                            console.error("Network error:", err);
-                        }
-                    }}
+                    onSubmit={handleUserRegistration}
                 />
             
 

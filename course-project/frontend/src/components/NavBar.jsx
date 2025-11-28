@@ -67,6 +67,7 @@ export default function NavBar() {
         
         setRole(null); // clear the role in the context
         setVisualRole(null);
+        localStorage.removeItem('visualRole');
         navigate("/"); // navigate back to login page
     }
 
@@ -76,6 +77,7 @@ export default function NavBar() {
             return;
         }
         setVisualRole(newRole);
+        localStorage.setItem('visualRole', newRole);
     }
 
     const availableRoles = getAvailableSwitchRoles(role);

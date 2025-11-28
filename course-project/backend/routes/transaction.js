@@ -218,7 +218,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
-        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page, limit, sortBy: sortByRaw, sortOrder: sortOrderRaw } = req.query;
+        const { name, utorid, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page, limit, sortBy: sortByRaw, sortOrder: sortOrderRaw } = req.query;
 
         // typecasted field values
         let suspiciousBool;
@@ -236,7 +236,7 @@ router.get("/", async (req, res) => {
         }
 
         // check validity of fields
-        if ((name && typeof name !== 'string') || (createdBy && typeof createdBy !== 'string')) {
+        if ((name && typeof name !== 'string') || (utorid && typeof utorid !== 'string') || (createdBy && typeof createdBy !== 'string')) {
             return res.status(400).json({ error: "Incorrect type for fields" });
         }
 
@@ -301,7 +301,7 @@ router.get("/", async (req, res) => {
 
         if (name) {
             const users = await prisma.user.findMany({
-                where: { OR: [{ name }, { utorid: name }] },
+                where: { OR: [{ name: { contains: name } }, { utorid: { contains: name } }] },
                 select: { utorid: true },
             });
             const matchingUtorids = users.map(u => u.utorid);
@@ -311,7 +311,11 @@ router.get("/", async (req, res) => {
             where.utorid = { in: matchingUtorids };
         }
 
-        if (createdBy) where.createdBy = createdBy;
+        if (utorid) {
+            where.utorid = { contains: utorid };
+        }
+
+        if (createdBy) where.createdBy = { contains: createdBy };
         if (suspiciousBool !== undefined) where.suspicious = suspiciousBool;
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
         if (type) where.type = type;

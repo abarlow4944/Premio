@@ -1,7 +1,7 @@
 import ModalForm from "../../components/Modal/ModalForm";
 import DataTable from "../../components/DataTable/DataTable";
 import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
 import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
@@ -101,6 +101,9 @@ export default function TransactionPage() {
         fetchStats();
     }, []);
 
+    // Pass columns
+    const columns = useMemo(() => getTransactionColumns(role), [role]);
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -190,7 +193,7 @@ export default function TransactionPage() {
             {/* Table */}
             <DataTable
                 data={rows}
-                columns={getTransactionColumns(role)}
+                columns={columns}
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}

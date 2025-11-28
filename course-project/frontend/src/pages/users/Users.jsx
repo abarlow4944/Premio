@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";

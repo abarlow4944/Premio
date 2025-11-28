@@ -17,7 +17,6 @@ require('dotenv').config();
 ///////////////////////////////// /USERS
 router.post("/", async (req, res) => {
     try{
-        console.log("THIS WS RECEIVED:", req.body)
         const { utorid, name, email } = req.body;
         
 

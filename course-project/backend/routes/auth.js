@@ -101,7 +101,6 @@ router.post("/logout", (req, res) => {
   return res.status(200).json({ ok: true });
 });
 
-
 // POST /auth/resets: Request a password reset email
 router.post("/resets", async (req, res) => {
 	const { utorid } = req.body;
@@ -174,10 +173,88 @@ router.post("/resets", async (req, res) => {
 			}
 		});
 
-
 		return res.status(202).json({ expiresAt: saved.expiresAt.toISOString(), resetToken: saved.token });
 	} catch (err) {
 		console.error("Error in /auth/resets:", err);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// POST /auth/activate: Request an activation email
+router.post("/activate", async (req, res) => {
+	const { utorid } = req.body;
+	const API_URL = process.env.VITE_API_URL; // API base URL
+
+	if (!utorid || typeof utorid !== "string") {
+		return res.status(400).json({ error: "Missing or invalid UTORid" });
+	}
+
+	//rate limit: 60 seconds between requests
+	const ip = req.ip || req.connection?.remoteAddress || "unknown";
+	const key = (utorid && typeof utorid === 'string') ? `utorid:${utorid}` : `ip:${ip}`;
+	const last = resetRateLimiter.get(key) || 0;
+	const now = Date.now();
+	if (now - last < 60 * 1000) {
+		return res.status(429).json({ error: "Too Many Requests" });
+	}
+	resetRateLimiter.set(key, now);
+
+	try {
+		const user = await prisma.user.findUnique({ where: { utorid } });
+
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+
+		const token = uuidv4();
+		const expiresAtDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+		const saved = await prisma.resetToken.upsert({
+			where: { utorid },
+			update: { token, expiresAt: expiresAtDate, used: false },
+			create: { utorid, token, expiresAt: expiresAtDate, used: false },
+		});
+
+		// send the password reset email
+		const resetLink = `${API_URL}/activate-account?token=${token}&utorid=${utorid}` // reset link
+		const recipientEmail = user.email
+
+		// email configuration
+		const transporter = nodemailer.createTransport({
+			host: process.env.SMTP_HOST, // for gmail
+			port: Number(process.env.SMTP_PORT),
+			secure: process.env.SMTP_SECURE === "true",
+			auth: {
+				user: process.env.SMTP_USER, // email
+				pass: process.env.SMTP_PASS, //password
+			},
+		});
+
+		// Define the email options
+		const mailOptions = {
+			from: process.env.SMTP_USER, 
+			to: recipientEmail, 
+			subject: "Account Activation Request", 
+			html: `
+				<p>Click below to activate your account:</p>
+				<a href="${resetLink}">${resetLink}</a>
+				<p>This link expires in 7 days.</p>
+			`,
+		};
+
+		// Send the email
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.error("Error occurred:", error);
+				res.status(500).send('Error in sending email. Please try again later.');
+			} else {
+				res.send('Email sent successfully!');
+			}
+		});
+
+		return res.status(202).json({ expiresAt: saved.expiresAt.toISOString(), resetToken: saved.token });
+	} catch (err) {
+		console.error("Error in /auth/activate:", err);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 });
@@ -225,8 +302,9 @@ router.post("/resets/:resetToken", async (req, res) => {
 		// hash new password and update user
 		const cost = 10;
 		const hashed = await bcrypt.hash(password, cost);
+		const now = new Date()
 
-		await prisma.user.update({ where: { utorid }, data: { password: hashed } });
+		await prisma.user.update({ where: { utorid }, data: { password: hashed, createdAt: now } });
 
 		// mark token as used
 		await prisma.resetToken.update({ where: { token: resetToken }, data: { used: true } });
@@ -234,6 +312,59 @@ router.post("/resets/:resetToken", async (req, res) => {
 		return res.status(200).json({});
 	} catch (err) {
 		console.error("Error in /auth/resets/:resetToken:", err);
+		return res.status(500).json({ error: "Internal server error" });
+	}
+});
+
+// POST /auth/activate/:resetToken: Activate account given a reset token.
+router.post("/activate/:resetToken", async (req, res) => {
+	const { resetToken } = req.params;
+	const { utorid, password } = req.body;
+
+	if (!resetToken || typeof resetToken !== "string") {
+		return res.status(400).json({ error: "Missing or invalid reset token" });
+	}
+	if (!utorid || typeof utorid !== "string") {
+		return res.status(400).json({ error: "Missing or invalid utorid" });
+	}
+
+	// password requirement: 8-20 chars, at least one uppercase, one lowercase, one number, one special character
+	const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/;
+	if (!pwdRegex.test(password)) {
+		return res.status(400).json({ error: "Password must be 8-20 characters, have at least one uppercase, one lowercase, one number, and one special character" });
+	}
+
+	try {
+		const tokenRow = await prisma.resetToken.findUnique({ where: { token: resetToken } });
+		if (!tokenRow) {
+			return res.status(404).json({ message: "Reset token not found" });
+		}
+
+		if (tokenRow.used) {
+			return res.status(410).json({ error: "Reset token already used" });
+		}
+
+		const expiresAtTime = new Date(tokenRow.expiresAt).getTime();
+		if (!expiresAtTime || expiresAtTime <= Date.now()) {
+			return res.status(410).json({ message: "Token expired" });
+		}
+
+		if (tokenRow.utorid !== utorid) {
+			return res.status(401).json({ message: "Token does not match user" });
+		}
+
+		// hash password and update user
+		const cost = 10;
+		const hashed = await bcrypt.hash(password, cost);
+
+		await prisma.user.update({ where: { utorid }, data: { password: hashed, activated: true, role: "regular" } });
+
+		// mark token as used
+		await prisma.resetToken.update({ where: { token: resetToken }, data: { used: true } });
+
+		return res.status(200).json({});
+	} catch (err) {
+		console.error("Error in /auth/activate/:resetToken:", err);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 });

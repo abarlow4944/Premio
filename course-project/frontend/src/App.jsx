@@ -15,6 +15,7 @@ import ResetPassword from "./pages/forgotPassword/ResetPassword";
 import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/promotions/Promotions";
 import Events from "./pages/events/Events";
+import ActivateAccount from "./pages/ActivateAccount";
 
 function App() {
 
@@ -32,6 +33,9 @@ function App() {
 
         {/* Reset Password Page */}
         <Route path="/email-confirmation" element={<EmailConfirmation />} /> 
+
+        {/* Activate Account Page */}
+        <Route path="/activate-account" element={<ActivateAccount />} /> 
 
         {/* Protected Landing Page */}
         <Route path="/home" element={

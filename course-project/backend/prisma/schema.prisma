@@ -34,8 +34,8 @@ model User {
   email      String      @unique
   role       RoleType    @default(regular)
   verified   Boolean?
-  activated  Boolean?
-  suspicious Boolean?
+  activated  Boolean     @default(false)
+  suspicious Boolean?    @default(false)
   birthday   String?
   avatarUrl  String? // stores file path
   password   String?

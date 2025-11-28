@@ -15,6 +15,7 @@ router.post("/", async (req, res) => {
     try {
         if(req.body.type === "purchase"){
             const { utorid, type, spent, promotionIds, remark } = req.body;
+            console.log("received promo is", promotionIds)
 
             // check if the user has proper clearance (must be cashier or higher)
             if (!["cashier", "manager", "superuser"].includes(req.user.role)) {
@@ -212,7 +213,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
     try {
-    const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, spentMin, spentMax, amountMin, amountMax, page, limit, sortBy: sortByRaw, sortOrder: sortOrderRaw } = req.query;
+        const { name, createdBy, suspicious, promotionId, type, relatedId, amount, operator, page, limit, sortBy: sortByRaw, sortOrder: sortOrderRaw } = req.query;
 
         // typecasted field values
         let suspiciousBool;
@@ -275,32 +276,6 @@ router.get("/", async (req, res) => {
             }
         }
 
-        // spent range
-        let spentMinNum, spentMaxNum;
-        if (spentMin !== undefined || spentMax !== undefined) {
-            if (spentMin !== undefined) {
-                spentMinNum = Number(spentMin);
-                if (isNaN(spentMinNum)) return res.status(400).json({ error: "Invalid spentMin" });
-            }
-            if (spentMax !== undefined) {
-                spentMaxNum = Number(spentMax);
-                if (isNaN(spentMaxNum)) return res.status(400).json({ error: "Invalid spentMax" });
-            }
-        }
-
-        // amount range
-        let amountMinNum, amountMaxNum;
-        if (amountMin !== undefined || amountMax !== undefined) {
-            if (amountMin !== undefined) {
-                amountMinNum = Number(amountMin);
-                if (isNaN(amountMinNum)) return res.status(400).json({ error: "Invalid amountMin" });
-            }
-            if (amountMax !== undefined) {
-                amountMaxNum = Number(amountMax);
-                if (isNaN(amountMaxNum)) return res.status(400).json({ error: "Invalid amountMax" });
-            }
-        }
-
         // Pagination
         if (page) {
             pageNum = Number(page);
@@ -336,21 +311,7 @@ router.get("/", async (req, res) => {
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
         if (type) where.type = type;
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
-        if (amountNum !== undefined) {
-            where.amount = { [operator]: amountNum };
-        } else {
-            if (amountMinNum !== undefined || amountMaxNum !== undefined) {
-                where.amount = {};
-                if (amountMinNum !== undefined) where.amount.gte = amountMinNum;
-                if (amountMaxNum !== undefined) where.amount.lte = amountMaxNum;
-            }
-        }
-
-        if (spentMinNum !== undefined || spentMaxNum !== undefined) {
-            where.spent = {};
-            if (spentMinNum !== undefined) where.spent.gte = spentMinNum;
-            if (spentMaxNum !== undefined) where.spent.lte = spentMaxNum;
-        }
+        if (amountNum !== undefined) where.amount = { [operator]: amountNum };
 
         // determine ordering
         const allowedSorts = ['id', 'utorid', 'createdBy', 'promotionId', 'type', 'amount', 'spent', 'relatedId', 'suspicious', 'processed', 'processedBy', 'eventId'];
@@ -641,6 +602,7 @@ router.patch("/:transactionId/processed", async(req, res) => {
 
 //////////////////////////////// HELPER FUNCTIONS
 async function arePromotionIdsValid(promotionIds, utorid, spent, type="purchase"){
+    console.log(promotionIds)
     for(const id of promotionIds){
         if(typeof id !== "number" || id < 0 || !Number.isInteger(id)){
             return false;
@@ -687,30 +649,5 @@ async function doesUtoridExist(utorid){
     }
     return true
 }
-
-// Get transaction statistics (max values for filters)
-router.get("/stats/maxes", async (req, res) => {
-    try {
-        const maxAmount = await prisma.transaction.aggregate({
-            _max: {
-                amount: true
-            }
-        });
-
-        const maxSpent = await prisma.transaction.aggregate({
-            _max: {
-                spent: true
-            }
-        });
-
-        res.json({
-            maxAmount: maxAmount._max.amount || 0,
-            maxSpent: maxSpent._max.spent || 0
-        });
-    } catch (err) {
-        console.error("Error fetching transaction stats:", err);
-        res.status(500).json({ error: "Could not fetch transaction stats" });
-    }
-});
 
 module.exports = router;

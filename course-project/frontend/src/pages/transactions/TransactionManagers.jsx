@@ -194,12 +194,9 @@ export default function TransactionPage() {
                         let value = data[f.name];
 
                         if (f.multiNumber) {
-                            const str = typeof value === "string" ? value.trim() : "";
-                            payload[f.name] = str === ""
-                                ? [] // empty input → empty array
-                                : str.split(/[\s,]+/)
-                                    .map(Number)
-                                    .filter(n => !isNaN(n));
+                            payload[f.name] =  Array.isArray(value) ? value : [];
+                            console.log("data type: ", value);
+                            console.log("PAYLOAD " + payload[f.name] );
                         }
                         else if (f.type === "number") {
                             payload[f.name] = value ? Number(value) : 0; // or null if you prefer

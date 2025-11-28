@@ -42,7 +42,9 @@ router.post("/", async (req, res) => {
             }
 
             // check if promotion ids are valid
-            if(promotionIds && !(await arePromotionIdsValid(promotionIds, utorid, spent, type))){
+            const validPromos = await arePromotionIdsValid(promotionIds, utorid, spent, type);
+
+            if(promotionIds && !(validPromos)){
                 return res.status(400).json({ error: "Invalid promotion ids" });
             }
 
@@ -57,7 +59,10 @@ router.post("/", async (req, res) => {
                         },
                     });
                     if(!p) continue;
-                    totalPoints += (p.points || 0) + Math.round(spent/p.rate); // add the points to the total
+
+                    let promoRate = p.rate;
+                    if(p.rate === null) promoRate = 1;
+                    totalPoints += (p.points || 0) + Math.round(spent/promoRate); // add the points to the total
                 }
             }
 

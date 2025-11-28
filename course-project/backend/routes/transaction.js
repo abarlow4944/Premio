@@ -610,7 +610,6 @@ router.patch("/:transactionId/processed", async(req, res) => {
 
 //////////////////////////////// HELPER FUNCTIONS
 async function arePromotionIdsValid(promotionIds, utorid, spent, type="purchase"){
-    console.log(promotionIds)
     for(const id of promotionIds){
         if(typeof id !== "number" || id < 0 || !Number.isInteger(id)){
             return false;

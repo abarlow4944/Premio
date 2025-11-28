@@ -73,26 +73,28 @@ export default function TransactionPage() {
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
-            <div className="mb-[10vh]">
+            <div className="mb-[2vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
                     Transactions
                 </h1>
                 <p className="text-center text-sm text-space-indigo-500">
                     Create any transactions in the system.
                 </p>
-            </div>
-            <div className="flex flex-col justify-center -mt-4">
-                {error && (
-                    <Message message={error} status="error"/>
-                )}
-        
-                {success && (
-                    <Message message={success} status="success"/>
-                )}
+
+                <div className="flex flex-col justify-center mb-4 mx-auto w-[40vw] block">
+                    {error && (
+                        <Message message={error} status="error"/>
+                    )}
+            
+                    {success && (
+                        <Message message={success} status="success"/>
+                    )}
+                </div>
             </div>
 
+
             {/* Transactions */}
-            <Card sx={{ borderRadius: 3, boxShadow: 6 }} className="w-[40vw] mx-auto -mt-10 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10">
+            <Card sx={{ borderRadius: 3, boxShadow: 6 }} className="w-[40vw] mx-auto rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10">
                 <CardContent sx={{ p: 3, position: "relative" }}>
 
 

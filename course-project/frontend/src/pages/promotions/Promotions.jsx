@@ -6,7 +6,8 @@ import { useUser } from "../../contexts/UserContexts";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
-    const { user } = useUser();
+    const { user, visualRole, role } = useUser();
+    const currentRole = visualRole || role || user?.role || 'regular';
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -110,9 +111,8 @@ export default function Promotions() {
         return () => { mounted = false };
     }, []);
 
-    const role = user?.role || 'regular';
-    const columns = useMemo(() => getPromoColumns(role), [role]);
-    const selectionEnabled = role === 'manager' || role === 'superuser';
+    const columns = useMemo(() => getPromoColumns(currentRole), [currentRole]);
+    const selectionEnabled = currentRole === 'manager' || currentRole === 'superuser';
     const [selectedPromos, setSelectedPromos] = useState([]);
     const [pendingDelete, setPendingDelete] = useState(null);
 
@@ -240,7 +240,7 @@ export default function Promotions() {
                     selectionEnabled={selectionEnabled}
                     onSelectionChange={setSelectedPromos}
                     onDeleteSelected={handleDeleteSelected}
-                    onCreate={role == "manager" ? () => {
+                    onCreate={currentRole == "manager" ? () => {
                         // placeholder for creating a new promotion
                     } : undefined}
                     error={error}

@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
+import { Button } from "@/components/UI/button";
+import ModalForm from "../../components/Modal/ModalForm";
+import ModalView from "../../components/Modal/ModalView";
+import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
 
 
 export default function Users() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
-    const { user } = useUser();
+    const { user, visualRole } = useUser();
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -24,8 +28,13 @@ export default function Users() {
 
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
-    const role = user?.role || 'regular';
+    const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
+
+    // modal stuff
+    const[isModalOpen, setIsModalOpen] = useState(false);
+    const[modalText, setModalText] = useState("");
+    const [open, setOpen] = useState(false);
 
     // call fetchData each time query changes
     useEffect(() => {        
@@ -101,6 +110,40 @@ export default function Users() {
         setSuccess("Successfully updated user")
     }
 
+    // modal helper functions
+    function closeModal(){
+        setIsModalOpen(false);
+        setModalText("");
+    }
+
+    // user registration
+    const handleUserRegistration = async (formData) => {
+        setError("")
+        setSuccess("")
+        console.log("form data is", formData)
+        // get data from the form
+
+        // register user
+        const res = await fetch(`${API_URL}/users`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await res.json(); // response from endpoint
+        
+        if(!res.ok){ // handle error
+            setError(`Could not register user: ${data.error}` || "Could not register user")
+            console.log("Error:", data.error)
+            return
+        }
+
+        setSuccess(`Successfully registered user ${formData.utorid}`)
+    };
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -110,6 +153,26 @@ export default function Users() {
                     View and manage all users in the system.
                 </p>
             </div>
+
+            <Button
+                    className="bg-[var(--color-strawberry-red-500)] text-white"
+                    onClick={() => {
+                        setOpen(true);
+                    }}
+                >
+                    Register a User
+            </Button>
+
+            {/* Register a User Modal */}
+                <ModalForm
+                    open={open}
+                    setOpen={setOpen}
+                    formTitle="Register a User"
+                    formDescription="Enter the new user's details"
+                    fields={getRegisterUserFields(role)}
+                    onSubmit={handleUserRegistration}
+                />
+            
 
             {/* Table */}
             <DataTable

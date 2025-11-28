@@ -8,10 +8,12 @@ import { Button } from "../../components/ui/button";
 import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
 
 export default function TransactionPage() {
-    const { role } = useUser();
+    const { visualRole, role } = useUser();
+    const currentRole = visualRole || role;
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [globalMaxes, setGlobalMaxes] = useState(null);
     const [modalMode, setModalMode] = useState(null);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
@@ -77,6 +79,36 @@ export default function TransactionPage() {
         fetchData();
     }, [query]);
 
+    // Fetch transaction stats (max values for filters)
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch(`${API_URL}/transactions/stats/maxes`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!res.ok) {
+                    console.warn('Could not fetch transaction stats:', res.status);
+                    return;
+                }
+
+                const body = await res.json();
+                if (body.error) {
+                    console.warn('Could not fetch transaction stats:', body.error);
+                    return;
+                }
+
+                setGlobalMaxes({
+                    amount: Number(body.maxAmount ?? 0),
+                    spent: Number(body.maxSpent ?? 0),
+                });
+            } catch (err) {
+                console.error('Error fetching transaction stats:', err);
+            }
+        };
+        fetchStats();
+    }, []);
 
     function closeModal(){
         setIsModalOpen(false);
@@ -185,9 +217,9 @@ export default function TransactionPage() {
                 open={open}
                 setOpen={setOpen}
                 modalType="transactions"
-                fields={getTransactionFields(role, modalMode)}
+                fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
-                    const formFields = getTransactionFields(role, modalMode);
+                    const formFields = getTransactionFields(currentRole, modalMode);
                     const payload = {};
 
                     formFields.forEach((f) => {
@@ -242,6 +274,7 @@ export default function TransactionPage() {
                 count={totalCount}
                 query={query}
                 setQuery={setQuery}
+                initialStableMax={globalMaxes}
                 onRowSave={handleRowSaved}
                 error={error}
                 success={success}

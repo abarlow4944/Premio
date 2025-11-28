@@ -32,10 +32,11 @@ const features = [
 ]
 
 export default function Manager() {
-  const { user } = useUser()
+  const { user, role } = useUser()
   const utorid = user.utorid
   const name = user.name;
   const points = user.points;
+  const roleDisplay = role ? role : 'N/A';
 
   const [selected, setSelected] = useState(null)
   const triggerRef = useRef(null)
@@ -73,8 +74,8 @@ export default function Manager() {
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-flag-red-500 sm:text-5xl lg:text-balance">
             {name}
           </p>
-          <p className="mt-6 text-lg/8 text-gray-700">
-            You currently have {points} points.
+          <p className="mt-4 text-lg/8 text-gray-700">
+            You are a: <span className="font-semibold text-space-indigo-500">{roleDisplay}</span>
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">

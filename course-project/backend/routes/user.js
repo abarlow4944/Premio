@@ -17,7 +17,9 @@ require('dotenv').config();
 ///////////////////////////////// /USERS
 router.post("/", async (req, res) => {
     try{
+        console.log("THIS WS RECEIVED:", req.body)
         const { utorid, name, email } = req.body;
+        
 
         // check if the user has proper clearance (must be cashier or higher)
         if (!["manager", "superuser"].includes(req.user.role)) {
@@ -514,8 +516,8 @@ router.get("/me/transactions", async (req, res) => {
         let pageNum = 1;
         let limitNum = 10;
 
-        const allowedTypes = ['purchase', 'redemption', 'adjustment', 'event', 'transfer'];
-        const {type, relatedId, promotionId, amount, operator, page, limit} = req.query;
+    const allowedTypes = ['purchase', 'redemption', 'adjustment', 'event', 'transfer'];
+    const {type, relatedId, promotionId, amount, operator, amountMin, amountMax, spentMin, spentMax, page, limit} = req.query;
 
         const utorid = req.user.utorid // get utorid of the logged in user
 
@@ -559,6 +561,31 @@ router.get("/me/transactions", async (req, res) => {
             }
         }
 
+        // amount range
+        let amountMinNum, amountMaxNum, spentMinNum, spentMaxNum;
+        if (amountMin !== undefined || amountMax !== undefined) {
+            if (amountMin !== undefined) {
+                amountMinNum = Number(amountMin);
+                if (isNaN(amountMinNum)) return res.status(400).json({ error: "Invalid amountMin" });
+            }
+            if (amountMax !== undefined) {
+                amountMaxNum = Number(amountMax);
+                if (isNaN(amountMaxNum)) return res.status(400).json({ error: "Invalid amountMax" });
+            }
+        }
+
+        // spent range
+        if (spentMin !== undefined || spentMax !== undefined) {
+            if (spentMin !== undefined) {
+                spentMinNum = Number(spentMin);
+                if (isNaN(spentMinNum)) return res.status(400).json({ error: "Invalid spentMin" });
+            }
+            if (spentMax !== undefined) {
+                spentMaxNum = Number(spentMax);
+                if (isNaN(spentMaxNum)) return res.status(400).json({ error: "Invalid spentMax" });
+            }
+        }
+
         // pagination
         if (page) {
             pageNum = Number(page);
@@ -580,7 +607,21 @@ router.get("/me/transactions", async (req, res) => {
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
         if (type) where.type = type;
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
-        if (amountNum !== undefined) where.amount = { [operator]: amountNum };
+        if (amountNum !== undefined) {
+            where.amount = { [operator]: amountNum };
+        } else {
+            if (amountMinNum !== undefined || amountMaxNum !== undefined) {
+                where.amount = {};
+                if (amountMinNum !== undefined) where.amount.gte = amountMinNum;
+                if (amountMaxNum !== undefined) where.amount.lte = amountMaxNum;
+            }
+        }
+
+        if (spentMinNum !== undefined || spentMaxNum !== undefined) {
+            where.spent = {};
+            if (spentMinNum !== undefined) where.spent.gte = spentMinNum;
+            if (spentMaxNum !== undefined) where.spent.lte = spentMaxNum;
+        }
 
         // query database
         const count = await prisma.transaction.count({ where });

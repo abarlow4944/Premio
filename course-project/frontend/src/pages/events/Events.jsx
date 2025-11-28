@@ -7,9 +7,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 
 export default function Events() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
-    const { user } = useUser();
+    const { user, visualRole } = useUser();
 
-    const role = user.role;
+    const role = visualRole || user?.role;
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);

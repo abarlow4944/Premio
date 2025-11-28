@@ -5,9 +5,11 @@ import ManagerHome from './landing/ManagerHome';
 import SuperuserHome from './landing/SuperuserHome';
 
 export default function Home() {
-    const {role} = useUser();
+    // shows different homepages based on role
+    const {visualRole, role} = useUser();
+    const currentRole = visualRole || role;
 
-    if (!role){
+    if (!currentRole){
         console.log("no role");
         return (
             <div>
@@ -15,9 +17,9 @@ export default function Home() {
             </div>
         );
     }
-    console.log("role is " + role); 
+    console.log("role is " + currentRole); 
 
-    switch(role){
+    switch(currentRole){
         case "regular":
             return <RegularHome />;
         case "cashier":

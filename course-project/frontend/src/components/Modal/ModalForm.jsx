@@ -88,6 +88,13 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
 
     if (!open) return null;
 
+    // for select fields
+    function convertToBoolean(v) {
+        if (v === "true") return true;
+        if (v === "false") return false;
+        return v; // leave everything else unchanged
+    }
+
     return (
         <div>
         {/* <Button onClick={() => setOpen(true)}>Open {modalType}</Button> */}
@@ -123,20 +130,38 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                             </h2>
                         }
                         
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[75vh]">
                             {fields.map(f => (
                                 <div key={f.name} style={{ marginBottom: 16 }}>
                                     <Typography variant="body2" sx={{ mb: 0.5 }}>
                                         {f.label}{f.required ? " *" : ""}
                                     </Typography>
 
-                                    <InputDefault
-                                        type={f.type || "text"}
-                                        name={f.name}
-                                        value={formData[f.name]}
-                                        onChange={handleChange}
-                                        
-                                    />
+                                    {f.type === "select" &&
+                                        <select
+                                            className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
+                                            value={formData[f.name]}
+                                            name={f.name}
+                                            onChange={handleChange}
+                                            >
+                                            <option value="">Select</option>
+                                            {f.options.map((o) => (
+                                                <option key={o.label} value={o.value}>
+                                                    {o.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    }
+                                    {f.type !== "select" &&
+                                        <InputDefault
+                                            type={f.type || "text"}
+                                            name={f.name}
+                                            value={formData[f.name]}
+                                            onChange={handleChange}
+                                            min={f.min}
+                                        />
+                                    }
+                                    
 
                                     {errors[f.name] && (
                                         <Typography color="error" variant="caption">

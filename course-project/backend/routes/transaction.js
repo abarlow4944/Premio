@@ -495,6 +495,16 @@ router.patch("/:transactionId/suspicious", async (req, res) => {
             return res.status(404).json({error: "Transaction not found"})
         }
 
+        // Calculate the points adjustment based on status change
+        let pointsAdjustment = 0;
+        if (suspicious && !transaction.suspicious) {
+            // Changing from false to true (marking as suspicious): deduct the original amount
+            pointsAdjustment = -Math.abs(transaction.amount);
+        } else if (!suspicious && transaction.suspicious) {
+            // Changing from true to false (verifying as not suspicious): credit the original amount back
+            pointsAdjustment = Math.abs(transaction.amount);
+        }
+
         const updatedTransaction = await prisma.transaction.update({
             where: {
                 id: transactionId,
@@ -508,6 +518,20 @@ router.patch("/:transactionId/suspicious", async (req, res) => {
                 }
             }
         });
+
+        // Update user's points balance if status changed
+        if (pointsAdjustment !== 0) {
+            await prisma.user.update({
+                where: {
+                    utorid: updatedTransaction.utorid,
+                },
+                data: {
+                    points: {
+                        increment: pointsAdjustment,
+                    }
+                }
+            });
+        }
 
         return res.status(200).json({
             id: transactionId,

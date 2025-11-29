@@ -170,7 +170,6 @@ export default function TransactionPage() {
             };
             
             setModalText(mergedData);
-            setSuccess("Successfully fetched transaction");
 
         } catch (err) {
             console.error(err);

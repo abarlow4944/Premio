@@ -5,10 +5,12 @@ import { useUser } from '../../contexts/UserContexts';
 import RegularTransaction from './TransactionRegular';
 import CashierTransaction from './TransactionsCashier';
 import ManagerTransaction from './TransactionManagers';
+import Forbidden from "../errorPages/Forbidden";
 
-export default function Home() {
+export default function TransactionsHome() {
     const {visualRole, role} = useUser();
     const currentRole = visualRole || role;
+    console.log("  ROLE IS: ", currentRole)
 
     if (!currentRole){
         console.log("no role");
@@ -29,6 +31,6 @@ export default function Home() {
         case "superuser":
             return <ManagerTransaction />;
         default:
-            return <div>40X PAGE TO BE CREATED</div>;
+            return <Forbidden/>;
     }
 }

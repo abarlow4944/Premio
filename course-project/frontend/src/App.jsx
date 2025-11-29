@@ -8,7 +8,7 @@ import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
-import TransactionPage from "./pages/transactions/Transactions";
+import TransactionsHome from "./pages/transactions/Transactions";
 import ProfileManagement from "./pages/ProfileManagement";
 import ForgotPassword from "./pages/forgotPassword/ForgotPassword";
 import ResetPassword from "./pages/forgotPassword/ResetPassword";
@@ -16,6 +16,8 @@ import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/promotions/Promotions";
 import Events from "./pages/events/Events";
 import ActivateAccount from "./pages/ActivateAccount";
+import NotFound from "./pages/errorPages/NotFound";
+import Forbidden from "./pages/errorPages/Forbidden";
 
 function App() {
 
@@ -39,26 +41,23 @@ function App() {
 
         {/* Protected Landing Page */}
         <Route path="/home" element={
-            <ProtectedRoute>      
-              <Layout />
-              <Home />
-            </ProtectedRoute>
-          }>
-        </Route>
+          <>
+            <Layout />
+            <Home />
+          </>
+        }/>
 
         {/* Profile Management Page */}
-        <Route path="/profile" element={
-            <ProtectedRoute>      
-              <Layout />
-              <ProfileManagement />
-            </ProtectedRoute>
-          }>
-          
-        </Route>
+        <Route path="/profile" element={ 
+          <> 
+            <Layout />
+            <ProfileManagement />
+          </>
+        }/>
 
         {/* Users Page */}
         <Route path="/users" element={
-            <ProtectedRoute>      
+            <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>      
               <Layout />
               <Users />
             </ProtectedRoute>
@@ -67,7 +66,7 @@ function App() {
 
         {/* Promotions Page */}
         <Route path="/promotions" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
               <Layout />
               <Promotions />
             </ProtectedRoute>
@@ -76,7 +75,7 @@ function App() {
 
         {/* Events Page */}
         <Route path="/events" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
               <Layout />
               <Events />
             </ProtectedRoute>
@@ -85,13 +84,16 @@ function App() {
         
         {/* Transaction Page */}
         <Route path="/transactions" element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>
             <Layout/>
+            <TransactionsHome />
           </ProtectedRoute>
         }>
-          <Route index element={<TransactionPage />} />
         </Route>
         
+        {/* Not Found Page*/}
+        <Route path="*" element={<NotFound />} />
+
       </Routes>
     </BrowserRouter>
   </UserProvider>

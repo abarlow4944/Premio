@@ -3,6 +3,7 @@ import RegularHome from './landing/RegularHome';
 import CashierHome from './landing/CashierHome';
 import ManagerHome from './landing/ManagerHome';
 import SuperuserHome from './landing/SuperuserHome';
+import Forbidden from './errorPages/Forbidden';
 
 export default function Home() {
     // shows different homepages based on role
@@ -27,6 +28,6 @@ export default function Home() {
         case "superuser":
             return <SuperuserHome />;
         default:
-            return <div>40X PAGE TO BE CREATED</div>;
+            return <Forbidden/>;
     }
 }

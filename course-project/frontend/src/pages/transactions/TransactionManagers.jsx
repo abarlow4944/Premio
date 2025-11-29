@@ -241,7 +241,7 @@ export default function TransactionPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end mt-6 gap-3">
+            <div className="flex justify-start mt-6 gap-3">
                 {(
                 <Button
                     className="bg-[var(--color-strawberry-red-500)] text-white"

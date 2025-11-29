@@ -16,6 +16,7 @@ import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/promotions/Promotions";
 import Events from "./pages/events/Events";
 import ActivateAccount from "./pages/ActivateAccount";
+import NotAuthorized from "./pages/NotAuthorized";
 
 function App() {
 
@@ -92,6 +93,9 @@ function App() {
           <Route index element={<TransactionPage />} />
         </Route>
         
+        {/* Not Authorized Page*/}
+        <Route path="*" element={<NotAuthorized />} />
+
       </Routes>
     </BrowserRouter>
   </UserProvider>

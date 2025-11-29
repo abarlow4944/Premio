@@ -59,6 +59,8 @@ export default function NavBar() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL
     
     const isOnUsersPage = location.pathname === '/users';
+    const isOnPromotionsPage = location.pathname === '/promotions';
+    const isOnEventsPage = location.pathname === '/events';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -73,10 +75,22 @@ export default function NavBar() {
     }
 
     const handleRoleSwitch = (newRole) => {
+        const currentRole = visualRole || role;
+        
         if (isOnUsersPage) {
             setSwitchRoleWarning("Role switching is not allowed while on the Users page");
             return;
         }
+
+        if (isOnPromotionsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+            setSwitchRoleWarning("Cannot switch to cashier role while on the Promotions page");
+            return;
+        }
+        if (isOnEventsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+            setSwitchRoleWarning("Cannot switch to cashier role while on the Events page");
+            return;
+        }
+        
         setVisualRole(newRole);
         localStorage.setItem('visualRole', newRole);
     }
@@ -119,7 +133,11 @@ export default function NavBar() {
               key={item.label}
               type="button"
               onClick={() => navigate(item.path)}
-              className="text-m font-bold text-flag-red-500 hover:text-strawberry-red-700 hover:cursor-pointer"
+              className={`text-m font-bold transition-colors px-3 py-1 rounded-lg ${
+                location.pathname === item.path
+                  ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
+                  : 'text-flag-red-500 hover:text-strawberry-red-700'
+              } hover:cursor-pointer`}
             >
               {item.label}
             </button>

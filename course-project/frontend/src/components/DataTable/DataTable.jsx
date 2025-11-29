@@ -80,6 +80,7 @@ export default function DataTable({
                 }
             });
 
+            console.log('saveEditingRow debug:', { original, updated, diff });
             changed = diff; // save for async call
             return prev; // don't modify internalData here
         });

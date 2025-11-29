@@ -77,8 +77,6 @@ export function getEventColumns(role) {
       header: 'Points Remain', 
       enableSorting: true, 
       cell: ({ row }) => row.original.pointsRemain ?? '—',
-      editableCell: TableCell,
-      editType: "text",
       filterType: 'range'  
     },
     { 
@@ -86,10 +84,20 @@ export function getEventColumns(role) {
       header: 'Points Awarded', 
       enableSorting: true, 
       cell: ({ row }) => row.original.pointsAwarded ?? 0,
+      filterType: 'range'  
+    },
+    { 
+      accessorKey: 'points', 
+      header: 'Total Points', 
+      enableSorting: true,
+      cell: ({ row }) => {
+        const total = (row.original.pointsRemain ?? 0) + (row.original.pointsAwarded ?? 0);
+        return total;
+      },
       editableCell: TableCell,
       editType: "text",
-      filterType: 'range'  
-    }, 
+      filterType: 'range'
+    },
     { 
       accessorKey: 'published', 
       header: 'Published', 

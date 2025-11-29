@@ -16,6 +16,7 @@ export default function Events() {
 
     const [data, setData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
+    const [maxTotalPoints, setMaxTotalPoints] = useState(0);
     const selectionEnabled = role === 'manager' || role === 'superuser';
     const [selectedEvents, setSelectedEvents] = useState([]);
     const [pendingDelete, setPendingDelete] = useState(null);
@@ -40,6 +41,12 @@ export default function Events() {
         page: 1,
         limit: 10
     })
+
+    // Clear success/error messages when role changes
+    useEffect(() => {
+        setError("");
+        setSuccess("");
+    }, [role]);
 
     // Fetch users list for organizer dropdown
     useEffect(() => {
@@ -82,9 +89,9 @@ export default function Events() {
                 if(query.capacity) params.append("capacity", query.capacity);
                 if(query.points) params.append("points", query.points);
                 if(query.published) params.append("published", query.published);
-                if(query.sortBy) params.append("sortBy", query.sortBy);
-                if(query.sortOrder) params.append("sortOrder", query.sortOrder);
-                if(query.sortBy) params.append("sortBy", query.sortBy);
+                
+                // Only send sortBy to backend if it's not 'points' (which is client-side only)
+                if(query.sortBy && query.sortBy !== 'points') params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
 
                 // regular users can only see published events
@@ -107,7 +114,35 @@ export default function Events() {
                     return
                 }
 
-                setData(data.results)
+                let results = data.results;
+
+                // Client-side sorting for 'points' field (computed field: pointsRemain + pointsAwarded)
+                if (query.sortBy === 'points') {
+                    results = [...results].sort((a, b) => {
+                        const aTotal = (a.pointsRemain ?? 0) + (a.pointsAwarded ?? 0);
+                        const bTotal = (b.pointsRemain ?? 0) + (b.pointsAwarded ?? 0);
+                        const diff = aTotal - bTotal;
+                        return query.sortOrder === 'desc' ? -diff : diff;
+                    });
+                }
+
+                // Client-side filtering for 'points' range (computed field: pointsRemain + pointsAwarded)
+                if (query.pointsMin !== undefined || query.pointsMax !== undefined) {
+                    const minPoints = query.pointsMin !== undefined ? Number(query.pointsMin) : -Infinity;
+                    const maxPoints = query.pointsMax !== undefined ? Number(query.pointsMax) : Infinity;
+                    results = results.filter(event => {
+                        const total = (event.pointsRemain ?? 0) + (event.pointsAwarded ?? 0);
+                        return total >= minPoints && total <= maxPoints;
+                    });
+                }
+
+                // Calculate the max total points from all results (before filtering) for the range slider
+                const allMaxPoints = data.results.length > 0 
+                    ? Math.max(...data.results.map(e => (e.pointsRemain ?? 0) + (e.pointsAwarded ?? 0)))
+                    : 0;
+                setMaxTotalPoints(allMaxPoints);
+
+                setData(results)
                 setTotalCount(data.count)
             }
 
@@ -166,12 +201,20 @@ export default function Events() {
             body: JSON.stringify(updatedRow)
         });
 
-        const data = await res.json();
+        const responseData = await res.json();
         if (!res.ok) {
-            setError(`Could not update event: ${data.error}` || "Could not update event")
-            console.warn('Could not update event:', data.error || res.status);
+            setError(`Could not update event: ${responseData.error}` || "Could not update event")
+            console.warn('Could not update event:', responseData.error || res.status);
             throw new Error('Could not update event');
         }
+
+        // Update the local data with the server response
+        setData(prevData => 
+            prevData.map(row => 
+                row.id === updatedRow.id ? { ...row, ...responseData } : row
+            )
+        );
+        
         setSuccess("Successfully updated event")
     }
 
@@ -334,6 +377,7 @@ export default function Events() {
                 columns={columns}
                 count={totalCount} // total number of rows
                 query={query} // the filters we are applying
+                initialStableMax={{ points: maxTotalPoints }}
                 selectionEnabled={selectionEnabled}
                 onSelectionChange={setSelectedEvents}
                 onDeleteSelected={handleDeleteSelected}

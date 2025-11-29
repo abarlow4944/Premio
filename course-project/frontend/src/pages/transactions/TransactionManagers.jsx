@@ -285,7 +285,7 @@ export default function TransactionPage() {
                             payload[f.name] = value ? value : [];
                         }
                         else if (f.type === "number") {
-                            payload[f.name] = value ? Number(value) : 0; // or null if you prefer
+                            payload[f.name] = value ? Number(value) : 0;
                         }
                         else {
                             payload[f.name] = value ?? "";

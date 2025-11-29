@@ -128,7 +128,6 @@ export default function ModalForm({ formTitle, formDescription, fields = [], ope
                                     <Typography variant="body2" sx={{ mb: 0.5 }}>
                                         {f.label}{f.required ? " *" : ""}
                                     </Typography>
-                                    {console.log("field is of type", f.type)}
 
                                     {f.type === "select" &&
                                         <select

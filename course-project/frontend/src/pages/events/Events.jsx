@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import ModalView from "../../components/Modal/ModalView";
+import ModalForm from "../../components/Modal/ModalForm";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
+import { getEventFields } from "@/components/Modal/FormFields/EventFields";
 import { useUser } from "@/contexts/UserContexts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 
@@ -21,6 +23,9 @@ export default function Events() {
     const[success, setSuccess] = useState("")
     const[isModalOpen, setIsModalOpen] = useState(false);
     const[modalText, setModalText] = useState("");
+    const [open, setOpen] = useState(false);
+    const [modalMode, setModalMode] = useState(null);
+    const [users, setUsers] = useState([]);
     const columns = useMemo(() => getEventColumns(role), [role]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
@@ -35,6 +40,29 @@ export default function Events() {
         page: 1,
         limit: 10
     })
+
+    // Fetch users list for organizer dropdown
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch(`${API_URL}/users?limit=1000`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+
+                const data = await res.json();
+                if (res.ok && data.results) {
+                    setUsers(data.results);
+                }
+            } catch (err) {
+                console.error("Error fetching users:", err);
+            }
+        };
+
+        if (selectionEnabled) {
+            fetchUsers();
+        }
+    }, [selectionEnabled, API_URL]);
 
     // call fetchData each time query changes
     useEffect(() => {
@@ -182,6 +210,68 @@ export default function Events() {
         setModalText("");
     }
 
+    const handleCreateEvent = async (formData) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            // Transform datetime-local values to ISO format
+            const payload = {
+                name: formData.name,
+                description: formData.description,
+                location: formData.location,
+                startTime: new Date(formData.startTime).toISOString(),
+                endTime: new Date(formData.endTime).toISOString(),
+                capacity: formData.capacity ? parseInt(formData.capacity) : null,
+                points: parseInt(formData.points)
+            };
+
+            const res = await fetch(`${API_URL}/events`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const responseData = await res.json();
+            
+            if (!res.ok) {
+                setError(`Could not create event: ${responseData.error}` || "Could not create event");
+                console.warn('Could not create event:', responseData.error || res.status);
+                return;
+            }
+
+            // If organizer was selected, add them to the event
+            if (formData.organizerUtorid) {
+                const addOrganizerRes = await fetch(`${API_URL}/events/${responseData.id}/organizers`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ utorid: formData.organizerUtorid })
+                });
+
+                if (!addOrganizerRes.ok) {
+                    console.warn('Could not add organizer to event');
+                }
+            }
+
+            setSuccess("Event created successfully");
+            setOpen(false);
+            setModalMode(null);
+            
+            // Refresh the data
+            setQuery(q => ({ ...q }));
+            
+        } catch (err) {
+            console.error(err);
+            setError("Failed to create event");
+        }
+    };
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -247,6 +337,7 @@ export default function Events() {
                 selectionEnabled={selectionEnabled}
                 onSelectionChange={setSelectedEvents}
                 onDeleteSelected={handleDeleteSelected}
+                onCreate={selectionEnabled ? () => { setModalMode("create"); setOpen(true); } : undefined}
                 setQuery={setQuery}
                 error={error}
                 success={success}
@@ -267,6 +358,23 @@ export default function Events() {
                 text={modalText}
                 title="Event Details"
             />
+
+            {/* Create Event Modal */}
+            {modalMode && (
+                <ModalForm
+                    open={open}
+                    setOpen={setOpen}
+                    modalType="events"
+                    fields={getEventFields(role, modalMode)}
+                    onSubmit={handleCreateEvent}
+                    options={{
+                        organizerUtorid: users.map(u => ({
+                            value: u.utorid,
+                            label: `${u.name} (${u.utorid})`
+                        }))
+                    }}
+                />
+            )}
         </div>
 
     )

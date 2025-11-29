@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   Modal,
-  IconButton,
-  Card,
-  CardContent
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InputDefault } from '../UI/Input';
-import { Button } from "@/components/UI/button";
 
 const modalStyle = {
   position: 'absolute',
@@ -22,7 +20,7 @@ const modalStyle = {
 
 
 
-export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit }) {
+export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit, options = {} }) {
     const [errors, setErrors] = useState({});
 
     const dataFields = Object.fromEntries(
@@ -90,67 +88,85 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
 
     return (
         <div>
-        {/* <Button onClick={() => setOpen(true)}>Open {modalType}</Button> */}
         <Modal open={open} onClose={handleClose}>
             <Box sx={modalStyle}>
-                <Card sx={{ borderRadius: 3, boxShadow: 6 }}>
-                    <CardContent sx={{ p: 3, position: "relative" }}>
-                        
-                        {/* Close Button */}
-                        <IconButton
-                            onClick={() => setOpen(false)}
-                            sx={{ position: 'absolute', right: 12, top: 12 }}
-                        >
-                            <CloseIcon />
-                        </IconButton>
+                {/* Faded background */}
+                <div
+                    className="absolute inset-0 bg-black/40"
+                    aria-hidden="true"
+                    onClick={handleClose}
+                />
 
-                        {modalType &&
-                            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                                Enter {modalType} Details
-                            </Typography>
-                        }
+                {/* Modal content */}
+                <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden max-h-[80vh] flex flex-col">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        aria-label="Close dialog"
+                        className="absolute top-4 right-4 rounded-md p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition duration-150 group/button z-10"
+                    >
+                        <XMarkIcon className="size-5 transition-transform duration-150 group-hover/button:rotate-90" />
+                    </button>
 
-                        {/* Form title and description */}
-                        {formTitle &&
-                            <h2 className="text-center text-lg font-semibold text-flag-red-500">
-                                {formTitle}
-                            </h2>
-                        }
-
-                        {formDescription &&
-                            <h2 className="text-center text-sm text-space-indigo-500">
+                    <CardHeader className="bg-white border-b border-gray-100 py-5 px-6 flex-shrink-0">
+                        <CardTitle className="text-xl font-bold text-space-indigo-600">
+                            {modalType ? `Enter ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} Details` : 'Form'}
+                        </CardTitle>
+                        {formDescription && (
+                            <p className="text-sm text-space-indigo-500 mt-1">
                                 {formDescription}
-                            </h2>
-                        }
-                        
-                        <form onSubmit={handleSubmit}>
-                            {fields.map(f => (
-                                <div key={f.name} style={{ marginBottom: 16 }}>
-                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                        {f.label}{f.required ? " *" : ""}
-                                    </Typography>
+                            </p>
+                        )}
+                    </CardHeader>
 
-                                    <InputDefault
-                                        type={f.type || "text"}
-                                        name={f.name}
-                                        value={formData[f.name]}
-                                        onChange={handleChange}
-                                        
-                                    />
+                    <CardContent className="px-6 py-6 overflow-y-auto flex-1">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {fields.map(f => (
+                                <div key={f.name} className="flex flex-col">
+                                    <label className="text-sm font-semibold text-strawberry-red-600 mb-2">
+                                        {f.label}{f.required ? " *" : ""}
+                                    </label>
+
+                                    {f.type === "select" ? (
+                                        <Select value={formData[f.name]} onValueChange={(value) => {
+                                            setFormData(prev => ({ ...prev, [f.name]: value }));
+                                            setErrors(prev => ({ ...prev, [f.name]: "" }));
+                                        }}>
+                                            <SelectTrigger className="w-full border-gray-300 text-gray-900 focus:border-strawberry-red-500 focus:ring-strawberry-red-500">
+                                                <SelectValue placeholder={`Select ${f.label}`} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {options[f.name]?.map(opt => (
+                                                    <SelectItem key={opt.value} value={opt.value}>
+                                                        {opt.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : (
+                                        <InputDefault
+                                            type={f.type || "text"}
+                                            name={f.name}
+                                            value={formData[f.name]}
+                                            onChange={handleChange}
+                                        />
+                                    )}
 
                                     {errors[f.name] && (
-                                        <Typography color="error" variant="caption">
+                                        <span className="text-red-600 text-xs mt-1">
                                             {errors[f.name]}
-                                        </Typography>
+                                        </span>
                                     )}
                                 </div>
                             ))}
 
-                            <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
+                            <Button 
+                                type="submit"
+                                className="w-full mt-6 bg-strawberry-red-500 text-white hover:bg-strawberry-red-600"
+                            >
                                 Submit
                             </Button>
                         </form>
-
                     </CardContent>
                 </Card>
             </Box>

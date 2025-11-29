@@ -186,14 +186,28 @@ export default function Promotions() {
         setError("")
         setSuccess("")
 
-        // register user
+        const payload = Object.entries({ // parse the form data
+            name: formData.name,
+            description: formData.description,
+            type: formData.type,
+            startTime: formData.startTime,
+            endTime: formData.endTime,
+            minSpending: formData.minSpending && Number(formData.minSpending),
+            rate: formData.rate && Number(formData.rate),
+            points: formData.points && Number(formData.points)
+        }).reduce((acc, [key, value]) => {
+            if (value !== "") acc[key] = value;   // remove empty strings
+            return acc;
+        }, {});
+
+        // create promotion
         const res = await fetch(`${API_URL}/promotions`, {
             method: "POST",
             credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({"name": formData.name, "description": formData.description, "type": formData.type, "startTime": formData.startTime, "endTime": formData.endTime, "minSpending": Number(formData.minSpending), "rate": Number(formData.rate), "points": Number(formData.points)})
+            body: JSON.stringify(payload)
         });
 
         const data = await res.json(); // response from endpoint

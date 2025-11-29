@@ -61,12 +61,10 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
 
         fields.forEach(field => {
             if(field.multiNumber){
-                console.log("multi-input started")
                 finalData[field.name] = formData[field.name]
                     .split(/[\s,]+/)
                     .map(Number)
                     .filter(n => !isNaN(n));
-                console.log("MULTI INPUT:", finalData[field.name])
             }
         });
 

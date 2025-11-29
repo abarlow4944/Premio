@@ -86,7 +86,7 @@ export default function TransactionPage() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch(`${API_URL}/transactions/stats/maxes`, {
+                const res = await fetch(`${API_URL}/transactions`, {
                     method: "GET",
                     credentials: "include",
                 });

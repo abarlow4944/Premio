@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button } from "@/components/UI/button";
+import React from 'react';
 
 function headerFormatter(str) {
   if (str === "id"){
@@ -15,6 +16,12 @@ function headerFormatter(str) {
   }
   else if(str === "utorid"){
     return "UTORid"
+  }
+  else if(str === "relatedId"){
+    return "Reference ID"
+  }
+  else if(str === "promotionIds"){
+    return "Promotion(s)"
   }
   else if(/.[A-Z]/.test(str)){
     let separateHeader = str.split(/(?=[A-Z])/);
@@ -27,10 +34,45 @@ function headerFormatter(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function bodyFormatter(key, value){
+function bodyFormatter(key, value, obj){
   if (key === "spent"){ // add dollar sign
-    
+    console.log("Value: " + value);
+    if (!value || value === null){
+      return "$0"
+    }
+    else{
+      return `$${value}`
+    }
   }
+  else if(key.includes("related") && value === null){
+    return "N/A"
+  }
+  else if(key === "amount"){
+    return `${value} points`
+  }
+
+  if (key.toLowerCase().includes("promotionid") && Array.isArray(value)) {
+    const promoNames = obj["promotionNames"] || []; // get corresponding names
+    if (value.length === 0) return "None Applied";
+    return (
+      <ul style={{ margin: 0, paddingLeft: "20px" }}>
+        {value.map((id, index) => (
+          <li key={id}>
+            {id}: {promoNames[index] || "Unknown"}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  if (value === false){
+    return "No"
+  }
+  else if (value === true){
+    return "Yes"
+  }
+
+  return value;
 }
 
 function formatText(text){
@@ -61,20 +103,22 @@ function formatText(text){
   }
 
   return Object.entries(obj).map(([key, value]) => {
+    console.log("CHECKING: ", obj);
+    if (key === "promotionNames") return null; // skip 
+
     const header = headerFormatter(key);
-    const body = bodyFormatter(key, value);
+    const body = bodyFormatter(key, value, obj);
+    
 
     return (
       <div key={key} style={{ marginBottom: "8px" }}>
         <Typography component="span" fontWeight="bold">
           {header}:
         </Typography>
-
         <Typography component="span" sx={{ ml: 1 }}>
-          {typeof value === "object" && value !== null
-            ? JSON.stringify(value)
-            : String(value)}
+          {React.isValidElement(body) ? body : String(body)}
         </Typography>
+        
       </div>
     );
   });

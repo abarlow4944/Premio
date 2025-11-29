@@ -164,8 +164,12 @@ export default function TransactionPage() {
             }
 
             const data = await res.json();
-            console.log("DATA: ", data);
-            setModalText(JSON.stringify(data, null, 2));
+            const mergedData = {
+            ...data,
+            promotionNames: row.original.promotionNames || [], // preserve names
+            };
+            
+            setModalText(mergedData);
             setSuccess("Successfully fetched transaction");
 
         } catch (err) {

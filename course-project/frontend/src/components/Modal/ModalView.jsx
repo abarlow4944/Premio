@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   Modal,
-  Card,
-  CardContent
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { Button } from "@/components/UI/button";
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
 import React from 'react';
 
 function headerFormatter(str) {
@@ -79,7 +77,7 @@ function formatText(text){
   console.log("TEXT: ", text)
 
   if (!text){
-    return <Typography>No data.</Typography>
+    return <p className="text-gray-600">No data.</p>
   }
 
   let obj = text;
@@ -90,16 +88,16 @@ function formatText(text){
       if (parsed && typeof parsed === "object") {
         obj = parsed; 
       } else {
-        return <Typography sx={{ whiteSpace: "pre-wrap" }}>{text}</Typography>;
+        return <p className="whitespace-pre-wrap text-gray-700">{text}</p>;
       }
     } catch (err) {
-      return <Typography sx={{ whiteSpace: "pre-wrap" }}>{text}</Typography>;
+      return <p className="whitespace-pre-wrap text-gray-700">{text}</p>;
     }
   }
 
 
   if (typeof obj !== "object") {
-    return <Typography>{String(obj)}</Typography>;
+    return <p className="text-gray-700">{String(obj)}</p>;
   }
 
   return Object.entries(obj).map(([key, value]) => {
@@ -111,13 +109,13 @@ function formatText(text){
     
 
     return (
-      <div key={key} style={{ marginBottom: "8px" }}>
-        <Typography component="span" fontWeight="bold">
-          {header}:
-        </Typography>
-        <Typography component="span" sx={{ ml: 1 }}>
+      <div key={key} className="flex flex-col py-3 px-1 border-b border-gray-100 last:border-b-0 hover:bg-red-50 rounded-md transition-colors duration-150 cursor-default">
+        <span className="text-sm font-semibold text-strawberry-red-600 mb-1">
+          {header}
+        </span>
+        <span className="text-sm text-gray-600">
           {React.isValidElement(body) ? body : String(body)}
-        </Typography>
+        </span>
         
       </div>
     );
@@ -135,33 +133,45 @@ const style = {
 
 export default function ModalView({ open, onClose, text }) {
   const textBody = formatText(text);
-  return (
-    <Modal
-      open={open}
-      onClose={onClose} // clicking outside also closes
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    return (
+      <Modal
+        open={open}
+        onClose={onClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
         <Box sx={style}>
-          <Card sx={{ borderRadius: 3, boxShadow: 6 }}>
-              <CardContent sx={{ p: 3, position: "relative" }}>
-                <Typography id="modal-modal-title" variant="h6" component="h2">
-                    Details
-                </Typography>
+          {/* Faded background */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            aria-hidden="true"
+            onClick={onClose}
+          />
 
-                <Box sx={{ mt: 2 }}>
-                  {textBody}
-                </Box>
-
-                {/* Close button */}
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                    <Button variant="default" onClick={onClose}>
-                        Close
-                    </Button>
-                </Box>
-              </CardContent>
-            </Card>
+          {/* Modal content */}
+          <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden max-h-[80vh] flex flex-col">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close dialog"
+              className="absolute top-4 right-4 rounded-md p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition duration-150 group/button z-10"
+            >
+              <XMarkIcon className="size-5 transition-transform duration-150 group-hover/button:rotate-90" />
+            </button>
+            <CardHeader className="bg-white border-b border-gray-100 py-5 px-6 flex-shrink-0 flex flex-row items-start justify-between">
+              <div className="flex-1">
+                <CardTitle id="modal-modal-title" className="text-xl font-bold text-strawberry-red-600">
+                  Transaction Details
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="px-6 overflow-y-auto flex-1">
+              <div className="space-y-0">
+                {textBody}
+              </div>
+            </CardContent>
+          </Card>
         </Box>
-    </Modal>
-  );
+      </Modal>
+    );
 }

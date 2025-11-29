@@ -63,6 +63,20 @@ function bodyFormatter(key, value, obj){
     );
   }
 
+  // Handle organizers array
+  if ((key === "organizers" || key === "guests") && Array.isArray(value)) {
+    if (value.length === 0) return "None";
+    return (
+      <ul style={{ margin: 0, paddingLeft: "20px" }}>
+        {value.map((item, index) => (
+          <li key={index}>
+            {typeof item === 'object' ? (item.name || item.utorid || JSON.stringify(item)) : item}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   if (value === false){
     return "No"
   }
@@ -131,7 +145,7 @@ const style = {
   outline: 'none',
 };
 
-export default function ModalView({ open, onClose, text }) {
+export default function ModalView({ open, onClose, text, title }) {
   const textBody = formatText(text);
     return (
       <Modal
@@ -161,7 +175,7 @@ export default function ModalView({ open, onClose, text }) {
             <CardHeader className="bg-white border-b border-gray-100 py-5 px-6 flex-shrink-0 flex flex-row items-start justify-between">
               <div className="flex-1">
                 <CardTitle id="modal-modal-title" className="text-xl font-bold text-strawberry-red-600">
-                  Transaction Details
+                  {title}
                 </CardTitle>
               </div>
             </CardHeader>

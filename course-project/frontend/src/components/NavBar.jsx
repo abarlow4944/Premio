@@ -82,11 +82,11 @@ export default function NavBar() {
             return;
         }
 
-        if (isOnPromotionsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+        if (isOnPromotionsPage && newRole === 'cashier') {
             setSwitchRoleWarning("Cannot switch to cashier role while on the Promotions page");
             return;
         }
-        if (isOnEventsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+        if (isOnEventsPage && newRole === 'cashier') {
             setSwitchRoleWarning("Cannot switch to cashier role while on the Events page");
             return;
         }

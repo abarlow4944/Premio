@@ -17,8 +17,8 @@ function formatDateTime(iso) {
 }
 
 // Viewable columns depends on user role
-// regular => cannot see published column 
-// manager/superuser => can see published column
+// regular => limited columns (name, description, location, startTime, endTime, capacity)
+// manager/superuser => all columns including organizers, pointsAwarded, pointsRemain, published
 export function getEventColumns(role) {
   const isManager = role === 'manager' || role === 'superuser';
   if (!isManager) {
@@ -28,8 +28,7 @@ export function getEventColumns(role) {
       { accessorKey: 'location', header: 'Location', enableSorting: true, enableSearch: true  },
       { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
       { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.capacity ?? '—' },
-      { accessorKey: 'points', header: 'Points', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.points ?? 0 },
+      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.capacity ?? '—' }
     ];
   }
   return [
@@ -40,14 +39,6 @@ export function getEventColumns(role) {
       enableSearch: true,
       editableCell: TableCell,
       editType:"text",
-    },
-    { 
-      accessorKey: 'description', 
-      header: 'Description', 
-      enableSorting: true, 
-      enableSearch: true, 
-      editableCell: TableCell,
-      editType: "text"
     },
     { 
       accessorKey: 'location', 
@@ -83,10 +74,19 @@ export function getEventColumns(role) {
       filterType: 'range'  
     },
     { 
-      accessorKey: 'points', 
-      header: 'Points', 
+      accessorKey: 'pointsRemain', 
+      header: 'Points Remain', 
       enableSorting: true, 
-      cell: ({ row }) => row.original.points ?? 0,
+      cell: ({ row }) => row.original.pointsRemain ?? '—',
+      editableCell: TableCell,
+      editType: "text",
+      filterType: 'range'  
+    },
+    { 
+      accessorKey: 'pointsAwarded', 
+      header: 'Points Awarded', 
+      enableSorting: true, 
+      cell: ({ row }) => row.original.pointsAwarded ?? 0,
       editableCell: TableCell,
       editType: "text",
       filterType: 'range'  

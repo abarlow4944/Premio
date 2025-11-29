@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import DataTable from "../../components/DataTable/DataTable";
+import ModalView from "../../components/Modal/ModalView";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { useUser } from "@/contexts/UserContexts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
@@ -18,6 +19,8 @@ export default function Events() {
     const [pendingDelete, setPendingDelete] = useState(null);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
+    const[isModalOpen, setIsModalOpen] = useState(false);
+    const[modalText, setModalText] = useState("");
     const columns = useMemo(() => getEventColumns(role), [role]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
@@ -144,6 +147,41 @@ export default function Events() {
         setSuccess("Successfully updated event")
     }
 
+    // view row
+    const handleViewRow = async (row) => {
+        setError("");
+        setSuccess("");
+        setModalText("Retrieving...");
+        setIsModalOpen(true);
+
+        try {
+            const res = await fetch(`${API_URL}/events/${row.id}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                setError(`Could not get event: ${errData.error || res.statusText}`);
+                setModalText("Error loading event.");
+                return;
+            }
+
+            const data = await res.json();
+            setModalText(JSON.stringify(data, null, 2));
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to retrieve event");
+            setModalText("Error loading event.");
+        }
+    };
+
+    function closeModal(){
+        setIsModalOpen(false);
+        setModalText("");
+    }
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -213,12 +251,21 @@ export default function Events() {
                 error={error}
                 success={success}
                 onRowSave={handleRowSaved} // for editing rows
+                onViewRow={handleViewRow}
             />
         
             {/* _ event(s) selected message */}
             {selectionEnabled && selectedEvents.length > 0 && (
                 <div className="text-xs mt-2 text-gray-600">{selectedEvents.length} event(s) selected</div>
             )}
+
+            {/* View Event */}
+            <ModalView
+                open={isModalOpen}
+                onClose={closeModal}
+                text={modalText}
+                title="Event Details"
+            />
         </div>
 
     )

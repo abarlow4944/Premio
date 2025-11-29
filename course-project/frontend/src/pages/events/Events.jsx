@@ -252,6 +252,7 @@ export default function Events() {
                 success={success}
                 onRowSave={handleRowSaved} // for editing rows
                 onViewRow={handleViewRow}
+                enableEditing={selectionEnabled}
             />
         
             {/* _ event(s) selected message */}

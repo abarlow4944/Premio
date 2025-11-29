@@ -3,7 +3,7 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, ArrowTopRightOnSquareIcon, FlagIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon } from '@heroicons/react/24/outline'
 import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import Message from '../Message';
@@ -228,7 +228,7 @@ export default function DataTable({
                             className="text-blue-600 hover:text-blue-800"
                             aria-label="View in Full"
                         >
-                            <ArrowTopRightOnSquareIcon className="size-5" />
+                            <InformationCircleIcon className="size-5" />
                         </button>
                         </>
                     )}
@@ -246,7 +246,7 @@ export default function DataTable({
                             className="text-blue-600 hover:text-blue-800"
                             aria-label="View in Full"
                         >
-                            <ArrowTopRightOnSquareIcon className="size-5" />
+                            <InformationCircleIcon className="size-5" />
                         </button>
                         </>
                     </div>

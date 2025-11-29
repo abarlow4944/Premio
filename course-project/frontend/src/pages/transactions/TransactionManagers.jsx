@@ -86,7 +86,7 @@ export default function TransactionPage() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch(`${API_URL}/transactions/stats/maxes`, {
+                const res = await fetch(`${API_URL}/transactions`, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -164,8 +164,12 @@ export default function TransactionPage() {
             }
 
             const data = await res.json();
-            console.log("DATA: ", data);
-            setModalText(JSON.stringify(data, null, 2));
+            const mergedData = {
+            ...data,
+            promotionNames: row.original.promotionNames || [], // preserve names
+            };
+            
+            setModalText(mergedData);
             setSuccess("Successfully fetched transaction");
 
         } catch (err) {

@@ -22,6 +22,8 @@ export default function TransactionPage() {
     const[isModalOpen, setIsModalOpen] = useState(false);
     const[modalText, setModalText] = useState("");
     const columns = useMemo(() => getTransactionColumns(role), [role]);
+    const [formTitle, setFormTitle] = useState("")
+    const [formDescription, setFormDescription] = useState("")
     
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -246,7 +248,9 @@ export default function TransactionPage() {
                 <Button
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
-                    setModalMode("create"); 
+                    setModalMode("create");
+                    setFormDescription("Enter the new transaction's details")
+                    setFormTitle("Create a Transaction");  
                     setOpen(true);
                     }}
                 >
@@ -259,6 +263,8 @@ export default function TransactionPage() {
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
                     setModalMode("adjust"); 
+                    setFormDescription("Enter the adjustment transaction's details")
+                    setFormTitle("Adjust a Transaction"); 
                     setOpen(true);
                     }}
                 >
@@ -272,7 +278,8 @@ export default function TransactionPage() {
             <ModalForm
                 open={open}
                 setOpen={setOpen}
-                modalType="transactions"
+                formTitle={formTitle}
+                formDescription={formDescription}
                 fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
                     const formFields = getTransactionFields(currentRole, modalMode);

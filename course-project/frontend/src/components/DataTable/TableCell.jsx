@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { InputDefault } from '../UI/Input';
 import { formatDateTime } from './Columns/PromoColumns';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 
 // converting from ISO to YYYY-MM-DD-TIME
@@ -82,22 +83,22 @@ export default function TableCell({ row, column, table }) {
             const options = dropdownOptions // get a list of the dropdown options
 
             return (
-               <select
-                    className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
-                    value={String(value)}
-                    onChange={e => { 
-                        const raw = e.target.value;
-                        const selectedValue = convertToBoolean(raw);
-                        setValue(selectedValue)
-                    }}
-                    onBlur={onBlur}
-                    >
-                    {options.map((o) => (
-                        <option key={o.label} value={o.value}>
-                            {o.value}
-                        </option>
-                    ))}
-                </select>
+                <Select value={String(value)} onValueChange={(selectedValue) => {
+                    const val = convertToBoolean(selectedValue);
+                    setValue(val);
+                    table.options.meta?.updateData(row.index, column.id, val);
+                }}>
+                    <SelectTrigger className="w-full mt-2">
+                        <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {options.map((o) => (
+                            <SelectItem key={o.label} value={String(o.value)}>
+                                {o.label || o.value}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             )
 
     }

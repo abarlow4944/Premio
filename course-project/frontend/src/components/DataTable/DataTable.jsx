@@ -439,12 +439,11 @@ export default function DataTable({
                         {onCreate && (
                             <Button
                                 onClick={() => onCreate()}
-                                className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
+                                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm bg-[var(--color-strawberry-red-500)] text-white hover:bg-[var(--color-strawberry-red-600)] transition"
                                 aria-label="Create new item"
-                                variant="outline"
                                 size="sm"
                             >
-                                <PlusIcon className="size-6" /> Create
+                                <PlusIcon className="size-5" /> Create
                             </Button>
                         )}
                     </div>

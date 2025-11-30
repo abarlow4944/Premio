@@ -430,7 +430,7 @@ export default function Events() {
                 <div className="text-center">
                     <h1 className="text-2xl font-semibold text-flag-red-500 mt-[10vh]">Events</h1>
                     <p className="text-sm text-space-indigo-500">
-                        View and manage all events in the system.
+                        {role === 'regular' ? 'View and RSVP to events.' : 'View and manage all events in the system.'}
                     </p>
                 </div>
             </div>

@@ -34,7 +34,6 @@ function headerFormatter(str) {
 
 function bodyFormatter(key, value, obj){
   if (key === "spent"){ // add dollar sign
-    console.log("Value: " + value);
     if (!value || value === null){
       return "$0"
     }
@@ -88,8 +87,6 @@ function bodyFormatter(key, value, obj){
 }
 
 function formatText(text){
-  console.log("TEXT: ", text)
-
   if (!text){
     return <p className="text-gray-600">No data.</p>
   }
@@ -115,7 +112,6 @@ function formatText(text){
   }
 
   return Object.entries(obj).map(([key, value]) => {
-    console.log("CHECKING: ", obj);
     if (key === "promotionNames") return null; // skip 
 
     const header = headerFormatter(key);

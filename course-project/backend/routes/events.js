@@ -369,7 +369,6 @@ router.patch("/:eventId", async(req, res) =>{
                 return res.status(400).json({ "error": "Cannot edit an event start/end time in the past." });
             }
             if((providedStart && providedEnd === null) && (providedStart > event.endTime)){
-                console.log("print bruh")
                 return res.status(400).json({ "error": "Event start time cannot be after the end time." });
             }
             if((providedEnd && providedStart === null) && (providedEnd < event.startTime)){

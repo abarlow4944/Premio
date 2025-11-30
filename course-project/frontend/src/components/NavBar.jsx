@@ -28,12 +28,14 @@ const NAV_ITEMS_BY_ROLE = {
     { label: "Transactions", path: "/transactions" },
     { label: "Promotions", path: "/promotions" },
     { label: "Events", path: "/events" },
+    { label: "Analytics", path: "/analytics" },
   ],
   superuser: [
     { label: "Users", path: "/users" },
     { label: "Transactions", path: "/transactions" },
     { label: "Promotions", path: "/promotions" },
     { label: "Events", path: "/events" },
+    { label: "Analytics", path: "/analytics" },
   ],
 };
 

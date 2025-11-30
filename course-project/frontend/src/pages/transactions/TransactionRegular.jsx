@@ -35,6 +35,11 @@ export default function TransactionPage() {
                     if (val) params.append(key, val);
                 });
 
+                // If using visual role, pass it to backend so filtering reflects visual role
+                if (visualRole && visualRole !== role) {
+                    params.append('asRole', visualRole);
+                }
+
                 const res = await fetch(`${API_URL}/users/me/transactions?${params}`, {
                     method: "GET",
                     credentials: "include",

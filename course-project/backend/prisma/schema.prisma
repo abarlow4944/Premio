@@ -60,7 +60,7 @@ model Transaction {
   relatedId   Int?
   createdBy   String?
   suspicious  Boolean         @default(false)
-  processed   Boolean
+  processed   Boolean         @default(false)
   processedBy String?
   Event       Event?          @relation(fields: [eventId], references: [id])
   eventId     Int?

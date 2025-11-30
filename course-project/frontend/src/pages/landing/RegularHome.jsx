@@ -38,7 +38,7 @@ const features = [
 
 export default function Regular() {
   const API_URL = import.meta.env.VITE_API_URL; // API base URL
-  const { user, loadingUser, reloadProfile, role } = useUser()
+  const { user, loadingUser, reloadProfile, role, visualRole } = useUser()
   const nameDisplay = loadingUser ? 'Loading...' : user ? user.name : '(FirstName), (LastName)'
   const pointsDisplay = loadingUser ? '...' : user ? user.points : '(##)'
   const roleDisplay = loadingUser ? 'Loading...' : role === 'regular' ? 'regular user' : role ? role : 'N/A'
@@ -76,6 +76,11 @@ export default function Regular() {
       try {
         const params = new URLSearchParams();
         params.append('type', 'redemption');
+        params.append('processed', 'false');
+        // Always pass asRole=regular since this is the regular user dashboard
+        if (role !== 'regular') {
+          params.append('asRole', 'regular');
+        }
         
         const res = await fetch(`${API_URL}/users/me/transactions?${params}`, {
           credentials: 'include'
@@ -84,16 +89,14 @@ export default function Regular() {
         if (!res.ok) throw new Error('Failed to fetch redemptions');
         
         const data = await res.json();
-        // Filter for pending (unprocessed) redemptions
-        const pending = data.results.filter(t => !t.processed);
-        setPendingRedemptions(pending);
+        setPendingRedemptions(data.results);
       } catch (err) {
         console.error('Error fetching pending redemptions:', err);
       }
     };
     
     fetchPendingRedemptions();
-  }, [API_URL])
+  }, [API_URL, role])
 
 
   const openFeature = useCallback((f, target) => {
@@ -410,7 +413,10 @@ export default function Regular() {
             <CardHeader className="pt-6 pr-12">
               <CardTitle id="pending-redemptions-title">Pending Redemption Requests</CardTitle>
               <CardDescription>
-                {pendingRedemptions.length === 0 ? 'No pending redemptions' : `Redemption ${currentRedemptionIndex + 1} of ${pendingRedemptions.length}`}
+                {pendingRedemptions.length === 0 
+                  ? 'No pending redemptions' 
+                  : `Redemption ${currentRedemptionIndex + 1} of ${pendingRedemptions.length}`
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pb-6">

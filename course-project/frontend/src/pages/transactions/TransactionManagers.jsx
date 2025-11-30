@@ -154,27 +154,27 @@ export default function TransactionPage() {
         try {
             const res = await fetch(`${API_URL}/transactions/${row.id}`, {
                 method: 'GET',
-                credentials: 'include'  // ok
-                // no body
+                credentials: 'include'
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                setError(`Could not get transaction: ${errData.error || res.statusText}`);
+                console.error('Error response:', data);
+                setError(`Could not get transaction: ${data.error || res.statusText}`);
                 setModalText("Error loading transaction.");
                 return;
             }
 
-            const data = await res.json();
             const mergedData = {
-            ...data,
-            promotionNames: row.original.promotionNames || [], // preserve names
+                ...data,
+                promotionNames: data.promotionNames || [],
             };
             
             setModalText(mergedData);
 
         } catch (err) {
-            console.error(err);
+            console.error('Fetch error:', err);
             setError("Failed to fetch transaction");
             setModalText("Error loading transaction.");
         }

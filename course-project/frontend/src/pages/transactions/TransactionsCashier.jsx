@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
-import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/UI/Card";
 import Message from "@/components/Message";
 import { CardContent } from "@/components/UI/Card";
@@ -14,22 +14,56 @@ export default function TransactionPage() {
     const { role } = useUser();
     const [error, setError] = useState("")
     const [success, setSuccess] = useState("")
-    const fields = getTransactionFields(role, "create")
+    const [transactionType, setTransactionType] = useState("purchase")
+    const [pendingRedemptions, setPendingRedemptions] = useState([])
+    const [selectedRedemptionId, setSelectedRedemptionId] = useState("")
 
-    
-    const dataFields = Object.fromEntries(
-        fields.map(f => [f.name, ""])
-    );
+    const [formData, setFormData] = useState({
+        utorid: "",
+        type: "purchase",
+        spent: "",
+        promotionIds: "",
+        remark: ""
+    });
 
-    const [formData, setFormData] = useState(dataFields);
-
+    // Fetch pending redemptions when component mounts or when utorid changes
     useEffect(() => {
-        const initData = Object.fromEntries(fields.map(f => [f.name, f.value ?? ""]));
-        setFormData(initData);
-    }, [fields]);
+        if (transactionType === "redemption" && formData.utorid) {
+            const fetchPendingRedemptions = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/users/lookup/${encodeURIComponent(formData.utorid)}/redemptions`, {
+                        credentials: 'include'
+                    });
+                    
+                    if (!res.ok) {
+                        const data = await res.json();
+                        console.error('Error fetching redemptions:', data);
+                        return;
+                    }
+                    
+                    const data = await res.json();
+                    setPendingRedemptions(data.results || []);
+                } catch (err) {
+                    console.error('Error fetching pending redemptions:', err);
+                }
+            };
+            
+            fetchPendingRedemptions();
+        } else {
+            setPendingRedemptions([]);
+        }
+    }, [transactionType, formData.utorid, API_URL]);
 
     const handleChange = (e) => {
-        setFormData(prev => ({...prev, [e.target.name]: e.target.value}));
+        const { name, value } = e.target;
+        setFormData(prev => ({...prev, [name]: value}));
+    };
+
+    const handleTypeChange = (value) => {
+        setTransactionType(value);
+        setFormData(prev => ({...prev, type: value}));
+        setSelectedRedemptionId("");
+        setPendingRedemptions([]);
     };
 
     // handle form submission
@@ -38,47 +72,128 @@ export default function TransactionPage() {
 
         setError("")
         setSuccess("")
-        let promotionIdsArray = [];
+        
+        if (transactionType === "purchase") {
+            let promotionIdsArray = [];
 
-        if (formData.promotionIds){ // extract numbers from promotionIds input and turn it into an array
-            promotionIdsArray = formData.promotionIds.match(/\d+/g).map(Number);
-        }
+            if (formData.promotionIds){ 
+                promotionIdsArray = formData.promotionIds.match(/\d+/g).map(Number);
+            }
 
-        try {
-            const res = await fetch(`${API_URL}/transactions`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({"utorid": formData.utorid, "type": "purchase", "spent": Number(formData.spent), "promotionIds": promotionIdsArray, "remark": formData.remark})
-            })
+            try {
+                const res = await fetch(`${API_URL}/transactions`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        "utorid": formData.utorid, 
+                        "type": "purchase", 
+                        "spent": Number(formData.spent), 
+                        "promotionIds": promotionIdsArray, 
+                        "remark": formData.remark
+                    })
+                })
 
-            const result = await res.json();
+                const result = await res.json();
 
-            if (!res.ok) {
-                setError(`Could not create transaction: ${result.error}` || "Could not create transaction")
-                console.log("Error creating transaction:", result.error);
+                if (!res.ok) {
+                    setError(`Could not create transaction: ${result.error}` || "Could not create transaction")
+                    console.log("Error creating transaction:", result.error);
+                    return;
+                }
+            } 
+            catch (err) {
+                setError(`Could not create transaction: ${err}` || "Could not create transaction")
+                console.log("Network error:", err);
+                return
+            }
+
+            setSuccess("Successfully created purchase transaction")
+        } else if (transactionType === "redemption") {
+            if (!selectedRedemptionId) {
+                setError("Please select a redemption request to process");
                 return;
             }
-        } 
-        catch (err) {
-            setError(`Could not create transaction: ${err}` || "Could not create transaction")
-            console.log("Network error:", err);
-            return
+
+            try {
+                const res = await fetch(`${API_URL}/transactions/${selectedRedemptionId}/processed`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ processed: true })
+                })
+
+                const result = await res.json();
+
+                if (!res.ok) {
+                    setError(`Could not process redemption: ${result.error}` || "Could not process redemption")
+                    console.log("Error processing redemption:", result.error);
+                    return;
+                }
+
+                setSuccess("Successfully processed redemption")
+                setSelectedRedemptionId("");
+                
+                // Refetch pending redemptions to update the list
+                const params = new URLSearchParams();
+                params.append('utorid', formData.utorid);
+                const redemptionsRes = await fetch(`${API_URL}/users/lookup/${encodeURIComponent(formData.utorid)}/redemptions`, {
+                    credentials: 'include'
+                });
+                
+                if (redemptionsRes.ok) {
+                    const redemptionsData = await redemptionsRes.json();
+                    setPendingRedemptions(redemptionsData.results || []);
+                }
+            }
+            catch (err) {
+                setError(`Could not process redemption: ${err}` || "Could not process redemption")
+                console.log("Network error:", err);
+                return
+            }
         }
 
-        setSuccess("Successfully created transaction")
+        // Clear form after successful submission
+        setFormData({
+            utorid: "",
+            type: "purchase",
+            spent: "",
+            promotionIds: "",
+            remark: ""
+        });
+        setTransactionType("purchase");
     }
 
     
     return (
         <div className="p-6 space-y-4">
+            {/* Error/Success Messages */}
+            {error && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="error" 
+                        message={error}
+                        onClose={() => setError("")}
+                    />
+                </div>
+            )}
+            {success && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="success" 
+                        message={success}
+                        onClose={() => setSuccess("")}
+                    />
+                </div>
+            )}
+
             {/* Page Title */}
             <div className="mb-[2vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">
-                    Transactions
+                    Process Transactions
                 </h1>
                 <p className="text-center text-sm text-space-indigo-500">
-                    Create any transactions in the system.
+                    Process purchase and redemption transactions in the system.
                 </p>
             </div>
 
@@ -92,31 +207,116 @@ export default function TransactionPage() {
                     <h2 className="text-center text-lg font-semibold text-flag-red-500">
                         Enter Transaction Details
                     </h2>
-
-                    <h2 className="text-center text-sm text-space-indigo-500 mb-5">
-                        Enter transaction details to create a purchase transaction.
-                    </h2>
                     
-                    
-                    <form onSubmit={handleSubmit}>
-                        {fields.map(f => (
-                            <div key={f.name} style={{ marginBottom: 16 }}>
-                                <Typography variant="body2" sx={{ mb: 0.5 }}>
-                                    {f.label}{f.required ? " *" : ""}
-                                </Typography>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Transaction Type Select */}
+                        <div>
+                            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                Transaction Type *
+                            </Typography>
+                            <Select value={transactionType} onValueChange={handleTypeChange}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select transaction type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="purchase">Purchase</SelectItem>
+                                    <SelectItem value="redemption">Redemption</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                                <InputDefault
-                                    type={f.type || "text"}
-                                    name={f.name}
-                                    value={formData[f.name]}
-                                    onChange={handleChange}
-                                    required={f.required}
-                                />
+                        {/* User UTORID - always shown */}
+                        <div>
+                            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                UTORid *
+                            </Typography>
+                            <InputDefault
+                                type="text"
+                                name="utorid"
+                                value={formData.utorid}
+                                onChange={handleChange}
+                                required
+                                placeholder="Enter user's UTORid"
+                            />
+                        </div>
 
-                            </div>
-                        ))}
+                        {/* Purchase-specific fields */}
+                        {transactionType === "purchase" && (
+                            <>
+                                <div>
+                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                        Amount Spent*
+                                    </Typography>
+                                    <InputDefault
+                                        type="number"
+                                        name="spent"
+                                        value={formData.spent}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Enter amount spent"
+                                    />
+                                </div>
 
-                        <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
+                                <div>
+                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                        Promotion IDs
+                                    </Typography>
+                                    <InputDefault
+                                        type="text"
+                                        name="promotionIds"
+                                        value={formData.promotionIds}
+                                        onChange={handleChange}
+                                        placeholder="Enter promotion IDs (comma or space separated)"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                        Remark
+                                    </Typography>
+                                    <InputDefault
+                                        type="text"
+                                        name="remark"
+                                        value={formData.remark}
+                                        onChange={handleChange}
+                                        placeholder="Optional remark"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Redemption-specific fields */}
+                        {transactionType === "redemption" && (
+                            <>
+                                <div>
+                                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                        Pending Redemption Request *
+                                    </Typography>
+                                    {formData.utorid ? (
+                                        pendingRedemptions.length > 0 ? (
+                                            <Select value={selectedRedemptionId} onValueChange={setSelectedRedemptionId}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select a redemption request" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {pendingRedemptions.map((redemption) => (
+                                                        <SelectItem key={redemption.id} value={String(redemption.id)}>
+                                                            {redemption.amount} points - {redemption.remark || 'No remark'}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No pending redemption requests for this user</p>
+                                        )
+                                    ) : (
+                                        <p className="text-sm text-gray-500">Enter a UTORid to see pending redemptions</p>
+                                    )}
+                                </div>
+                            </>
+                        )}
+
+                        <Button variant="default" type="submit" className="w-full mt-6">
                             Submit
                         </Button>
                     </form>

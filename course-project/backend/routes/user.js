@@ -447,6 +447,41 @@ router.get('/lookup/:utorid', async (req, res) => {
     }
 });
 
+/////////////////////////////// /USERS/LOOKUP/:UTORID/REDEMPTIONS
+// For cashiers to view pending redemptions of a user
+router.get('/lookup/:utorid/redemptions', async (req, res) => {
+    try {
+        const utorid = req.params.utorid;
+        
+        // check if user has clearance (must be cashier or higher)
+        if (!['cashier', 'manager', 'superuser'].includes(req.user.role)) {
+            return res.status(403).json({ error: "Not authorized" });
+        }
+
+        if (!utorid || typeof utorid !== 'string') {
+            return res.status(400).json({ error: 'Invalid utorid' });
+        }
+
+        // check if the user exists
+        const user = await prisma.user.findUnique({ where: { utorid } });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        // fetch pending redemptions for this user
+        const redemptions = await prisma.transaction.findMany({
+            where: {
+                utorid: utorid,
+                type: 'redemption',
+                processed: false
+            }
+        });
+
+        return res.status(200).json({ results: redemptions });
+    } catch (err) {
+        console.error('Error fetching user redemptions:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 /////////////////////////////// /USERS/ME/PASSWORD
 router.patch("/me/password", async (req, res) =>{
 
@@ -587,9 +622,19 @@ router.get("/me/transactions", async (req, res) => {
         let limitNum = 10;
 
     const allowedTypes = ['purchase', 'redemption', 'adjustment', 'event', 'transfer'];
-    const {type, relatedId, promotionId, amount, operator, amountMin, amountMax, spentMin, spentMax, page, limit, createdBy, remark, sortBy: sortByRaw, sortOrder: sortOrderRaw} = req.query;
+    const {type, relatedId, promotionId, amount, operator, amountMin, amountMax, spentMin, spentMax, page, limit, createdBy, remark, sortBy: sortByRaw, sortOrder: sortOrderRaw, asRole, processed} = req.query;
 
         const utorid = req.user.utorid // get utorid of the logged in user
+        
+        // Determine the effective role for filtering
+        // If asRole is provided and user has the actual role to back it up, use asRole for filtering
+        let effectiveRole = req.user.role;
+        if (asRole && ['manager', 'cashier', 'superuser'].includes(req.user.role)) {
+            // Managers, cashiers, and superusers can view as regular to see filtered view
+            if (asRole === 'regular') {
+                effectiveRole = 'regular';
+            }
+        }
 
         
         // check validity of payload
@@ -680,7 +725,8 @@ router.get("/me/transactions", async (req, res) => {
         let where = {};
         
         // For 'event' type transactions, show both where user is recipient (utorid) OR creator (createdBy)
-        // For other types, only show where user is recipient
+        // For other types, show where user is recipient OR created the transaction (for cashiers)
+        // Also include transactions processed by user (for cashiers viewing processed redemptions)
         if (type === 'event') {
             // Show event transactions where user is either recipient or organizer
             where = {
@@ -692,16 +738,30 @@ router.get("/me/transactions", async (req, res) => {
             };
         } else if (type) {
             where.type = type;
-            where.utorid = utorid;
+            // For redemptions, regular users should only see their own redemptions
+            // For other transaction types, users can see ones they created or received
+            if (type === 'redemption' && !['cashier', 'manager', 'superuser'].includes(effectiveRole)) {
+                where.utorid = utorid;
+            } else {
+                where.OR = [
+                    { utorid: utorid },
+                    { createdBy: utorid },
+                    { processedBy: utorid }
+                ];
+            }
         } else {
-            // If no type specified, show both types:
-            // - All non-event transactions where user is recipient
+            // If no type specified, show:
+            // - All non-event transactions where user is recipient OR created it OR processed it
             // - All event transactions where user is either recipient or organizer
             where = {
                 OR: [
                     { 
                         type: { not: 'event' },
-                        utorid: utorid
+                        OR: [
+                            { utorid: utorid },
+                            { createdBy: utorid },
+                            { processedBy: utorid }
+                        ]
                     },
                     {
                         type: 'event',
@@ -712,6 +772,36 @@ router.get("/me/transactions", async (req, res) => {
                     }
                 ]
             };
+        }
+        
+        // Filter out suspicious transactions for regular users and unprocessed redemptions
+        if (!['cashier', 'manager', 'superuser'].includes(effectiveRole)) {
+            where.suspicious = false;
+            
+            // For regular users, if they're looking at redemptions, allow them to filter by processed status
+            // If no processed filter is provided, only show processed ones by default
+            if (type === 'redemption') {
+                if (processed === undefined) {
+                    where.processed = true;
+                } else if (processed === 'true') {
+                    where.processed = true;
+                } else if (processed === 'false') {
+                    where.processed = false;
+                }
+            } else if (!type) {
+                // When no type is specified, exclude unprocessed redemptions
+                where = {
+                    AND: [
+                        where,
+                        {
+                            OR: [
+                                { type: { not: 'redemption' } },
+                                { processed: true }
+                            ]
+                        }
+                    ]
+                };
+            }
         }
         
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
@@ -780,7 +870,9 @@ router.get("/me/transactions", async (req, res) => {
             promotionIds: t.promotions.map(p => p.id),
             promotionNames: t.promotions.map(p => p.name),
             remark: t.remark || "",
-            createdBy: t.createdBy
+            createdBy: t.createdBy,
+            processed: t.processed ?? false,
+            processedBy: t.processedBy ?? null
         }));
         return res.status(200).json({ count, results });
     }

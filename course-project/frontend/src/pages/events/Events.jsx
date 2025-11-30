@@ -1,16 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/DataTable/DataTable";
 import ModalView from "../../components/Modal/ModalView";
 import ModalForm from "../../components/Modal/ModalForm";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { getEventFields } from "@/components/Modal/FormFields/EventFields";
 import { useUser } from "@/contexts/UserContexts";
+import Message from "../../components/Message";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 
 
 export default function Events() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
     const { user, visualRole } = useUser();
+    const navigate = useNavigate();
 
     const role = visualRole || user?.role;
 
@@ -27,6 +30,82 @@ export default function Events() {
     const [open, setOpen] = useState(false);
     const [modalMode, setModalMode] = useState(null);
     const [users, setUsers] = useState([]);
+    const [userOrganizedEventIds, setUserOrganizedEventIds] = useState(new Set());
+    const [userGuestEventIds, setUserGuestEventIds] = useState(new Set());
+    
+    // Fetch user's organized and guest events to determine RSVP eligibility
+    useEffect(() => {
+        const fetchUserEvents = async () => {
+            try {
+                const res = await fetch(`${API_URL}/users/me`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+
+                if (res.ok) {
+                    const userData = await res.json();
+                    const organizedIds = new Set((userData.organizedEvents || []).map(e => e.id));
+                    const guestIds = new Set((userData.guestEvents || []).map(e => e.id));
+                    setUserOrganizedEventIds(organizedIds);
+                    setUserGuestEventIds(guestIds);
+                }
+            } catch (error) {
+                console.error("Error fetching user events:", error);
+            }
+        };
+
+        if (role === 'regular') {
+            fetchUserEvents();
+        }
+    }, [API_URL, role]);
+    
+    // Check if an event can be RSVPed to
+    const canRSVP = (event) => {
+        return !userOrganizedEventIds.has(event.id) && !userGuestEventIds.has(event.id);
+    };
+
+    // RSVP handler for regular users
+    const handleRSVP = async (event) => {
+        // Check if user is already an organizer or guest
+        if (!canRSVP(event)) {
+            if (userOrganizedEventIds.has(event.id)) {
+                setError("You are an organizer of this event");
+            } else {
+                setError("You are already attending this event");
+            }
+            return;
+        }
+
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/events/${event.id}/guests/me`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const responseData = await res.json();
+            
+            if (!res.ok) {
+                setError(`Could not RSVP to event: ${responseData.error}` || "Could not RSVP to event");
+                console.warn('Could not RSVP:', responseData.error || res.status);
+                return;
+            }
+
+            setSuccess(`Successfully RSVPed to ${event.name}`);
+            // Update the guest events set
+            setUserGuestEventIds(prev => new Set([...prev, event.id]));
+            
+        } catch (err) {
+            console.error(err);
+            setError("Failed to RSVP to event");
+        }
+    };
+
     const columns = useMemo(() => getEventColumns(role), [role]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
@@ -133,6 +212,15 @@ export default function Events() {
                     results = results.filter(event => {
                         const total = (event.pointsRemain ?? 0) + (event.pointsAwarded ?? 0);
                         return total >= minPoints && total <= maxPoints;
+                    });
+                }
+
+                // Filter out ended events for regular users
+                if (role === "regular") {
+                    const now = new Date();
+                    results = results.filter(event => {
+                        const eventEnd = new Date(event.endTime);
+                        return eventEnd > now;
                     });
                 }
 
@@ -317,12 +405,34 @@ export default function Events() {
 
     return (
         <div className="p-6 space-y-4">
+            {/* Error/Success Messages */}
+            {error && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="error" 
+                        message={error}
+                        onClose={() => setError("")}
+                    />
+                </div>
+            )}
+            {success && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="success" 
+                        message={success}
+                        onClose={() => setSuccess("")}
+                    />
+                </div>
+            )}
+            
             {/* Page Title */}
             <div className="mb-[5vh]">
-                <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Events</h1>
-                <p className="text-center text-sm text-space-indigo-500">
-                View and manage all events in the system.
-                </p>
+                <div className="text-center">
+                    <h1 className="text-2xl font-semibold text-flag-red-500 mt-[10vh]">Events</h1>
+                    <p className="text-sm text-space-indigo-500">
+                        View and manage all events in the system.
+                    </p>
+                </div>
             </div>
 
             {/* Deletion Confirmation Modal */}
@@ -387,6 +497,8 @@ export default function Events() {
                 success={success}
                 onRowSave={handleRowSaved} // for editing rows
                 onViewRow={handleViewRow}
+                onRSVP={(visualRole === 'regular' || (visualRole === null && role === 'regular')) ? handleRSVP : undefined}
+                canRSVP={(visualRole === 'regular' || (visualRole === null && role === 'regular')) ? canRSVP : undefined}
                 enableEditing={selectionEnabled}
             />
         

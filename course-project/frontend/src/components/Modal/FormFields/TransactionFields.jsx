@@ -24,6 +24,7 @@ export const TransactionFieldSets = {
             { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark" }
         ]
+        
     },
     superuser: {
         create: [
@@ -54,4 +55,24 @@ export const TransactionFieldSets = {
 export function getTransactionFields(role, mode){
     console.log(TransactionFieldSets[role]?.[mode] ?? [])
     return TransactionFieldSets[role]?.[mode] ?? [];
+}
+
+export function getFilterFields(columnKey) {
+    if (columnKey === "amount") {
+        return [
+        {
+            name: "operator",
+            label: "Select one:",
+            type: "radio",
+            required: true,
+            options: [
+                { label: " Less than", value: "lte" },
+                { label: " Greater than", value: "gte" },
+            ],
+        },
+        { name: "amount", label: "Number of Points", required: true, type: "number" },
+        ];
+    }
+  return [];
+    
 }

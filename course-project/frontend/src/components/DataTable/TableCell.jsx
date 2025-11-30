@@ -99,7 +99,6 @@ export default function TableCell({ row, column, table }) {
                     ))}
                 </select>
             )
-
     }
 
 

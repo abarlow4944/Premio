@@ -22,7 +22,7 @@ const modalStyle = {
 
 
 
-export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit }) {
+export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit, currentFilterKey, setColumnFilters }) {
     const [errors, setErrors] = useState({});
 
     const dataFields = Object.fromEntries(
@@ -46,9 +46,10 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
         e.preventDefault();
 
         const newErrors = {};
-        fields.forEach(field => {
-            if (field.required && !formData[field.name].trim()) {
-                newErrors[field.name] = `${field.label} is required`;
+        fields.forEach(f => {
+            const value = formData[f.name];
+            if (f.required && (value === "" || value === null || value === undefined)) {
+                newErrors[f.name] = `${f.label} is required`;
             }
         });
 
@@ -60,11 +61,17 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
         const finalData = {...formData};
 
         fields.forEach(field => {
-            if(field.multiNumber){
-                finalData[field.name] = formData[field.name]
-                    .split(/[\s,]+/)
-                    .map(Number)
-                    .filter(n => !isNaN(n));
+            if (field.multiNumber) {
+                const raw = formData[field.name];
+
+                if (!raw || raw.trim() === "") {
+                    finalData[field.name] = [];
+                } else {
+                    finalData[field.name] = raw
+                        .split(/[\s,]+/)
+                        .map(Number)
+                        .filter(n => !isNaN(n));
+                }
             }
         });
 
@@ -130,13 +137,32 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                         {f.label}{f.required ? " *" : ""}
                                     </Typography>
 
-                                    <InputDefault
-                                        type={f.type || "text"}
-                                        name={f.name}
-                                        value={formData[f.name]}
-                                        onChange={handleChange}
-                                        
-                                    />
+                                    {f.type === "radio" && f.options ? (
+                                        <div>
+                                            {f.options.map(opt => (
+                                                <label key={opt.value} style={{ marginRight: 12 }}>
+                                                    <input
+                                                        type="radio"
+                                                        name={f.name}
+                                                        value={opt.value}
+                                                        checked={formData[f.name] === opt.value}
+                                                        onChange={(e) =>
+                                                            setFormData(prev => ({ ...prev, [f.name]: e.target.value }))
+                                                        }
+                                                    />
+                                                    {opt.label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <InputDefault
+                                            type={f.type || "text"}
+                                            name={f.name}
+                                            value={formData[f.name]}
+                                            onChange={handleChange}
+                                            placeholder={f.multiNumber ? "Enter numbers separated by commas or spaces" : ""}
+                                        />
+                                    )}
 
                                     {errors[f.name] && (
                                         <Typography color="error" variant="caption">
@@ -146,9 +172,40 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                 </div>
                             ))}
 
-                            <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
-                                Submit
-                            </Button>
+                            
+                            
+                            <div className="flex justify-end gap-2 mt-4">
+                                {/* Reset button */}
+                                {modalType === "filter" && (
+                                    <Button
+                                        type="button" // prevents form submission
+                                        variant="outline"
+                                        onClick={() => {
+                                            // Clear the form data
+                                            const clearedData = {};
+                                            fields.forEach(f => (clearedData[f.name] = ""));
+                                            setFormData(clearedData);
+
+                                            // Reset the column filter in the table
+                                            if (currentFilterKey) {
+                                                setColumnFilters(prev => ({
+                                                    ...prev,
+                                                    [currentFilterKey]: undefined,
+                                                }));
+                                            }
+
+                                            // Optionally close the modal after resetting
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        Reset
+                                    </Button>
+                                )}
+
+                                <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }} >
+                                    Submit
+                                </Button>
+                            </div>
                         </form>
 
                     </CardContent>

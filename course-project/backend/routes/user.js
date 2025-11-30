@@ -163,7 +163,7 @@ router.get("/", async(req, res) => {
         });
 
         //apply filter with pagination
-        const allowedSorts = ['id','utorid','name','birthday','role','points','createdAt','lastLogin'];
+        const allowedSorts = ['id','utorid','name','email','birthday','role','points','createdAt','lastLogin','verified','activated','suspicious'];
         let orderBy = { id: 'asc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
             const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';

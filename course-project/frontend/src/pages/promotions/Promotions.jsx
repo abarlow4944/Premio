@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { useUser } from "../../contexts/UserContexts";
 import { getPromotionFields } from "@/components/Modal/FormFields/PromotionFields";
 import ModalForm from "@/components/Modal/ModalForm";
-import { Button } from "@/components/UI/button";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -287,16 +286,6 @@ export default function Promotions() {
                 onSubmit={handleCreatePromotion}
             />
 
-            {/* Create Promotion Button */}
-            <Button
-                className="bg-strawberry-red-500 text-platinum-500"
-                onClick={() => {
-                    setOpen(true)
-                }}
-            >
-                Create a Promotion
-            </Button>
-
             {/* Table */}
             {globalMaxes && (
                 <DataTable
@@ -312,6 +301,7 @@ export default function Promotions() {
                     error={error}
                     success={success}
                     onRowSave={handleRowSaved} // for editing rows
+                    onCreate={() => setOpen(true)}
                 />
             )}
 

@@ -62,9 +62,7 @@ export default function TransactionPage() {
                 let data;
                 try {
                     data = JSON.parse(text);
-                    console.log("GOT: ", data);
                 } catch {
-                    console.error("Not JSON:", text);
                     return;
                 }
 
@@ -72,6 +70,10 @@ export default function TransactionPage() {
                     console.error("Error:", data.error);
                     return;
                 }
+
+                data.results.forEach((r) => {
+                    r.spent = r.spent ? `$${r.spent.toFixed(2)}` : "-"
+                })
 
                 setRows(data.results);
                 setTotalCount(data.count);

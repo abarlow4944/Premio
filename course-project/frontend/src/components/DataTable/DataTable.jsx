@@ -449,17 +449,6 @@ export default function DataTable({
 
                     {/* Right side: selection actions */}
                     <div className="flex items-center gap-2">
-                        {selectionEnabled && selectedCount === 1 && (
-                            <Button
-                                onClick={() => onEditSelected && onEditSelected(selectedRowObjects)}
-                                className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
-                                aria-label="Edit selected row"
-                                variant="outline"
-                                size="sm"
-                            >
-                                <PencilSquareIcon className="size-6" /> Edit
-                            </Button>
-                        )}
                         {selectionEnabled && selectedCount >= 1 && (
                             <Button
                                 onClick={() => onDeleteSelected && onDeleteSelected(selectedRowObjects)}

@@ -72,7 +72,7 @@
   --font-lexend-deca: "Lexend Deca", sans-serif;
 }
 
-body, label {
+body, label, input {
   font-family: var(--font-lexend-deca)
 }
 

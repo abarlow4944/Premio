@@ -60,16 +60,16 @@ router.post('/', async (req, res) => {
 			return res.status(400).json({ error: 'Invalid date format' });
 		}
 		if (start < now) {
-			return res.status(400).json({ error: 'startTime must not be in the past' });
+			return res.status(400).json({ error: 'start time must not be in the past' });
 		}
 		if (end <= start) {
-			return res.status(400).json({ error: 'endTime must be after startTime' });
+			return res.status(400).json({ error: 'end time must be after startTime' });
 		}
 
 		let minSpendVal = null;
 		if (minSpending !== undefined && minSpending !== null) {
 			if (typeof minSpending !== 'number' || Number(minSpending) <= 0) {
-				return res.status(400).json({ error: 'minSpending must be a positive number' });
+				return res.status(400).json({ error: 'minimum spending must be a positive number' });
 			}
 			minSpendVal = Math.round(minSpending);
 		}

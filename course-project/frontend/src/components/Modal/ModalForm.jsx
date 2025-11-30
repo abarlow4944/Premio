@@ -68,7 +68,6 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
 
         if (onSubmit) onSubmit(finalData);
 
-        console.log("Submitting... ", modalType, finalData);
         setOpen(false);
     };
 
@@ -85,6 +84,13 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
     }, [open]);
 
     if (!open) return null;
+
+    // for select fields
+    function convertToBoolean(v) {
+        if (v === "true") return true;
+        if (v === "false") return false;
+        return v; // leave everything else unchanged
+    }
 
     return (
         <div>

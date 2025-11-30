@@ -3,6 +3,9 @@ import DataTable from "../../components/DataTable/DataTable";
 import { getPromoColumns } from "../../components/DataTable/Columns/PromoColumns";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 import { useUser } from "../../contexts/UserContexts";
+import { getPromotionFields } from "@/components/Modal/FormFields/PromotionFields";
+import ModalForm from "@/components/Modal/ModalForm";
+import { Button } from "@/components/UI/button";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -16,7 +19,17 @@ export default function Promotions() {
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
 
-    const [query, setQuery] = useState({ // the filters we will be applying (params)
+    const columns = useMemo(() => getPromoColumns(currentRole), [currentRole]);
+    const selectionEnabled = currentRole === 'manager' || currentRole === 'superuser';
+    const [selectedPromos, setSelectedPromos] = useState([]);
+    const [pendingDelete, setPendingDelete] = useState(null);
+
+    // create promotion modal stuff
+    const [open, setOpen] = useState(false);
+    const [modalMode, setModalMode] = useState(null);
+
+    // the filters we will be applying (params)
+    const [query, setQuery] = useState({ 
         name: "",
         role: "",
         verified: "",
@@ -111,11 +124,6 @@ export default function Promotions() {
         return () => { mounted = false };
     }, []);
 
-    const columns = useMemo(() => getPromoColumns(currentRole), [currentRole]);
-    const selectionEnabled = currentRole === 'manager' || currentRole === 'superuser';
-    const [selectedPromos, setSelectedPromos] = useState([]);
-    const [pendingDelete, setPendingDelete] = useState(null);
-
     // deleting promotion
     const performDeletion = async (rows) => {
         setError("")
@@ -171,6 +179,46 @@ export default function Promotions() {
             throw new Error('Could not update promotion');
         }
         setSuccess("Successfully updated promotion")
+    }
+
+    // handle promotion creation
+    const handleCreatePromotion = async(formData) => {
+        setError("")
+        setSuccess("")
+
+        const payload = Object.entries({ // parse the form data
+            name: formData.name,
+            description: formData.description,
+            type: formData.type,
+            startTime: formData.startTime,
+            endTime: formData.endTime,
+            minSpending: formData.minSpending && Number(formData.minSpending),
+            rate: formData.rate && Number(formData.rate),
+            points: formData.points && Number(formData.points)
+        }).reduce((acc, [key, value]) => {
+            if (value !== "") acc[key] = value;   // remove empty strings
+            return acc;
+        }, {});
+
+        // create promotion
+        const res = await fetch(`${API_URL}/promotions`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json(); // response from endpoint
+        
+        if(!res.ok){ // handle error
+            setError(`Could not create promotion: ${data.error}` || "Could not create promotion")
+            console.log("Error:", data.error)
+            return
+        }
+
+        setSuccess(`Successfully created promotion "${formData.name}"`)
     }
 
     return (
@@ -229,6 +277,27 @@ export default function Promotions() {
                 </div>
             )}
 
+            {/* Create Promotion Modal */}
+            <ModalForm
+                open={open}
+                setOpen={setOpen}
+                formTitle="Create a Promotion"
+                formDescription="Enter the new promotion's details"
+                fields={getPromotionFields(role)}
+                onSubmit={handleCreatePromotion}
+            />
+
+            {/* Create Promotion Button */}
+            <Button
+                className="bg-strawberry-red-500 text-platinum-500"
+                onClick={() => {
+                    setOpen(true)
+                }}
+            >
+                Create a Promotion
+            </Button>
+
+            {/* Table */}
             {globalMaxes && (
                 <DataTable
                     data={data}
@@ -240,9 +309,6 @@ export default function Promotions() {
                     selectionEnabled={selectionEnabled}
                     onSelectionChange={setSelectedPromos}
                     onDeleteSelected={handleDeleteSelected}
-                    onCreate={currentRole == "manager" ? () => {
-                        // placeholder for creating a new promotion
-                    } : undefined}
                     error={error}
                     success={success}
                     onRowSave={handleRowSaved} // for editing rows

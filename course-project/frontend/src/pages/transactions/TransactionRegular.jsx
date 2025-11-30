@@ -136,7 +136,6 @@ export default function TransactionPage() {
             <ModalForm
                 open={open}
                 setOpen={setOpen}
-                modalType="transactions"
                 fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
                     const formFields = getTransactionFields(currentRole, modalMode);

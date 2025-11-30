@@ -60,7 +60,8 @@ export default function NavBar() {
     
     const isOnUsersPage = location.pathname === '/users';
     const isOnPromotionsPage = location.pathname === '/promotions';
-    const isOnEventsPage = location.pathname === '/events' || location.pathname === '/my-events';
+    const isOnEventsPage = location.pathname === '/events';
+    const isOnMyEventsPage = location.pathname === '/my-events';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -79,6 +80,11 @@ export default function NavBar() {
         
         if (isOnUsersPage) {
             setSwitchRoleWarning("Role switching is not allowed while on the Users page");
+            return;
+        }
+
+        if (isOnMyEventsPage) {
+            setSwitchRoleWarning("Role switching is not allowed while on the My Events page");
             return;
         }
 

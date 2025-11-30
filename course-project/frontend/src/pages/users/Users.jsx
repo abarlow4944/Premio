@@ -181,7 +181,7 @@ export default function Users() {
             {/* Page Title */}
             <div className="mb-[5vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>
-                <p className="text-center text-sm text-space-indigo-500">
+                <p className="text-center text-sm text-space-indigo-500 mt-">
                     View and manage all users in the system.
                 </p>
             </div>

@@ -5,6 +5,7 @@ import { useUser } from '../../contexts/UserContexts'
 import QRCode from 'react-qr-code'
 import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/UI/Card'
+import {getTransactionFields} from "@/components/Modal/FormFields/TransactionFields";
 
 console.log('RegularHome rendered...')
 
@@ -24,13 +25,13 @@ const features = [
   {
     name: 'Pending Redemptions',
     description:
-      'Sit quis amet rutrum tellus ullamcorper ultricies libero dolor eget. Sem sodales gravida quam turpis enim lacus amet.',
+      'View all your unprocessed point redemption requests.',
     icon: ArrowPathIcon,
   },
   {
     name: 'Redeem Points',
     description:
-      'Arcu egestas dolor vel iaculis in ipsum mauris. Tincidunt mattis aliquet hac quis. Id hac maecenas ac donec pharetra eget.',
+      'Request to redeem your points. You receive $1 for every 100 points redeemed.',
     icon: CursorArrowRaysIcon,
   },
 ]
@@ -46,6 +47,7 @@ export default function Regular() {
   const [qrValue, setQrValue] = useState(null)
   const [qrLoading, setQrLoading] = useState(false)
   const triggerRef = useRef(null)
+  const [redeemOpen, setRedeemOpen] = useState(false)
 
   const fetchQr = useCallback(async () => {
     if (!user) return
@@ -71,6 +73,11 @@ export default function Regular() {
     // For Transfer Points open the ModalForm directly
     if (f.name === 'Transfer Points') {
       setTransferOpen(true);
+      return;
+    }
+    // For Redeem Points open the ModalForm directly
+    if (f.name === 'Redeem Points') {
+      setRedeemOpen(true);
       return;
     }
 
@@ -138,6 +145,59 @@ export default function Regular() {
       console.error('Transfer error', err);
       setMessageStatus('error');
       setMessage('Network error during transfer');
+    }
+  }
+
+  const handleRedeemSubmit = async (data) => {
+    const formFields = getTransactionFields('regular', 'redeem');
+    const payload = {};
+
+    formFields.forEach((f) => {
+      let value = data[f.name];
+
+      if (f.multiNumber) {
+        const str = typeof value === "string" ? value.trim() : "";
+        payload[f.name] = str === ""
+          ? [] // empty input → empty array
+          : str.split(/[\s,]+/)
+              .map(Number)
+              .filter(n => !isNaN(n));
+      }
+      else if (f.type === "number" || f.type === "price") {
+        payload[f.name] = value ? Number(value) : null;
+      }
+      else {
+        payload[f.name] = value ?? "";
+      }
+    });
+
+    try {
+      const res = await fetch(`${API_URL}/users/me/transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      console.log("RAW: ", JSON.stringify(result))
+
+      if (!res.ok) {
+        setMessageStatus('error');
+        setMessage(result.error || "Points redemption request failed");
+        return;
+      }
+
+      setMessageStatus('success');
+      setMessage("Successfully sent request to redeem points");
+      setRedeemOpen(false);
+      
+      // refresh profile to update points
+      if (reloadProfile) reloadProfile();
+    } catch (err) {
+      console.error("Network error:", err);
+      setMessageStatus('error');
+      setMessage('Network error during redemption');
     }
   }
 
@@ -280,6 +340,16 @@ export default function Regular() {
           { name: 'remark', label: 'Remark', required: false },
         ]}
         onSubmit={handleTransferSubmit}
+      />
+
+      {/* Redeem Points ModalForm */}
+      <ModalForm
+        open={redeemOpen}
+        setOpen={setRedeemOpen}
+        formTitle="Redeem Points"
+        formDescription="Redeem your points"
+        fields={getTransactionFields('regular', 'redeem')}
+        onSubmit={handleRedeemSubmit}
       />
     </div>
   )

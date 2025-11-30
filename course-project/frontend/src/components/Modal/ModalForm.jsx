@@ -142,7 +142,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                         {f.label}{f.required ? " *" : ""}
                                     </label>
 
-                                    {f.type === "select" ? (
+                                    {f.type === "select" &&
                                         <Select value={formData[f.name]} onValueChange={(value) => {
                                             setFormData(prev => ({ ...prev, [f.name]: value }));
                                             setErrors(prev => ({ ...prev, [f.name]: "" }));
@@ -151,21 +151,22 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                                 <SelectValue placeholder={`Select ${f.label}`} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {options[f.name]?.map(opt => (
+                                                {f.options?.map(opt => (
                                                     <SelectItem key={opt.value} value={opt.value}>
                                                         {opt.label}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                    ) : (
+                                    }
+                                    {f.type !== "select" &&
                                         <InputDefault
                                             type={f.type || "text"}
                                             name={f.name}
                                             value={formData[f.name]}
                                             onChange={handleChange}
                                         />
-                                    )}
+                                    }
 
                                     {errors[f.name] && (
                                         <span className="text-red-600 text-xs mt-1">

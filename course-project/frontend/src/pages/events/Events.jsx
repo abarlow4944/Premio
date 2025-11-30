@@ -263,10 +263,11 @@ export default function Events() {
                 setError(err.message || "Could not complete deletion")
             }
         }
+        setSuccess("Successfully completed deletion")
         setQuery(q => ({ ...q }));
         setSelectedEvents([]);
         setPendingDelete(null);
-        setSuccess("Successfully completed deletion")
+        
     };
 
     const handleDeleteSelected = (rows) => {

@@ -127,7 +127,7 @@ export default function Login() {
             </form>
             
             {error && (
-                <Message message={error} status="error" onClose={() => setError(null)}/>
+                <Message notCorner message={error} status="error" onClose={() => setError(null)}/>
             )}
             
             </div>

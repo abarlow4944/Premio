@@ -102,16 +102,6 @@ export default function Users() {
                 <p className="text-center text-sm text-space-indigo-500">
                     Register new users.
                 </p>
-
-                <div className="flex flex-col justify-center mx-auto w-[40vw] block min-h-[7vh]">
-                    {error && (
-                        <Message message={error} status="error"/>
-                    )}
-            
-                    {success && (
-                        <Message message={success} status="success"/>
-                    )}
-                </div>
             </div>
 
             {/* Register a User Form */}

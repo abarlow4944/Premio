@@ -175,11 +175,11 @@ export default function ProfileManagement() {
             </div>
 
         {error && (
-            <Message message={error} status="error" onClose={() => setError(null)}/>
+            <Message notCorner message={error} status="error" onClose={() => setError(null)}/>
         )}
 
         {success && (
-            <Message message={success} status="success" onClose={() => setSuccess(null)}/>
+            <Message notCorner message={success} status="success" onClose={() => setSuccess(null)}/>
         )}
 
         </div>

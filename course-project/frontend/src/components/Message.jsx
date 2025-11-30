@@ -1,7 +1,7 @@
 import { CheckCircleIcon, XCircleIcon} from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react';
 
-export default function Message({status, message, onClose}){
+export default function Message({notCorner, status, message, onClose}){
     const [fadeOut, setFadeOut] = useState(false);
     var colour
     var icon
@@ -41,9 +41,19 @@ export default function Message({status, message, onClose}){
         };
     }, []);
 
-    return (
-        <p className={`z-50 fixed absolute top-[10vh] right-[2vw] mt-4 text-md font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
-            {message}
-        </p>
-    )
+    if(notCorner){
+        return (
+            <p className={`z-50 mt-4 text-md font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
+                {message}
+            </p>
+        )
+    }
+    else{
+        return (
+            <p className={`z-50 fixed absolute top-[10vh] right-[2vw] mt-4 text-md font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
+                {message}
+            </p>
+        )
+    }
+
 }

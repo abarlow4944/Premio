@@ -41,9 +41,7 @@ export default function Users() {
     const [open, setOpen] = useState(false);
 
     // call fetchData each time query changes
-    useEffect(() => {        
-        setError("")
-        setSuccess("")
+    useEffect(() => {   
 
         // retrieve the user data by making a HTTP request
         try {

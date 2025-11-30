@@ -41,8 +41,6 @@ export default function Promotions() {
 
     // call fetchData each time query changes
     useEffect(() => {
-        setError("")
-        setSuccess("")
 
         // retrieve the promotions data by making a HTTP request
         try {

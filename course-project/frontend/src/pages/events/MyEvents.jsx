@@ -83,8 +83,6 @@ export default function MyEvents() {
 
     // call fetchData each time query changes
     useEffect(() => {
-        setError("")
-        setSuccess("")
         // retrieve the user data by making a HTTP request
         try {
             const fetchData = async () => {

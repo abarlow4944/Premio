@@ -3,7 +3,7 @@ import ModalForm from '@/components/Modal/ModalForm'
 import Message from '@/components/Message'
 import { useUser } from '../../contexts/UserContexts'
 import QRCode from 'react-qr-code'
-import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/UI/Card'
 import {getTransactionFields} from "@/components/Modal/FormFields/TransactionFields";
 
@@ -48,6 +48,9 @@ export default function Regular() {
   const [qrLoading, setQrLoading] = useState(false)
   const triggerRef = useRef(null)
   const [redeemOpen, setRedeemOpen] = useState(false)
+  const [pendingRedemptions, setPendingRedemptions] = useState([])
+  const [pendingRedemptionsOpen, setPendingRedemptionsOpen] = useState(false)
+  const [currentRedemptionIndex, setCurrentRedemptionIndex] = useState(0)
 
   const fetchQr = useCallback(async () => {
     if (!user) return
@@ -67,6 +70,31 @@ export default function Regular() {
     }
   }, [user])
 
+  // Fetch pending redemptions on component mount
+  useEffect(() => {
+    const fetchPendingRedemptions = async () => {
+      try {
+        const params = new URLSearchParams();
+        params.append('type', 'redemption');
+        
+        const res = await fetch(`${API_URL}/users/me/transactions?${params}`, {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) throw new Error('Failed to fetch redemptions');
+        
+        const data = await res.json();
+        // Filter for pending (unprocessed) redemptions
+        const pending = data.results.filter(t => !t.processed);
+        setPendingRedemptions(pending);
+      } catch (err) {
+        console.error('Error fetching pending redemptions:', err);
+      }
+    };
+    
+    fetchPendingRedemptions();
+  }, [API_URL])
+
 
   const openFeature = useCallback((f, target) => {
     triggerRef.current = target
@@ -78,6 +106,12 @@ export default function Regular() {
     // For Redeem Points open the ModalForm directly
     if (f.name === 'Redeem Points') {
       setRedeemOpen(true);
+      return;
+    }
+    // For Pending Redemptions open the gallery modal
+    if (f.name === 'Pending Redemptions') {
+      setPendingRedemptionsOpen(true);
+      setCurrentRedemptionIndex(0);
       return;
     }
 
@@ -194,6 +228,24 @@ export default function Regular() {
       
       // refresh profile to update points
       if (reloadProfile) reloadProfile();
+      
+      // refetch pending redemptions
+      try {
+        const params = new URLSearchParams();
+        params.append('type', 'redemption');
+        
+        const res = await fetch(`${API_URL}/users/me/transactions?${params}`, {
+          credentials: 'include'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          const pending = data.results.filter(t => !t.processed);
+          setPendingRedemptions(pending);
+        }
+      } catch (err) {
+        console.error('Error refetching pending redemptions:', err);
+      }
     } catch (err) {
       console.error("Network error:", err);
       setMessageStatus('error');
@@ -330,10 +382,101 @@ export default function Regular() {
         </div>
       )}
 
+      {/* Pending Redemptions Gallery Modal */}
+      {pendingRedemptionsOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pending-redemptions-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          {/* Faded background */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            aria-hidden="true"
+            onClick={() => setPendingRedemptionsOpen(false)}
+          />
+
+          {/* Modal content */}
+          <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl">
+            <button
+              type="button"
+              onClick={() => setPendingRedemptionsOpen(false)}
+              aria-label="Close dialog"
+              className="absolute top-4 right-4 rounded-md p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition duration-150 group/button"
+            >
+              <XMarkIcon className="size-5 transition-transform duration-150 group-hover/button:rotate-90" />
+            </button>
+            <CardHeader className="pt-6 pr-12">
+              <CardTitle id="pending-redemptions-title">Pending Redemption Requests</CardTitle>
+              <CardDescription>
+                {pendingRedemptions.length === 0 ? 'No pending redemptions' : `Redemption ${currentRedemptionIndex + 1} of ${pendingRedemptions.length}`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 pb-6">
+              {pendingRedemptions.length === 0 ? (
+                <p className="text-sm text-gray-700 text-center">You have no pending redemption requests.</p>
+              ) : (
+                <>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-4 bg-white rounded-md border border-gray-200">
+                      <QRCode 
+                        value={JSON.stringify({
+                          id: pendingRedemptions[currentRedemptionIndex].id,
+                          utorid: pendingRedemptions[currentRedemptionIndex].utorid,
+                          amount: pendingRedemptions[currentRedemptionIndex].amount,
+                          type: 'redemption'
+                        })} 
+                        size={192} 
+                        fgColor="#2B2D42" 
+                      />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-sm font-medium text-gray-700">
+                        Points: {pendingRedemptions[currentRedemptionIndex].amount}
+                      </p>
+                      {pendingRedemptions[currentRedemptionIndex].remark && (
+                        <p className="text-xs text-gray-500">
+                          {pendingRedemptions[currentRedemptionIndex].remark}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Navigation buttons */}
+                  {pendingRedemptions.length > 1 && (
+                    <div className="flex justify-center items-center gap-8 mt-6">
+                      <button
+                        onClick={() => setCurrentRedemptionIndex(Math.max(0, currentRedemptionIndex - 1))}
+                        disabled={currentRedemptionIndex === 0}
+                        className="p-2 rounded-full border border-gray-300 text-gray-700 hover:text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        aria-label="Previous redemption"
+                      >
+                        <ChevronLeftIcon className="size-6" />
+                      </button>
+                      <button
+                        onClick={() => setCurrentRedemptionIndex(Math.min(pendingRedemptions.length - 1, currentRedemptionIndex + 1))}
+                        disabled={currentRedemptionIndex === pendingRedemptions.length - 1}
+                        className="p-2 rounded-full border border-gray-300 text-gray-700 hover:text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                        aria-label="Next redemption"
+                      >
+                        <ChevronRightIcon className="size-6" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Transfer ModalForm */}
       <ModalForm
         open={transferOpen}
         setOpen={setTransferOpen}
+        formTitle="Transfer Points"
+        formDescription="Transfer your points to another user"
         fields={[
           { name: 'recipientUtorid', label: 'Recipient UTORid', required: true },
           { name: 'amount', label: 'Amount', type: 'number', required: true },
@@ -347,7 +490,7 @@ export default function Regular() {
         open={redeemOpen}
         setOpen={setRedeemOpen}
         formTitle="Redeem Points"
-        formDescription="Redeem your points"
+        formDescription="Make a point redemption request"
         fields={getTransactionFields('regular', 'redeem')}
         onSubmit={handleRedeemSubmit}
       />

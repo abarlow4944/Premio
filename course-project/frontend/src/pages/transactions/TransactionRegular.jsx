@@ -3,17 +3,13 @@ import DataTable from "../../components/DataTable/DataTable";
 import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect, useMemo } from "react";
 import { useUser } from '../../contexts/UserContexts';
-import { Button } from "../../components/ui/button";
-import {getTransactionFields} from "../../components/Modal/FormFields/TransactionFields";
 
 export default function TransactionPage() {
     const { visualRole, role } = useUser();
     const currentRole = visualRole || role;
-    const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [globalMaxes, setGlobalMaxes] = useState(null);
-    const [modalMode, setModalMode] = useState(null);
     const API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -38,6 +34,11 @@ export default function TransactionPage() {
                 Object.entries(query).forEach(([key, val]) => {
                     if (val) params.append(key, val);
                 });
+
+                // If using visual role, pass it to backend so filtering reflects visual role
+                if (visualRole && visualRole !== role) {
+                    params.append('asRole', visualRole);
+                }
 
                 const res = await fetch(`${API_URL}/users/me/transactions?${params}`, {
                     method: "GET",
@@ -117,79 +118,6 @@ export default function TransactionPage() {
                     View your transaction history.
                 </p>
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-center mt-6 gap-3">
-                {(
-                <Button
-                    className="bg-[var(--color-strawberry-red-500)] text-white"
-                    onClick={() => {
-                    setModalMode("redeem"); 
-                    setOpen(true);
-                    }}
-                >
-                    Redeem Transaction
-                </Button>
-                )}
-            </div>
-
-            {/* Modal */}
-            {modalMode && (
-            <ModalForm
-                open={open}
-                setOpen={setOpen}
-                fields={getTransactionFields(currentRole, modalMode)}
-                onSubmit={async (data) => {
-                    const formFields = getTransactionFields(currentRole, modalMode);
-                    const payload = {};
-
-                    formFields.forEach((f) => {
-                        let value = data[f.name];
-
-                        if (f.multiNumber) {
-                            const str = typeof value === "string" ? value.trim() : "";
-                            payload[f.name] = str === ""
-                                ? [] // empty input → empty array
-                                : str.split(/[\s,]+/)
-                                    .map(Number)
-                                    .filter(n => !isNaN(n));
-                        }
-                        else if (f.type === "number" || f.type === "price") {
-                            payload[f.name] = value ? Number(value) : null; // or null if you prefer
-                        }
-                        else {
-                            payload[f.name] = value ?? "";
-                        }
-
-
-                    });
-
-                    try {
-                        const res = await fetch(`${API_URL}/users/me/transactions`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            credentials: "include",
-                            body: JSON.stringify(payload),
-                        });
-
-                        const result = await res.json();
-                        console.log("RAW: ", JSON.stringify(result))
-
-                        if (!res.ok) {
-                            console.error("Error creating transaction:", result.error);
-                            return;
-                        }
-
-                        setRows(prev => [{ ...result }, ...prev.map(r => ({ ...r }))]);
-                        setTotalCount(prev => prev + 1);
-                        setOpen(false);
-                        setModalMode(null); // reset after closing
-                    } catch (err) {
-                        console.error("Network error:", err);
-                    }
-                }}
-            />
-            )}
 
             {/* Table */}
             <DataTable

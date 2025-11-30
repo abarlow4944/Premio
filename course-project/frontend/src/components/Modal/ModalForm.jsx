@@ -128,7 +128,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
 
                     <CardHeader className="bg-white border-b border-gray-100 py-5 px-6 flex-shrink-0">
                         <CardTitle className="text-xl font-bold text-space-indigo-600">
-                            {modalType ? `Enter ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} Details` : 'Form'}
+                            {formTitle || (modalType ? `Enter ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} Details` : 'Form')}
                         </CardTitle>
                         {formDescription && (
                             <p className="text-sm text-space-indigo-500 mt-1">

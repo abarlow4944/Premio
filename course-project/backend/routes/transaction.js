@@ -426,7 +426,7 @@ router.get("/:transactionId", async(req, res) =>{
             },
             include: {
                 promotions: {
-                    select: {id: true},
+                    select: {id: true, name: true},
                 }
             }
         })
@@ -591,6 +591,11 @@ router.patch("/:transactionId/processed", async(req, res) => {
         }
         if(transaction.processed === true){
             return res.status(400).json({error: "Transaction has already been processed"})
+        }
+        
+        // check if the cashier is trying to process their own redemption
+        if(transaction.createdBy === req.user.utorid){
+            return res.status(403).json({error: "Cannot process your own redemption request"})
         }
 
         // process the transaction

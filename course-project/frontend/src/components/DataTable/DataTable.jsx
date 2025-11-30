@@ -3,9 +3,11 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon, UserPlusIcon, GiftIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon } from '@heroicons/react/24/outline'
 import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
+import ModalForm from "../Modal/ModalForm";
+import { getFilterFields } from "../Modal/FormFields/TransactionFields";
 import Message from '../Message';
 
 
@@ -35,6 +37,9 @@ export default function DataTable({
 
     const [rowSelection, setRowSelection] = useState({});
     const [columnFilters, setColumnFilters] = useState({});
+    const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const [currentFilterKey, setCurrentFilterKey] = useState(null); 
+
     const stableMaxRef = useRef({});
 
     // for editable rows
@@ -525,7 +530,7 @@ export default function DataTable({
                             {hg.headers.map((header) => {
                                 const def = header.column.columnDef;
                                 const accessorKey = def.accessorKey;
-                                const hasSearch = accessorKey && (def.enableSearch || def.enableFilter || def.filterType === 'select' || def.filterType === 'range');
+                                const hasSearch = accessorKey && (def.enableSearch || def.enableFilter || def.filterType === 'select' || def.filterType === 'range' || def.filterType === 'button');
                                 return (
                                     <th key={header.id} className="px-4 py-2 text-sm font-medium text-platinum-500 border-b">
                                         {hasSearch ? (
@@ -604,6 +609,51 @@ export default function DataTable({
                                                         </div>
                                                     )
                                                 })()
+                                            ) : def.filterType === "button" ? (
+                                                (() => {
+                                                    return (
+                                                    <>  
+                                                        <Button variant="outline" onClick={() => {
+                                                            setCurrentFilterKey(accessorKey);
+                                                            setFilterModalOpen(true);
+                                                        }}>Filter</Button>
+
+                                                        <ModalForm
+                                                            open={filterModalOpen}
+                                                            setOpen={setFilterModalOpen}
+                                                            modalType="Point"
+                                                            fields={getFilterFields(accessorKey)}
+                                                            currentFilterKey={currentFilterKey}
+                                                            setColumnFilters={setColumnFilters}
+                                                            onSubmit={async (data) => {
+                                                                const formFields = getFilterFields(accessorKey);
+                                                                const payload = {};
+
+                                                                formFields.forEach((f) => {
+                                                                    let value = data[f.name];
+
+                                                                    if (f.type === "number") {
+                                                                        payload[f.name] = value ? Number(value) : 0;
+                                                                    } 
+                                                                    else {
+                                                                        payload[f.name] = value ?? "";
+                                                                    }
+                                                                });
+
+                                                                setColumnFilters(prev => ({
+                                                                    ...prev,
+                                                                    [accessorKey]: {
+                                                                    operator: data.operator,
+                                                                    amount: Number(data.amount)
+                                                                    }
+                                                                }));
+                                                                
+                                                                setFilterModalOpen(false);
+                                                            }}
+                                                        />
+                                                    </>);
+                                                })()
+                                                
                                             ) : (
                                                 <input
                                                     type="text"

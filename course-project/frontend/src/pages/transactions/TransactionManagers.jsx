@@ -50,9 +50,18 @@ export default function TransactionPage() {
                 const params = new URLSearchParams();
 
                 Object.entries(query).forEach(([key, val]) => {
-                    if (val) params.append(key, val);
+                     if (val && typeof val === "object") {
+                        // flatten objects into separate params
+                        Object.entries(val).forEach(([subKey, subVal]) => {
+                        if (subVal !== undefined && subVal !== null) {
+                            params.append(subKey, subVal);
+                        }
+                        });
+                    } else if (val !== undefined && val !== null) {
+                        params.append(key, val);
+                    }
                 });
-
+                
                 const res = await fetch(`${API_URL}/transactions?${params}`, {
                     method: "GET",
                     credentials: "include",

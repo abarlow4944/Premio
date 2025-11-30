@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
   Box,
+  Typography,
   Modal,
+  IconButton
 } from '@mui/material';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { InputDefault } from '../UI/Input';
 
 const modalStyle = {
@@ -20,7 +22,7 @@ const modalStyle = {
 
 
 
-export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit, options = {} }) {
+export default function ModalForm({ formTitle, formDescription, modalType, fields = [], open, setOpen, onSubmit, currentFilterKey, setColumnFilters, options = {} }) {
     const [errors, setErrors] = useState({});
 
     const dataFields = Object.fromEntries(
@@ -44,9 +46,10 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
         e.preventDefault();
 
         const newErrors = {};
-        fields.forEach(field => {
-            if (field.required && !formData[field.name].trim()) {
-                newErrors[field.name] = `${field.label} is required`;
+        fields.forEach(f => {
+            const value = formData[f.name];
+            if (f.required && (value === "" || value === null || value === undefined)) {
+                newErrors[f.name] = `${f.label} is required`;
             }
         });
 
@@ -132,64 +135,109 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                 {formDescription}
                             </p>
                         )}
+
                     </CardHeader>
-
-                    <CardContent className="px-6 py-6 overflow-y-auto flex-1">
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    <CardContent sx={{ p: 3, position: "relative" }}>
+                        <form onSubmit={handleSubmit}>
                             {fields.map(f => (
-                                
-                                <div key={f.name} className="flex flex-col">
-                                    <label className="text-sm font-semibold text-strawberry-red-600 mb-2">
-                                        {f.label}{f.required ? " *" : ""}
-                                    </label>
+                                <div key={f.name} style={{ marginBottom: 16 }}>
+                                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                    {f.label}{f.required ? " *" : ""}
+                                </Typography>
 
-                                    {f.type === "select" &&
-                                        <Select value={formData[f.name]} onValueChange={(value) => {
-                                            setFormData(prev => ({ ...prev, [f.name]: value }));
-                                            setErrors(prev => ({ ...prev, [f.name]: "" }));
-                                        }}>
-                                            <SelectTrigger className="w-full border-gray-300 text-gray-900 focus:border-strawberry-red-500 focus:ring-strawberry-red-500">
-                                                <SelectValue placeholder={`Select ${f.label}`} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {options[f.name]?.map(opt => (
-                                                    
-                                                    <SelectItem key={opt.value} value={opt.value}>
-                                                        {opt.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    }
-                                    {f.type !== "select" &&
-                                        <InputDefault
-                                            type={f.type || "text"}
+
+                                {f.type === "select" ? (
+                                    <SelectField
+                                        field={f}
+                                        value={formData[f.name]}
+                                        onChange={v => setFormData(prev => ({ ...prev, [f.name]: v }))}
+                                        options={options}
+                                    />
+                                ) : f.type === "radio" ? (
+                                    <div>
+                                    {f.options.map(opt => (
+                                        <label key={opt.value} style={{ marginRight: 12 }}>
+                                        <input
+                                            type="radio"
                                             name={f.name}
-                                            value={formData[f.name]}
-                                            onChange={handleChange}
-                                            readOnly={f.readOnly}
+                                            value={opt.value}
+                                            checked={formData[f.name] === opt.value}
+                                            onChange={(e) =>
+                                            setFormData(prev => ({ ...prev, [f.name]: e.target.value }))
+                                            }
                                         />
-                                    }
-
-                                    {errors[f.name] && (
-                                        <span className="text-red-600 text-xs mt-1">
-                                            {errors[f.name]}
-                                        </span>
-                                    )}
+                                        {opt.label}
+                                        </label>
+                                    ))}
+                                    </div>
+                                ) : (
+                                    <InputDefault
+                                    type={f.type || "text"}
+                                    name={f.name}
+                                    value={formData[f.name]}
+                                    onChange={handleChange}
+                                    placeholder={f.multiNumber ? "Enter numbers separated by commas or spaces" : ""}
+                                    />
+                                )}
+                                {errors[f.name] && (
+                                    <Typography color="error" variant="caption">
+                                    {errors[f.name]}
+                                    </Typography>
+                                )}
                                 </div>
                             ))}
 
-                            <Button 
-                                type="submit"
-                                className="w-full mt-6 bg-strawberry-red-500 text-white hover:bg-strawberry-red-600"
-                            >
+                            <div className="flex justify-end gap-2 mt-4">
+                                {modalType === "filter" && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                    const clearedData = {};
+                                    fields.forEach(f => (clearedData[f.name] = ""));
+                                    setFormData(clearedData);
+
+                                    if (currentFilterKey) {
+                                        setColumnFilters(prev => ({
+                                        ...prev,
+                                        [currentFilterKey]: undefined,
+                                        }));
+                                    }
+
+                                    setOpen(false);
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                                )}
+
+                                <Button variant="default" type="submit" fullWidth sx={{ mt: 1 }}>
                                 Submit
-                            </Button>
-                        </form>
+                                </Button>
+                            </div>
+                            </form>
+
                     </CardContent>
                 </Card>
             </Box>
         </Modal>
         </div>
     );
+}
+
+function SelectField({ field, value, onChange, options }) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger>
+        <SelectValue placeholder={`Select ${field.label}`} />
+      </SelectTrigger>
+      <SelectContent>
+        {options[field.name]?.map(opt => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
 }

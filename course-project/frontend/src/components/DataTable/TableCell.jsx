@@ -100,7 +100,6 @@ export default function TableCell({ row, column, table }) {
                     </SelectContent>
                 </Select>
             )
-
     }
 
 

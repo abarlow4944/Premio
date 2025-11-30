@@ -127,7 +127,8 @@ export function  getTransactionColumns(role) {
         {
           accessorKey: "amount",
           header: "Points",
-          enableSorting: true
+          enableSorting: true,
+          filterType: "button",
         },
     ];
   }

@@ -120,11 +120,11 @@ export default function ResetPassword() {
             </div>
             
             {error && (
-                <Message message={error} status="error" onClose={() => setError(null)}/>
+                <Message notCorner message={error} status="error" onClose={() => setError(null)}/>
             )}
 
             {success && (
-                <Message message={success} status="success" onClose={() => setError(null)}/>
+                <Message notCorner message={success} status="success" onClose={() => setError(null)}/>
             )}
             
             </div>

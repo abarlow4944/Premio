@@ -136,7 +136,6 @@ export default function TransactionPage() {
             <ModalForm
                 open={open}
                 setOpen={setOpen}
-                modalType="transactions"
                 fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
                     const formFields = getTransactionFields(currentRole, modalMode);
@@ -153,8 +152,8 @@ export default function TransactionPage() {
                                     .map(Number)
                                     .filter(n => !isNaN(n));
                         }
-                        else if (f.type === "number") {
-                            payload[f.name] = value ? Number(value) : 0; // or null if you prefer
+                        else if (f.type === "number" || f.type === "price") {
+                            payload[f.name] = value ? Number(value) : null; // or null if you prefer
                         }
                         else {
                             payload[f.name] = value ?? "";

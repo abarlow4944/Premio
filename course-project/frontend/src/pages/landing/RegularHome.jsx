@@ -272,7 +272,6 @@ export default function Regular() {
 
       {/* Transfer ModalForm */}
       <ModalForm
-        modalType="transfer"
         open={transferOpen}
         setOpen={setTransferOpen}
         fields={[

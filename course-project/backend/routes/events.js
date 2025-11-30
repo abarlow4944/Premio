@@ -269,7 +269,29 @@ router.get("/:eventId", async(req, res) =>{
 
 router.patch("/:eventId", async(req, res) =>{
     const user = req.user;
-    if (!user || (user.role !== "superuser" && user.role !== "manager")){ // clearance
+    if (!user){ // must be authenticated
+        return res.status(403).json({ "error": "Not authorized" });
+    }
+
+    // Check authorization: manager/superuser OR organizer of the event
+    let authorized = false;
+    if (user.role === "superuser" || user.role === "manager") {
+        authorized = true;
+    } else {
+        // Check if user is an organizer of this event
+        const isOrganizer = await prisma.event.findFirst({
+            where: {
+                id: parseInt(req.params.eventId, 10),
+                organizers: { some: { utorid: user.utorid } },
+            },
+            select: { id: true },
+        });
+        if (isOrganizer) {
+            authorized = true;
+        }
+    }
+
+    if (!authorized) {
         return res.status(403).json({ "error": "Not authorized" });
     }
 
@@ -347,7 +369,6 @@ router.patch("/:eventId", async(req, res) =>{
                 return res.status(400).json({ "error": "Cannot edit an event start/end time in the past." });
             }
             if((providedStart && providedEnd === null) && (providedStart > event.endTime)){
-                console.log("print bruh")
                 return res.status(400).json({ "error": "Event start time cannot be after the end time." });
             }
             if((providedEnd && providedStart === null) && (providedEnd < event.startTime)){

@@ -80,16 +80,6 @@ export default function TransactionPage() {
                 <p className="text-center text-sm text-space-indigo-500">
                     Create any transactions in the system.
                 </p>
-
-                <div className="flex flex-col justify-center mb-4 mx-auto w-[40vw] block min-h-[7vh]">
-                    {error && (
-                        <Message message={error} status="error"/>
-                    )}
-            
-                    {success && (
-                        <Message message={success} status="success"/>
-                    )}
-                </div>
             </div>
 
 

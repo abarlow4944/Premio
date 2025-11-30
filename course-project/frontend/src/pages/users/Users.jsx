@@ -38,14 +38,10 @@ export default function Users() {
     }
 
     // modal stuff
-    const[isModalOpen, setIsModalOpen] = useState(false);
-    const[modalText, setModalText] = useState("");
     const [open, setOpen] = useState(false);
 
     // call fetchData each time query changes
-    useEffect(() => {        
-        setError("")
-        setSuccess("")
+    useEffect(() => {   
 
         // retrieve the user data by making a HTTP request
         try {
@@ -116,12 +112,6 @@ export default function Users() {
         setSuccess("Successfully updated user")
     }
 
-    // modal helper functions
-    function closeModal(){
-        setIsModalOpen(false);
-        setModalText("");
-    }
-
     // user registration
     const handleUserRegistration = async (formData) => {
         setError("")
@@ -189,29 +179,30 @@ export default function Users() {
             {/* Page Title */}
             <div className="mb-[5vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>
-                <p className="text-center text-sm text-space-indigo-500">
+                <p className="text-center text-sm text-space-indigo-500 mt-">
                     View and manage all users in the system.
                 </p>
             </div>
 
+            {/* Register User Button */}
             <Button
-                    className="bg-[var(--color-strawberry-red-500)] text-white"
-                    onClick={() => {
-                        setOpen(true);
-                    }}
-                >
-                    Register a User
+                className="bg-strawberry-red-500 text-platinum-500"
+                onClick={() => {
+                    setOpen(true);
+                }}
+            >
+                Register a User
             </Button>
 
             {/* Register a User Modal */}
-                <ModalForm
-                    open={open}
-                    setOpen={setOpen}
-                    formTitle="Register a User"
-                    formDescription="Enter the new user's details"
-                    fields={getRegisterUserFields(role)}
-                    onSubmit={handleUserRegistration}
-                />
+            <ModalForm
+                open={open}
+                setOpen={setOpen}
+                formTitle="Register a User"
+                formDescription="Enter the new user's details"
+                fields={getRegisterUserFields(role)}
+                onSubmit={handleUserRegistration}
+            />
             
 
             {/* Table */}
@@ -222,9 +213,6 @@ export default function Users() {
                 query={query} // the filters we are applying
                 setQuery={setQuery}
                 error={error}
-                onCreate={role == "manager" ? () => {
-                        // placeholder for creating a new promotion
-                } : undefined}
                 success={success}
                 onRowSave={handleRowSaved} // for editing rows
             />

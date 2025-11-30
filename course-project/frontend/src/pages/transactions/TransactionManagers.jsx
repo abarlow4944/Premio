@@ -22,6 +22,8 @@ export default function TransactionPage() {
     const[isModalOpen, setIsModalOpen] = useState(false);
     const[modalText, setModalText] = useState("");
     const columns = useMemo(() => getTransactionColumns(role), [role]);
+    const [formTitle, setFormTitle] = useState("")
+    const [formDescription, setFormDescription] = useState("")
     
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -235,26 +237,15 @@ export default function TransactionPage() {
                 </p>
             </div>
 
-            {/* Success/Error Messages Overlay */}
-            {error && (
-                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-                    <Message message={error} status="error" onClose={() => setError("")}/>
-                </div>
-            )}
-            
-            {success && (
-                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-                    <Message message={success} status="success" onClose={() => setSuccess("")}/>
-                </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex justify-start mt-6 gap-3">
                 {(
                 <Button
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
-                    setModalMode("create"); 
+                    setModalMode("create");
+                    setFormDescription("Enter the new transaction's details")
+                    setFormTitle("Create a Transaction");  
                     setOpen(true);
                     }}
                 >
@@ -267,6 +258,8 @@ export default function TransactionPage() {
                     className="bg-[var(--color-strawberry-red-500)] text-white"
                     onClick={() => {
                     setModalMode("adjust"); 
+                    setFormDescription("Enter the adjustment transaction's details")
+                    setFormTitle("Adjust a Transaction"); 
                     setOpen(true);
                     }}
                 >
@@ -280,9 +273,12 @@ export default function TransactionPage() {
             <ModalForm
                 open={open}
                 setOpen={setOpen}
-                modalType="transactions"
+                formTitle={formTitle}
+                formDescription={formDescription}
                 fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
+                    setError("")
+                    setSuccess("")
                     const formFields = getTransactionFields(currentRole, modalMode);
                     const payload = {};
 
@@ -292,17 +288,16 @@ export default function TransactionPage() {
                         if (f.multiNumber) {
                             payload[f.name] = value ? value : [];
                         }
-                        else if (f.type === "number") {
-                            payload[f.name] = value ? Number(value) : 0; // or null if you prefer
+                        else if (f.type === "number" || f.type === "price") {
+                            payload[f.name] = value ? Number(value) : 0;
                         }
                         else {
                             payload[f.name] = value ?? "";
                         }
-
-
                     });
 
                     try {
+                        console.log(payload)
                         const res = await fetch(`${API_URL}/transactions`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -314,6 +309,7 @@ export default function TransactionPage() {
                         console.log("RAW: ", JSON.stringify(result))
 
                         if (!res.ok) {
+                            setError(`Could not create transaction: ${result.error}` || "Could not create transaction")
                             console.error("Error creating transaction:", result.error);
                             return;
                         }
@@ -325,6 +321,7 @@ export default function TransactionPage() {
                     } catch (err) {
                         console.error("Network error:", err);
                     }
+                    setSuccess("Successfully created transaction")
                 }}
             />
             )}
@@ -351,6 +348,7 @@ export default function TransactionPage() {
                 open={isModalOpen}
                 onClose={closeModal}
                 text={modalText}
+                title={"Transaction Details"}
             />
         </div>
     );

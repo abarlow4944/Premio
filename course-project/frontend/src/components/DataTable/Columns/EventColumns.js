@@ -17,93 +17,175 @@ function formatDateTime(iso) {
 }
 
 // Viewable columns depends on user role
-// regular => cannot see published column 
-// manager/superuser => can see published column
-export function getEventColumns(role) {
+// regular => limited columns (name, description, location, startTime, endTime, capacity)
+// manager/superuser => all columns including organizers, pointsAwarded, pointsRemain, published
+// organizer => same as regular but with edit capability
+export function getEventColumns(role, allowEditing = false) {
   const isManager = role === 'manager' || role === 'superuser';
-  if (!isManager) {
+  if (!isManager && !allowEditing) {
     return [
       { accessorKey: 'name', header: 'Name', enableSorting: true, enableSearch: true  },
       { accessorKey: 'description', header: 'Description', enableSorting: true, enableSearch: true  },
       { accessorKey: 'location', header: 'Location', enableSorting: true, enableSearch: true  },
       { accessorKey: 'startTime', header: 'Start Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.startTime) },
-      { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) },
-      { accessorKey: 'capacity', header: 'Capacity', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.capacity ?? '—' },
-      { accessorKey: 'points', header: 'Points', enableSorting: true, filterType: 'range', cell: ({ row }) => row.original.points ?? 0 },
+      { accessorKey: 'endTime', header: 'End Time', enableSorting: true, cell: ({ row }) => formatDateTime(row.original.endTime) }
     ];
   }
-  return [
-    { 
-      accessorKey: 'name', 
-      header: 'Name', 
-      enableSorting: true,
-      enableSearch: true,
-      editableCell: TableCell,
-      editType:"text",
-    },
-    { 
-      accessorKey: 'description', 
-      header: 'Description', 
-      enableSorting: true, 
-      enableSearch: true, 
-      editableCell: TableCell,
-      editType: "text"
-    },
-    { 
-      accessorKey: 'location', 
-      header: 'Location', 
-      enableSorting: true,
-      editableCell: TableCell,
-      editType:"text",
-      enableSearch: true
-    },
-    { 
-      accessorKey: 'startTime', 
-      header: 'Start Time', 
-      enableSorting: true, 
-      cell: ({ row }) => formatDateTime(row.original.startTime),
-      editableCell: TableCell,
-      editType: "date",
-    },
-    { 
-      accessorKey: 'endTime', 
-      header: 'End Time', 
-      enableSorting: true, 
-      cell: ({ row }) => formatDateTime(row.original.endTime),
-      editableCell: TableCell,
-      editType: "date",
-    },
-    { 
-      accessorKey: 'capacity', 
-      header: 'Capacity', 
-      enableSorting: true, 
-      cell: ({ row }) => row.original.capacity ?? '—',
-      editableCell: TableCell,
-      editType: "text",
-      filterType: 'range'  
-    },
-    { 
-      accessorKey: 'points', 
-      header: 'Points', 
-      enableSorting: true, 
-      cell: ({ row }) => row.original.points ?? 0,
-      editableCell: TableCell,
-      editType: "text",
-      filterType: 'range'  
-    },
-    { 
-      accessorKey: 'published', 
-      header: 'Published', 
-      enableSorting: true,
-      editableCell: TableCell,
-      editType: "select",
-      filterType: 'select',
-      filterOptions: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ],
-    },
-  ];
+
+  // For organizers editing their own events - same columns as regular users but editable
+  if (allowEditing && !isManager) {
+    return [
+      { 
+        accessorKey: 'name', 
+        header: 'Name', 
+        enableSorting: true,
+        enableSearch: true,
+        editableCell: TableCell,
+        editType:"text",
+      },
+      { 
+        accessorKey: 'description', 
+        header: 'Description', 
+        enableSorting: true,
+        enableSearch: true,
+        editableCell: TableCell,
+        editType:"text",
+      },
+      { 
+        accessorKey: 'location', 
+        header: 'Location', 
+        enableSorting: true,
+        editableCell: TableCell,
+        editType:"text",
+        enableSearch: true
+      },
+      { 
+        accessorKey: 'startTime', 
+        header: 'Start Time', 
+        enableSorting: true, 
+        cell: ({ row }) => formatDateTime(row.original.startTime),
+        editableCell: TableCell,
+        editType: "date",
+      },
+      { 
+        accessorKey: 'endTime', 
+        header: 'End Time', 
+        enableSorting: true, 
+        cell: ({ row }) => formatDateTime(row.original.endTime),
+        editableCell: TableCell,
+        editType: "date",
+      },
+      { 
+        accessorKey: 'capacity', 
+        header: 'Capacity', 
+        enableSorting: true, 
+        cell: ({ row }) => row.original.capacity ?? '—',
+        editableCell: TableCell,
+        editType: "text",
+        filterType: 'range'  
+      },
+      { 
+        accessorKey: 'pointsRemain', 
+        header: 'Points Remain', 
+        enableSorting: true, 
+        cell: ({ row }) => row.original.pointsRemain ?? '—',
+        filterType: 'range'  
+      },
+    ];
+  }
+
+  // For managers/superusers - full view with all columns
+  if (isManager) {
+    return [
+      { 
+        accessorKey: 'name', 
+        header: 'Name', 
+        enableSorting: true,
+        enableSearch: true,
+        editableCell: TableCell,
+        editType:"text",
+      },
+      { 
+        accessorKey: 'description', 
+        header: 'Description', 
+        enableSorting: true,
+        enableSearch: true,
+        editableCell: TableCell,
+        editType:"text",
+      },
+      { 
+        accessorKey: 'location', 
+        header: 'Location', 
+        enableSorting: true,
+        editableCell: TableCell,
+        editType:"text",
+        enableSearch: true
+      },
+      { 
+        accessorKey: 'startTime', 
+        header: 'Start Time', 
+        enableSorting: true, 
+        cell: ({ row }) => formatDateTime(row.original.startTime),
+        editableCell: TableCell,
+        editType: "date",
+      },
+      { 
+        accessorKey: 'endTime', 
+        header: 'End Time', 
+        enableSorting: true, 
+        cell: ({ row }) => formatDateTime(row.original.endTime),
+        editableCell: TableCell,
+        editType: "date",
+      },
+      { 
+        accessorKey: 'capacity', 
+        header: 'Capacity', 
+        enableSorting: true, 
+        cell: ({ row }) => row.original.capacity ?? '—',
+        editableCell: TableCell,
+        editType: "text",
+        filterType: 'range'  
+      },
+      { 
+        accessorKey: 'pointsRemain', 
+        header: 'Points Remain', 
+        enableSorting: true, 
+        cell: ({ row }) => row.original.pointsRemain ?? '—',
+        filterType: 'range'  
+      },
+      { 
+        accessorKey: 'pointsAwarded', 
+        header: 'Points Awarded', 
+        enableSorting: true, 
+        cell: ({ row }) => row.original.pointsAwarded ?? 0,
+        filterType: 'range'  
+      },
+      { 
+        accessorKey: 'points', 
+        header: 'Total Points', 
+        enableSorting: true,
+        cell: ({ row }) => {
+          const total = (row.original.pointsRemain ?? 0) + (row.original.pointsAwarded ?? 0);
+          return total;
+        },
+        editableCell: TableCell,
+        editType: "text",
+        filterType: 'range'
+      },
+      { 
+        accessorKey: 'published', 
+        header: 'Published', 
+        enableSorting: true,
+        editableCell: TableCell,
+        editType: "select",
+        filterType: 'select',
+        filterOptions: [
+          { label: 'True', value: 'true' },
+          { label: 'False', value: 'false' },
+        ],
+      },
+    ];
+  }
 }
 
 export const eventColumns = getEventColumns('regular');

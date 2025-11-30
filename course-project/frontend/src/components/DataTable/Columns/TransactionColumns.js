@@ -7,6 +7,21 @@ const relatedTxCache = {};
 
 function SenderReceiverCell({ row }) {
   const t = row.original || {};
+  
+  // For event transactions, show who it was awarded to (if user is organizer) or who awarded it (if user is guest)
+  if (t.type === 'event') {
+    const currentUser = t.utorid; // The recipient in the transaction
+    const organizer = t.createdBy;
+    
+    if (organizer === currentUser) {
+      // User is viewing their own transaction as the organizer
+      return `Awarded to: ${currentUser}`;
+    } else {
+      // User is viewing as recipient
+      return `Awarded by: ${organizer}`;
+    }
+  }
+  
   // sender/receiver column only applies to transfer transactions
   if (t.type !== 'transfer') return '-';
 

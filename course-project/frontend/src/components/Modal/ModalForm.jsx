@@ -137,6 +137,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                     <CardContent className="px-6 py-6 overflow-y-auto flex-1">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {fields.map(f => (
+                                
                                 <div key={f.name} className="flex flex-col">
                                     <label className="text-sm font-semibold text-strawberry-red-600 mb-2">
                                         {f.label}{f.required ? " *" : ""}
@@ -151,7 +152,8 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                                 <SelectValue placeholder={`Select ${f.label}`} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {f.options?.map(opt => (
+                                                {options[f.name]?.map(opt => (
+                                                    
                                                     <SelectItem key={opt.value} value={opt.value}>
                                                         {opt.label}
                                                     </SelectItem>
@@ -165,6 +167,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                             name={f.name}
                                             value={formData[f.name]}
                                             onChange={handleChange}
+                                            readOnly={f.readOnly}
                                         />
                                     }
 

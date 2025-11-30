@@ -284,6 +284,10 @@ export default function Promotions() {
                 formDescription="Enter the new promotion's details"
                 fields={getPromotionFields(role)}
                 onSubmit={handleCreatePromotion}
+                options={
+                    {type: [{ label: 'Automatic', value: 'automatic' },
+                    { label: 'One-time', value: 'one-time' }]}
+                }
             />
 
             {/* Table */}

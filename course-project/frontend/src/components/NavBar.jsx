@@ -61,6 +61,7 @@ export default function NavBar() {
     const isOnUsersPage = location.pathname === '/users';
     const isOnPromotionsPage = location.pathname === '/promotions';
     const isOnEventsPage = location.pathname === '/events';
+    const isOnMyEventsPage = location.pathname === '/my-events';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -82,11 +83,16 @@ export default function NavBar() {
             return;
         }
 
-        if (isOnPromotionsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+        if (isOnMyEventsPage) {
+            setSwitchRoleWarning("Role switching is not allowed while on the My Events page");
+            return;
+        }
+
+        if (isOnPromotionsPage && newRole === 'cashier') {
             setSwitchRoleWarning("Cannot switch to cashier role while on the Promotions page");
             return;
         }
-        if (isOnEventsPage && (currentRole === 'manager' || currentRole === 'superuser') && newRole === 'cashier') {
+        if (isOnEventsPage && newRole === 'cashier') {
             setSwitchRoleWarning("Cannot switch to cashier role while on the Events page");
             return;
         }
@@ -128,20 +134,52 @@ export default function NavBar() {
 
             {/* Navigation items (based on role) */}
             <div className="hidden lg:flex lg:gap-x-8">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => navigate(item.path)}
-              className={`text-m font-bold transition-colors px-3 py-1 rounded-lg ${
-                location.pathname === item.path
-                  ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
-                  : 'text-flag-red-500 hover:text-strawberry-red-700'
-              } hover:cursor-pointer`}
-            >
-              {item.label}
-            </button>
-          ))}
+          {navItems.map((item) => {
+            // Replace Events with dropdown for regular users
+            if (item.label === 'Events' && (visualRole === 'regular' || (visualRole === null && role === 'regular'))) {
+              return (
+                <DropdownMenu key="events-dropdown">
+                  <DropdownMenuTrigger className={`text-m font-bold transition-colors px-3 py-1 rounded-lg flex items-center gap-1 outline-none ${
+                    location.pathname === '/events' || location.pathname === '/my-events'
+                      ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
+                      : 'text-flag-red-500 hover:text-strawberry-red-700'
+                  } hover:cursor-pointer`}>
+                    Events
+                    <ChevronDownIcon className="size-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="bg-white border border-gray-200">
+                    <DropdownMenuItem
+                      onClick={() => navigate('/events')}
+                      className={`${location.pathname === '/events' ? 'bg-strawberry-red-100 text-strawberry-red-600 font-semibold' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}
+                    >
+                      Available Events
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => navigate('/my-events')}
+                      className={`${location.pathname === '/my-events' ? 'bg-strawberry-red-100 text-strawberry-red-600 font-semibold' : 'text-gray-700 hover:bg-gray-100'} cursor-pointer`}
+                    >
+                      My Events
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              );
+            }
+            
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => navigate(item.path)}
+                className={`text-m font-bold transition-colors px-3 py-1 rounded-lg ${
+                  location.pathname === item.path
+                    ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
+                    : 'text-flag-red-500 hover:text-strawberry-red-700'
+                } hover:cursor-pointer`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
 
         

@@ -3,7 +3,7 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon, UserPlusIcon, GiftIcon } from '@heroicons/react/24/outline'
 import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import Message from '../Message';
@@ -26,6 +26,9 @@ export default function DataTable({
     success,
     onRowSave, // for saving edited row
     onViewRow,
+    onRSVP, // for RSVP action
+    canRSVP, // function to check if RSVP is allowed for a row
+    onAwardPoints, // for Award Points action (organizers only)
     showSuspiciousFlag = false,
     onSuspiciousFlagToggle,
 }) {
@@ -221,15 +224,27 @@ export default function DataTable({
                         >
                             <PencilSquareIcon className="size-5" />
                         </button>
-                        {/* Open Full View */}
-                        <button
-                            type="button"
-                            onClick={() => onViewRow(row.original)}
-                            className="text-blue-600 hover:text-blue-800"
-                            aria-label="View in Full"
-                        >
-                            <InformationCircleIcon className="size-5" />
-                        </button>
+                        {/* Award Points Action (for organizers) */}
+                        {onAwardPoints ? (
+                            <button
+                                type="button"
+                                onClick={() => onAwardPoints(row.original)}
+                                className="text-blue-600 hover:text-blue-800"
+                                aria-label="Award points to guests"
+                                title="Award points to guests"
+                            >
+                                <GiftIcon className="size-5" />
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => onViewRow(row.original)}
+                                className="text-blue-600 hover:text-blue-800"
+                                aria-label="View in Full"
+                            >
+                                <InformationCircleIcon className="size-5" />
+                            </button>
+                        )}
                         </>
                     )}
                     </div>
@@ -239,15 +254,44 @@ export default function DataTable({
                 return (
                     <div className="flex items-center gap-2">
                         <>
-                        {/* Open Full View */}
-                        <button
-                            type="button"
-                            onClick={() => onViewRow(row)}
-                            className="text-blue-600 hover:text-blue-800"
-                            aria-label="View in Full"
-                        >
-                            <InformationCircleIcon className="size-5" />
-                        </button>
+                        {/* Award Points Action (for organizers) */}
+                        {onAwardPoints ? (
+                            <button
+                                type="button"
+                                onClick={() => onAwardPoints(row.original)}
+                                className="text-blue-600 hover:text-blue-800"
+                                aria-label="Award points to guests"
+                                title="Award points to guests"
+                            >
+                                <GiftIcon className="size-5" />
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => onViewRow(row.original)}
+                                className="text-blue-600 hover:text-blue-800"
+                                aria-label="View in Full"
+                            >
+                                <InformationCircleIcon className="size-5" />
+                            </button>
+                        )}
+                        {/* RSVP Action */}
+                        {onRSVP && (
+                            <button
+                                type="button"
+                                onClick={() => onRSVP(row.original)}
+                                disabled={canRSVP && !canRSVP(row.original)}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    canRSVP && !canRSVP(row.original)
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-strawberry-red-500 text-white hover:bg-strawberry-red-600'
+                                }`}
+                                aria-label="RSVP to event"
+                                title={canRSVP && !canRSVP(row.original) ? "You cannot RSVP to this event" : "RSVP to event"}
+                            >
+                                RSVP
+                            </button>
+                        )}
                         </>
                     </div>
                 );
@@ -259,7 +303,7 @@ export default function DataTable({
         // console.log(actionsCol);
         return [...cols, actionsCol];
    
-    }, [columns, selectionEnabled, editingRowId]);
+    }, [columns, selectionEnabled, editingRowId, onRSVP, canRSVP, onViewRow, enableEditing, onAwardPoints]);
 
 
     const table = useReactTable({
@@ -395,12 +439,11 @@ export default function DataTable({
                         {onCreate && (
                             <Button
                                 onClick={() => onCreate()}
-                                className="inline-flex items-center gap-1 rounded-md border border-flag-red-500 px-2 py-1 text-xs font-medium text-flag-red-500 hover:bg-flag-red-500 hover:text-white transition"
+                                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm bg-[var(--color-strawberry-red-500)] text-white hover:bg-[var(--color-strawberry-red-600)] transition"
                                 aria-label="Create new item"
-                                variant="outline"
                                 size="sm"
                             >
-                                <PlusIcon className="size-6" /> Create
+                                <PlusIcon className="size-5" /> Create
                             </Button>
                         )}
                     </div>

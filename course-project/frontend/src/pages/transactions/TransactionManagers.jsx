@@ -340,6 +340,7 @@ export default function TransactionPage() {
                 open={isModalOpen}
                 onClose={closeModal}
                 text={modalText}
+                title={"Transaction Details"}
             />
         </div>
     );

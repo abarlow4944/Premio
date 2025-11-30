@@ -163,7 +163,7 @@ router.get("/", async(req, res) => {
         });
 
         //apply filter with pagination
-        const allowedSorts = ['id','utorid','name','birthday','role','points','createdAt','lastLogin'];
+        const allowedSorts = ['id','utorid','name','email','birthday','role','points','createdAt','lastLogin','verified','activated','suspicious'];
         let orderBy = { id: 'asc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
             const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -316,6 +316,75 @@ router.get("/me", async (req, res) => {
             },
         })
 
+        // find events where user is an organizer
+        const organizedEvents = await prisma.event.findMany({
+            where: {
+                organizers: {
+                    some: { utorid: req.user.utorid }
+                }
+            },
+            include: {
+                organizers: {
+                    select: {
+                        id: true,
+                        name: true,
+                        utorid: true,
+                    },
+                },
+                guests: {
+                    select: {
+                        guest: {
+                            select: {
+                                id: true,
+                                name: true,
+                                utorid: true,
+                            } 
+                        },
+                    },
+                },
+            },
+        });
+
+        // find events where user is a guest
+        const guestEvents = await prisma.event.findMany({
+            where: {
+                guests: {
+                    some: { utoridGuest: req.user.utorid }
+                }
+            },
+            include: {
+                organizers: {
+                    select: {
+                        id: true,
+                        name: true,
+                        utorid: true,
+                    },
+                },
+                guests: {
+                    select: {
+                        guest: {
+                            select: {
+                                id: true,
+                                name: true,
+                                utorid: true,
+                            } 
+                        },
+                    },
+                },
+            },
+        });
+
+        // flatten the guests lists
+        const flattenedOrganizedEvents = organizedEvents.map(event => ({
+            ...event,
+            guests: event.guests.map(g => g.guest),
+        }));
+
+        const flattenedGuestEvents = guestEvents.map(event => ({
+            ...event,
+            guests: event.guests.map(g => g.guest),
+        }));
+
         const responseData = {
             id: user.id,
             utorid: user.utorid,
@@ -328,7 +397,9 @@ router.get("/me", async (req, res) => {
             lastLogin: user.lastLogin,
             verified: user.verified,
             avatarUrl: user.avatarUrl,
-            promotions: promotions
+            promotions: promotions,
+            organizedEvents: flattenedOrganizedEvents,
+            guestEvents: flattenedGuestEvents,
         };
 
         return res.status(200).json(responseData);
@@ -606,10 +677,44 @@ router.get("/me/transactions", async (req, res) => {
         }
 
         // built filters
-        const where = {};
-        where.utorid = utorid
+        let where = {};
+        
+        // For 'event' type transactions, show both where user is recipient (utorid) OR creator (createdBy)
+        // For other types, only show where user is recipient
+        if (type === 'event') {
+            // Show event transactions where user is either recipient or organizer
+            where = {
+                type: 'event',
+                OR: [
+                    { utorid: utorid },
+                    { createdBy: utorid }
+                ]
+            };
+        } else if (type) {
+            where.type = type;
+            where.utorid = utorid;
+        } else {
+            // If no type specified, show both types:
+            // - All non-event transactions where user is recipient
+            // - All event transactions where user is either recipient or organizer
+            where = {
+                OR: [
+                    { 
+                        type: { not: 'event' },
+                        utorid: utorid
+                    },
+                    {
+                        type: 'event',
+                        OR: [
+                            { utorid: utorid },
+                            { createdBy: utorid }
+                        ]
+                    }
+                ]
+            };
+        }
+        
         if (promotionIdNum !== undefined) where.promotions = { some: { id: promotionIdNum } };
-        if (type) where.type = type;
         if (relatedIdNum !== undefined) where.relatedId = relatedIdNum;
         if (createdBy) where.createdBy = { contains: createdBy };
         if (remark) where.remark = { contains: remark };

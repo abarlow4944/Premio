@@ -15,6 +15,7 @@ import ResetPassword from "./pages/forgotPassword/ResetPassword";
 import EmailConfirmation from "./pages/forgotPassword/EmailConfirmation";
 import Promotions from "./pages/promotions/Promotions";
 import Events from "./pages/events/Events";
+import MyEvents from "./pages/events/MyEvents";
 import ActivateAccount from "./pages/ActivateAccount";
 import NotFound from "./pages/errorPages/NotFound";
 import Forbidden from "./pages/errorPages/Forbidden";
@@ -78,6 +79,15 @@ function App() {
             <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
               <Layout />
               <Events />
+            </ProtectedRoute>
+          }>
+        </Route>
+
+        {/* My Events Page */}
+        <Route path="/my-events" element={
+            <ProtectedRoute allowedRoles={["regular"]}>
+              <Layout />
+              <MyEvents />
             </ProtectedRoute>
           }>
         </Route>

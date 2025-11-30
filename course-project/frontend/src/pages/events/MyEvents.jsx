@@ -353,7 +353,7 @@ export default function MyEvents() {
                 <div className="text-center">
                     <h1 className="text-2xl font-semibold text-flag-red-500 mt-[10vh]">My Events</h1>
                     <p className="text-sm text-space-indigo-500">
-                        View events you're a part of and RSVP to events.
+                        {viewMode === 'organized' ? 'View and manage your organized events.' : 'View events you have RSVPed to.'}
                     </p>
                 </div>
             </div>

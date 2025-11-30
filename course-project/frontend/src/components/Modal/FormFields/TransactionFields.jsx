@@ -52,6 +52,5 @@ export const TransactionFieldSets = {
 }
 
 export function getTransactionFields(role, mode){
-    console.log(TransactionFieldSets[role]?.[mode] ?? [])
     return TransactionFieldSets[role]?.[mode] ?? [];
 }

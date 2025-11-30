@@ -42,7 +42,7 @@ export default function Message({status, message, onClose}){
     }, []);
 
     return (
-        <p className={`mt-4 text-sm font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
+        <p className={`z-50 fixed absolute top-[10vh] right-[2vw] mt-4 text-md font-medium ${colours[colour].text} ${colours[colour].bg} border ${colours[colour].border} rounded-md py-2 px-4 text-center ${fadeOut ? "animate-fade-out" : ""}`}>
             {message}
         </p>
     )

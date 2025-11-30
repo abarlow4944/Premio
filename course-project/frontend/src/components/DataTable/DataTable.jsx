@@ -404,17 +404,6 @@ export default function DataTable({
                             </Button>
                         )}
                     </div>
-                    
-                    {/* Middle: Error/success messages */}
-                    <div className="flex flex-col justify-center -mt-4">
-                        {error && (
-                            <Message message={error} status="error"/>
-                        )}
-                
-                        {success && (
-                            <Message message={success} status="success"/>
-                        )}
-                    </div>
 
                     {/* Right side: selection actions */}
                     <div className="flex items-center gap-2">
@@ -444,8 +433,19 @@ export default function DataTable({
                 </div>
             )}
 
+            {/* Middle: Error/success messages */}
+            <div className="flex flex-col justify-center -mt-4">
+                {error && (
+                    <Message message={error} status="error"/>
+                )}
+        
+                {success && (
+                    <Message message={success} status="success"/>
+                )}
+            </div>
+
             {/* Table */}
-            <div className="rounded-xl shadow-sm overflow-auto">
+            <div className="rounded-xl shadow-sm overflow-auto mt-4">
 
             {/* Header */}
             <table className="w-full table-auto">

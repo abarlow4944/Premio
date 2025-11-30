@@ -60,8 +60,17 @@ export default function ModalForm({ formTitle, formDescription, fields = [], ope
         const finalData = {...formData};
 
         fields.forEach(field => {
-            if(field.multiNumber){
-                finalData[field.name] = formData[field.name]
+            if (field.multiNumber) {
+                const raw = formData[field.name];
+
+                // empty, so return empty array
+                if (!raw || raw.trim() === "") {
+                    finalData[field.name] = [];
+                    return;
+                }
+
+                // otherwise parse normally
+                finalData[field.name] = raw
                     .split(/[\s,]+/)
                     .map(Number)
                     .filter(n => !isNaN(n));
@@ -124,7 +133,9 @@ export default function ModalForm({ formTitle, formDescription, fields = [], ope
                         
                         <form onSubmit={handleSubmit} className="mt-5 overflow-y-auto max-h-[75vh]">
                             {fields.map(f => (
+                                
                                 <div key={f.name} style={{ marginBottom: 16 }}>
+
                                     <Typography variant="body2" sx={{ mb: 0.5 }}>
                                         {f.label}{f.required ? " *" : ""}
                                     </Typography>
@@ -133,7 +144,7 @@ export default function ModalForm({ formTitle, formDescription, fields = [], ope
                                         <select
                                             className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
                                             value={formData[f.name]}
-                                            name={f.label}
+                                            name={f.name}
                                             onChange={handleChange}
                                             >
                                             <option value="">Select</option>
@@ -147,7 +158,7 @@ export default function ModalForm({ formTitle, formDescription, fields = [], ope
                                     {f.type !== "select" &&
                                         <InputDefault
                                             type={f.type || "text"}
-                                            name={f.label}
+                                            name={f.name}
                                             value={formData[f.name]}
                                             onChange={handleChange}
                                             min={f.min}

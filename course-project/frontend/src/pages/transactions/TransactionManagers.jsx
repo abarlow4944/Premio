@@ -229,19 +229,6 @@ export default function TransactionPage() {
                 </p>
             </div>
 
-            {/* Success/Error Messages Overlay */}
-            {error && (
-                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-                    <Message message={error} status="error" onClose={() => setError("")}/>
-                </div>
-            )}
-            
-            {success && (
-                <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50">
-                    <Message message={success} status="success" onClose={() => setSuccess("")}/>
-                </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex justify-start mt-6 gap-3">
                 {(
@@ -282,6 +269,8 @@ export default function TransactionPage() {
                 formDescription={formDescription}
                 fields={getTransactionFields(currentRole, modalMode)}
                 onSubmit={async (data) => {
+                    setError("")
+                    setSuccess("")
                     const formFields = getTransactionFields(currentRole, modalMode);
                     const payload = {};
 
@@ -291,17 +280,16 @@ export default function TransactionPage() {
                         if (f.multiNumber) {
                             payload[f.name] = value ? value : [];
                         }
-                        else if (f.type === "number") {
+                        else if (f.type === "number" || f.type === "price") {
                             payload[f.name] = value ? Number(value) : 0;
                         }
                         else {
                             payload[f.name] = value ?? "";
                         }
-
-
                     });
 
                     try {
+                        console.log(payload)
                         const res = await fetch(`${API_URL}/transactions`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
@@ -313,6 +301,7 @@ export default function TransactionPage() {
                         console.log("RAW: ", JSON.stringify(result))
 
                         if (!res.ok) {
+                            setError(`Could not create transaction: ${result.error}` || "Could not create transaction")
                             console.error("Error creating transaction:", result.error);
                             return;
                         }
@@ -324,6 +313,7 @@ export default function TransactionPage() {
                     } catch (err) {
                         console.error("Network error:", err);
                     }
+                    setSuccess("Successfully created transaction")
                 }}
             />
             )}

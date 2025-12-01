@@ -8,7 +8,11 @@ function authenticateToken(req, res, next) {
   if (!token && req.cookies && req.cookies.auth_token) {
     token = req.cookies.auth_token; // cookie fallback
   }
-
+  
+  console.log("AUTH HEADER:", authHeader);
+  console.log("COOKIE TOKEN:", req.cookies?.auth_token);
+  console.log("TOKEN USED:", token);
+  
   try {
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {

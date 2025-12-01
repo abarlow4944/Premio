@@ -23,8 +23,7 @@ import Analytics from "./pages/Analytics";
 
 function App() {
 
-  return
-    <UserProvider>
+  return <UserProvider>
       <BrowserRouter>
         <Routes>
           {/* Login Page */}

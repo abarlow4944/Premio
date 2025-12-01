@@ -135,13 +135,13 @@ export default function NavBar() {
             </div>
 
             {/* Navigation items (based on role) */}
-            <div className="hidden lg:flex lg:gap-x-8">
+            <div className="hidden lg:flex lg:gap-x-6 lg:flex-1 lg:justify-center">
           {navItems.map((item) => {
             // Replace Events with dropdown for regular users
             if (item.label === 'Events' && (visualRole === 'regular' || (visualRole === null && role === 'regular'))) {
               return (
                 <DropdownMenu key="events-dropdown">
-                  <DropdownMenuTrigger className={`text-m font-bold transition-colors px-3 py-1 rounded-lg flex items-center gap-1 outline-none ${
+                  <DropdownMenuTrigger className={`text-sm font-semibold transition-colors px-3 py-1 rounded-lg flex items-center gap-1 outline-none whitespace-nowrap ${
                     location.pathname === '/events' || location.pathname === '/my-events'
                       ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
                       : 'text-flag-red-500 hover:text-strawberry-red-700'
@@ -172,7 +172,7 @@ export default function NavBar() {
                 key={item.label}
                 type="button"
                 onClick={() => navigate(item.path)}
-                className={`text-m font-bold transition-colors px-3 py-1 rounded-lg ${
+                className={`text-sm font-semibold transition-colors px-3 py-1 rounded-lg whitespace-nowrap ${
                   location.pathname === item.path
                     ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
                     : 'text-flag-red-500 hover:text-strawberry-red-700'
@@ -185,11 +185,11 @@ export default function NavBar() {
         </div>
 
         
-        <div className="lg:flex lg:flex-1 lg:justify-end gap-4 flex flex-wrap items-center">
+        <div className="lg:flex lg:flex-1 lg:justify-end lg:gap-4 hidden lg:flex items-center">
             {/* Role with Switch Dropdown */}
             {availableRoles.length > 1 ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="text-m text-white hover:text-gray-100 hover:cursor-pointer outline-none flex items-center gap-1 bg-strawberry-red-500 px-4 py-2 rounded-lg hover:bg-strawberry-red-600 transition-colors">
+                <DropdownMenuTrigger className="text-m text-white hover:text-gray-100 hover:cursor-pointer outline-none flex items-center gap-1 bg-strawberry-red-500 px-4 py-2 rounded-lg hover:bg-strawberry-red-600 transition-colors whitespace-nowrap">
                   Viewing as: <span className="font-bold">{(visualRole || role).toUpperCase()}</span>
                   <ChevronDownIcon className="size-4" />
                 </DropdownMenuTrigger>
@@ -206,14 +206,14 @@ export default function NavBar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              role === 'regular' ? null : <h2 className="text-m font-bold text-space-indigo-500">{visualRole}</h2>
+              role === 'regular' ? null : <h2 className="text-m font-bold text-space-indigo-500 whitespace-nowrap">{visualRole}</h2>
             )}
             
             {/* Logout */}
             <button
                 type="button"
                 onClick={handleLogout}
-                className="text-m font-bold text-flag-red-500 hover:text-strawberry-red-700 hover:cursor-pointer"
+                className="text-m font-bold text-flag-red-500 hover:text-strawberry-red-700 hover:cursor-pointer whitespace-nowrap"
                 >
                 Logout
             </button>

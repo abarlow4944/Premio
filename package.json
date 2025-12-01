@@ -13,6 +13,7 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
+    "type": "module",
     "start": "node index.js"
   }
 }

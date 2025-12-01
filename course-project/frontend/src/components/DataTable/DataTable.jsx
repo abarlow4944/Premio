@@ -209,7 +209,7 @@ export default function DataTable({
                             className="text-green-600 hover:text-green-800 hover:cursor-pointer"
                             aria-label="Save row"
                         >
-                            <CheckCircleIcon className="size-5" />
+                            <CheckCircleIcon className="size-5 hover:cursor-pointer" />
                         </button>
 
                         {/* Cancel */}
@@ -219,7 +219,7 @@ export default function DataTable({
                             className="text-red-600 hover:text-red-800 hover:cursor-pointer"
                             aria-label="Cancel edit"
                         >
-                            <XCircleIcon className="size-5" />
+                            <XCircleIcon className="size-5 hover:cursor-pointer" />
                         </button>
                         </>
                     ) : (
@@ -231,7 +231,7 @@ export default function DataTable({
                             className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
                             aria-label="Edit row"
                         >
-                            <PencilSquareIcon className="size-5" />
+                            <PencilSquareIcon className="size-5 hover:cursor-pointer" />
                         </button>
 
                         {/* Award Points Action (for organizers) */}
@@ -243,7 +243,7 @@ export default function DataTable({
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
-                                <GiftIcon className="size-5" />
+                                <GiftIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         ) : onViewRow ? (
                             <button
@@ -252,7 +252,7 @@ export default function DataTable({
                                 className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
                                 aria-label="View in Full"
                             >
-                                <InformationCircleIcon className="size-5" />
+                                <InformationCircleIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         ) : null}
 
@@ -265,7 +265,7 @@ export default function DataTable({
                                 aria-label="Manage event guests"
                                 title="Manage event guests"
                             >
-                                <UserPlusIcon className="size-5" />
+                                <UserPlusIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         )}
                         </>
@@ -286,7 +286,7 @@ export default function DataTable({
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
-                                <GiftIcon className="size-5" />
+                                <GiftIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         ) : onViewRow ? (
                             <button
@@ -295,7 +295,7 @@ export default function DataTable({
                                 className="text-blue-600 hover:text-blue-800"
                                 aria-label="View in Full"
                             >
-                                <InformationCircleIcon className="size-5" />
+                                <InformationCircleIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         ) : null}
 
@@ -308,7 +308,7 @@ export default function DataTable({
                                 aria-label="Manage event guests"
                                 title="Manage event guests"
                             >
-                                <UserPlusIcon className="size-5" />
+                                <UserPlusIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         )}
                         {/* RSVP Action */}
@@ -573,13 +573,13 @@ export default function DataTable({
                                                     return (
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button className="w-full flex items-center justify-between rounded-md p-2 text-sm text-left border-2 bg-strawberry-red-500 border-strawberry-red-600 text-white">
+                                                                <Button className="hover:cursor-pointer w-full flex items-center justify-between rounded-md p-2 text-sm text-left border-2 bg-strawberry-red-500 border-strawberry-red-600 text-white">
                                                                     <span className="text-white font-medium">{displayLabel}</span>
-                                                                    <ChevronDownIcon className="size-4 text-white" />
+                                                                    <ChevronDownIcon className="hover:cursor-pointer size-4 text-white" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="w-full p-1">
-                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
+                                                                <DropdownMenuItem className={`hover:cursor-pointer flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
                                                                     <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500  hover:bg-strawberry-red-100'}>All</span>
                                                                     {currentVal === '' && <CheckIcon className="size-4 text-white" />}
                                                                 </DropdownMenuItem>
@@ -762,14 +762,14 @@ export default function DataTable({
             <div className="flex items-center mb-4 sm:mb-0">
                 <span className="mr-2">Items per page</span>
                 <select
-                    className="border border-2 border-strawberry-red-500 rounded-md shadow-sm focus:ring-strawberry-red-500 focus:border-strawberry-red-500 p-2 focus:border-2"
+                    className="hover:cursor-pointer border border-2 border-strawberry-red-500 rounded-md shadow-sm focus:ring-strawberry-red-500 focus:border-strawberry-red-500 p-2 focus:border-2"
                     value={table.getState().pagination.pageSize}
                     onChange={e => { // update the page size when this is changed
                         table.setPageSize(Number(e.target.value))
                     }}
                     >
                     {[10, 20, 30, 40, 50].map(pageSize => (
-                        <option key={pageSize} value={pageSize}>
+                        <option key={pageSize} value={pageSize} className="hover:cursor-pointer">
                         {pageSize}
                         </option>
                     ))}

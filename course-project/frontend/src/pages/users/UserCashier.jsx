@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
-import { Button } from "@/components/UI/button";
+import { Button } from "@/components/ui/button";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
-import { Card, CardContent } from "@/components/UI/Card";
-import { InputDefault } from "@/components/UI/Input";
+import { Card, CardContent } from "@/components/ui/Card";
+import { InputDefault } from "@/components/ui/Input";
 import { Typography } from "@mui/material";
 import Message from "@/components/Message";
 

@@ -36,7 +36,7 @@ export default function Analytics() {
     };
 
     // get user data for line graph
-    const fetchData = async () => {
+    const fetchUserData = async () => {
         // retrieve users
         const res = await fetch(`${API_URL}/users`, {
             method: "GET",
@@ -74,15 +74,32 @@ export default function Analytics() {
         return timeline
     }
 
+    // get promo data for ranking
+    const fetchPromoData = async () => {
+        // retrieve users
+        const res = await fetch(`${API_URL}/promotions`, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        const users = await res.json(); // response from endpoint (users)
+        
+        if(!res.ok){ // handle error
+            setError(`Could not retrieve promotion data: ${data.error}` || "Could not retrieve promotion data")
+            console.log("Error:", data.error)
+            return
+        }
+
+
+    }
+
     useEffect(() => {
         async function loadData() {
-            const result = await fetchData();
+            const result = await fetchUserData();
             setUserData(result);
         }
         loadData();
     }, []);
-
-    console.log(userData)
 
     return (
         <div className="flex p-6 space-y-4 w-[70vw] mx-auto justify-center flex-col">
@@ -93,9 +110,27 @@ export default function Analytics() {
 
             {/* Line Graph: users overtime */}
             <div className="space-y-4 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10 w-[70vw]">
-                <h2 className="text-lg font-semibold text-space-indigo-500 text-center">
-                Registered Users Over Time
-                </h2>
+                <div className="flex flex-col justify-center gap-2 align-center">
+                    <h2 className="text-xl font-semibold text-space-indigo-500 text-center">
+                        Registered Users Over Time
+                    </h2>
+
+                    {/* Line Graph */}
+                    <LineGraph data={userData} xAxis="date" yAxis="count" name="Users" label="Registered Users" />
+                </div>
+            </div>
+
+            {/* Ranking: top 5 users */}
+            <div className="space-y-4 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10 w-[70vw]">
+                <div className="flex flex-col justify-center gap-1">
+                    <h2 className="text-xl font-semibold text-space-indigo-500 text-center">
+                        Top 5 Users
+                    </h2>
+                    <p className="text-md font-semibold text-lavender-grey-500 text-center">
+                        In terms of points
+                    </p>
+                </div>
+                
 
                 {/* Line Graph */}
                 <div className="grid xl:grid-cols-3 lg:grid-cols-2 w-full gap-10 ">
@@ -104,13 +139,6 @@ export default function Analytics() {
                     <LineGraph data={userData} xAxis="date" yAxis="count" xAxisName="Date" yAxisName="Users" label="Registered Users" />
                     {/* </GridItem> */}
                 </div>
-
-
-            </div>
-
-            {/* Ranking: top 5 users */}
-            <div>
-
             </div>
 
             {/* Ranking: top 5 popular events */}

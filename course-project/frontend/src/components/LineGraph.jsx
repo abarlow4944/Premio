@@ -9,8 +9,7 @@ import {
     CartesianGrid,
 } from "recharts";
 
-export default function LineGraph({ data, xAxis, yAxis, xAxisName, yAxisName }) {
-    console.log(data)
+export default function LineGraph({ data, xAxis, yAxis, name }) {
     return (
         <div className="w-[60vw] h-[60vh] bg-white p-4 rounded-xl shadow">
             <ResponsiveContainer width="100%" height="100%">
@@ -23,8 +22,7 @@ export default function LineGraph({ data, xAxis, yAxis, xAxisName, yAxisName }) 
             <YAxis dataKey={yAxis}/>
             <Tooltip />
             <Legend />
-            <Line type="monotone" name={xAxisName}dataKey={xAxis} stroke="#ef4444" strokeWidth={3} activeDot={{ r: 8 }}/>
-            <Line type="monotone" name={yAxisName}dataKey={yAxis} stroke="#ef4444" strokeWidth={3} activeDot={{ r: 8 }}/>
+            <Line type="monotone" name={name} dataKey={yAxis} stroke="#ef4444" strokeWidth={3} activeDot={{ r: 8 }}/>
             </LineChart>
         </ResponsiveContainer>
     </div>

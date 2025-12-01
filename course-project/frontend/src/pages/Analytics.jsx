@@ -153,10 +153,9 @@ export default function Analytics() {
 
         // get the top 5 promotions
         const top5 = eventCountData 
-            .sort((a, b) => b.count - a.count)
+            .sort((a, b) => b.guestCount - a.guestCount)
             .slice(0, 5);
 
-        console.log(top5)
         return top5
     }
 
@@ -175,93 +174,101 @@ export default function Analytics() {
     }, []);
 
     
-    const promoRows = promoData.map(row => (
+    const promoRows = promoData.map((row, index) => (
         <ListItem
             key={row.id}
-            name={row.name}
+            name={`${index + 1}. ${row.name}`}
             subName={`Promotion id: ${row.id}`}
             value={row.count}
         />
     ));
 
-    const eventRows = eventData.map(row => (
+    const eventRows = eventData.map((row, index) => (
         <ListItem
             key={row.id}
-            name={row.name}
+            name={`${index + 1}. ${row.name}`}
             subName={`Event id: ${row.id}`}
             value={row.guestCount}
         />
     ));
 
     return (
-        <div className="flex p-6 space-y-4 w-[70vw] mx-auto justify-center flex-col">
-            {/* Page Title */}
-            <div>
-                <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Analytics</h1>
+<div className="p-10 w-full max-w-[1400px] mx-auto">
+
+    {/* Page Title */}
+    <h1 className="text-center text-3xl font-semibold text-flag-red-500 mt-[6vh] mb-10">
+        Analytics
+    </h1>
+
+    {/* 3-column grid: chart spans 2 columns */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+        {/* LEFT: Line Chart */}
+        <div className="xl:col-span-2 rounded-xl bg-white border border-gray-200 shadow p-8 h-[420px] flex flex-col">
+            <h2 className="text-xl font-semibold text-space-indigo-600 text-center mb-4">
+                Registered Users Over Time
+            </h2>
+
+            <div className="flex-1 min-h-0"> 
+                {/* Forces chart to stay inside card */}
+                <LineGraph
+                    data={userData}
+                    xAxis="date"
+                    yAxis="count"
+                    name="Users"
+                    label="Registered Users"
+                />
             </div>
+        </div>
 
-            {/* Line Graph: users overtime */}
-            <div className="space-y-4 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10 w-[70vw]">
-                <div className="flex flex-col justify-center gap-2 items-center">
-                    <h2 className="text-xl font-semibold text-space-indigo-500 text-center">
-                        Registered Users Over Time
-                    </h2>
+        {/* RIGHT COLUMN: Rankings */}
+        <div className="flex flex-col gap-8">
 
-                    {/* Line Graph */}
-                    <LineGraph data={userData} xAxis="date" yAxis="count" name="Users" label="Registered Users" />
+            {/* Top Promotions */}
+            <div className="rounded-xl bg-white border border-gray-200 shadow p-6">
+                <h2 className="text-lg font-semibold text-space-indigo-600 text-center mb-4">
+                    Top 5 Popular Promotions
+                </h2>
+
+                <div className="flex justify-between pb-2 border-b border-gray-300 text-sm font-bold text-strawberry-red-500">
+                    <span>Promotion</span>
+                    <span>Transactions</span>
                 </div>
+
+                <ul className="divide-y divide-gray-200">
+                    {promoRows}
+                </ul>
             </div>
 
-            {/* Ranking: top 5 promotions */}
-            <div className="space-y-4 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10 ">
-                <div className="flex flex-col justify-center gap-1 items-center">
-                    <h2 className="text-xl font-semibold text-space-indigo-500 text-center">
-                        Top 5 Popular Promotions
-                    </h2>
+            {/* Top Events */}
+            <div className="rounded-xl bg-white border border-gray-200 shadow p-6">
+                <h2 className="text-lg font-semibold text-space-indigo-600 text-center mb-4">
+                    Top 5 Popular Events
+                </h2>
 
-                    {/* Header row */}
-                    <div className="flex items-center justify-between px-1 pb-2 border-b border-gray-300">
-                        <span className="text-m font-bold text-strawberry-red-500">Promotion</span>
-                        <span className="text-m font-bold text-strawberry-red-500">Transactions</span>
-                    </div>
-
-                    {/* Ranking */}
-                    <ul className="max-w-md divide-y divide-default">
-                        {promoRows}   
-                    </ul>
+                <div className="flex justify-between pb-2 border-b border-gray-300 text-sm font-bold text-strawberry-red-500">
+                    <span>Event</span>
+                    <span>Guests</span>
                 </div>
+
+                <ul className="divide-y divide-gray-200">
+                    {eventRows}
+                </ul>
             </div>
-
-            {/* Ranking: top 5  events */}
-            <div className="space-y-4 rounded-md bg-platinum-50 border-2 border-platinum-100 shadow-md p-10 ">
-                <div className="flex flex-col justify-center gap-1 items-center">
-                    <h2 className="text-xl font-semibold text-space-indigo-500 text-center">
-                        Top 5 Popular Events
-                    </h2>
-
-                    {/* Header row */}
-                    <div className="flex items-center justify-between px-1 pb-2 border-b border-gray-300">
-                        <span className="text-m font-bold text-strawberry-red-500">Event</span>
-                        <span className="text-m font-bold text-strawberry-red-500">Guests</span>
-                    </div>
-
-                    {/* Ranking */}
-                    <ul className="max-w-md divide-y divide-default">
-                        {eventRows}   
-                    </ul>
-                </div>
-            </div>
-
-        
-
-            {error && (
-                <Message notCorner message={error} status="error" onClose={() => setError(null)}/>
-            )}
-
-            {success && (
-                <Message notCorner message={success} status="success" onClose={() => setSuccess(null)}/>
-            )}
 
         </div>
+    </div>
+
+    {/* Error and success messages */}
+    {error && (
+        <Message notCorner message={error} status="error" onClose={() => setError(null)} />
+    )}
+    {success && (
+        <Message notCorner message={success} status="success" onClose={() => setSuccess(null)} />
+    )}
+
+</div>
+
+
     )
 }

@@ -9,7 +9,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { InputDefault } from '../UI/Input';
+import { InputDefault } from '../ui/Input';
 
 const modalStyle = {
   position: 'absolute',

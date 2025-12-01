@@ -7,7 +7,7 @@
     "createsuperuser": "node prisma/createsu.js",
     "clean": "rm -rf prisma/dev.db* node_modules package-lock.json prisma/migrations/",
     "dev": "nodemon index.js 3000",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "author": "CSC309 Student, Winter 2025",
   "license": "ISC",

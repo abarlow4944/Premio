@@ -1,0 +1,30 @@
+import {
+    LineChart,
+    ResponsiveContainer,
+    Legend,
+    Tooltip,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+} from "recharts";
+
+export default function LineGraph({ data, xAxis, yAxis, name, ...rest }) {
+    return (
+        <div className="w-full h-full bg-white p-4 rounded-xl shadow">
+            <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+                data={data}
+                margin={{ right: 30 }}
+            >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey={xAxis}/>
+            <YAxis dataKey={yAxis}/>
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" name={name} dataKey={yAxis} stroke="#ef4444" strokeWidth={3} activeDot={{ r: 8 }}/>
+            </LineChart>
+        </ResponsiveContainer>
+    </div>
+  );
+}

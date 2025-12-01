@@ -19,6 +19,7 @@ import MyEvents from "./pages/events/MyEvents";
 import ActivateAccount from "./pages/ActivateAccount";
 import NotFound from "./pages/errorPages/NotFound";
 import Forbidden from "./pages/errorPages/Forbidden";
+import Analytics from "./pages/Analytics";
 
 function App() {
 
@@ -97,6 +98,15 @@ function App() {
           <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>
             <Layout/>
             <TransactionsHome />
+          </ProtectedRoute>
+        }>
+        </Route>
+
+        {/* Analytics Page */}
+        <Route path="/analytics" element={
+          <ProtectedRoute allowedRoles={["manager", "superuser"]}>
+            <Layout/>
+            <Analytics />
           </ProtectedRoute>
         }>
         </Route>

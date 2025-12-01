@@ -14,6 +14,7 @@ const resetRateLimiter = new Map();
 
 // POST /auth/tokens: Authenticate a user and return a JWT token
 router.post("/tokens", async (req, res) => {
+	console.log("IN AUTH TOKENS");
 	const { utorid, password } = req.body;
 
 	if (!utorid || !password) {

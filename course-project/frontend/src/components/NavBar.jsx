@@ -64,6 +64,7 @@ export default function NavBar() {
     const isOnPromotionsPage = location.pathname === '/promotions';
     const isOnEventsPage = location.pathname === '/events';
     const isOnMyEventsPage = location.pathname === '/my-events';
+    const isOnProfilePage = location.pathname === '/profile';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -102,8 +103,13 @@ export default function NavBar() {
         setVisualRole(newRole);
         localStorage.setItem('visualRole', newRole);
         
-        // Refresh the page to reload data with new role
-        window.location.reload();
+        // Only refresh the page if not on the profile page
+        // On profile page, role switch updates the UI without reload
+        if (!isOnProfilePage) {
+            window.location.reload();
+        } else {
+            setMobileMenuOpen(false);
+        }
     }
 
     const availableRoles = getAvailableSwitchRoles(role);
@@ -136,6 +142,118 @@ export default function NavBar() {
                 <Bars3Icon aria-hidden="true" className="size-6" />
             </button>
             </div>
+
+            {/* Mobile menu */}
+            {mobileMenuOpen && (
+              <div className="fixed inset-0 z-40 lg:hidden">
+                {/* Backdrop */}
+                <div 
+                  className="fixed inset-0 bg-black/50"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                {/* Menu content */}
+                <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="rounded-md text-gray-400 hover:text-gray-500"
+                    >
+                      <span className="sr-only">Close menu</span>
+                      <svg className="size-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {navItems.map((item) => {
+                      if (item.label === 'Events' && (visualRole === 'regular' || (visualRole === null && role === 'regular'))) {
+                        return (
+                          <div key="events-dropdown" className="space-y-1">
+                            <button
+                              className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              onClick={() => {
+                                navigate('/events');
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              Available Events
+                            </button>
+                            <button
+                              className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              onClick={() => {
+                                navigate('/my-events');
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              My Events
+                            </button>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <button
+                          key={item.label}
+                          onClick={() => {
+                            navigate(item.path);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-6 space-y-4 border-t border-gray-200 pt-4">
+                    {availableRoles.length > 1 && (
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Switch Role:</p>
+                        <div className="space-y-2">
+                          {availableRoles.map((availableRole) => (
+                            <button
+                              key={availableRole}
+                              onClick={() => {
+                                handleRoleSwitch(availableRole);
+                                setMobileMenuOpen(false);
+                              }}
+                              className={`block w-full text-left rounded-lg px-3 py-2 text-base font-semibold ${
+                                (visualRole || role) === availableRole
+                                  ? 'bg-strawberry-red-500 text-white'
+                                  : 'text-flag-red-500 hover:bg-gray-100'
+                              }`}
+                            >
+                              {availableRole.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="border-t border-gray-200 pt-4" />
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                    >
+                      Profile
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Navigation items (based on role) */}
             <div className="hidden lg:flex lg:gap-x-6 lg:flex-1 lg:justify-center">

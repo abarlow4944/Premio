@@ -12,8 +12,8 @@
     "jsonwebtoken": "^9.0.0",
     "uuid": "^9.0.0"
   },
+  "type": "module",
   "scripts": {
-    "type": "module",
     "start": "node index.js"
   }
 }

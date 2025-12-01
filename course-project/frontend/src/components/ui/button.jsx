@@ -9,17 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-platinum-800 shadow-black/30 bg-space-indigo-500 text-platinum-500",
+        default: "bg-primary text-primary-foreground hover:bg-platinum-800 hover:cursor-pointer shadow-black/30 bg-space-indigo-500 text-platinum-500",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-destructive text-white hover:bg-destructive/90 hover:cursor-pointer focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border bg-background shadow-xs hover:bg-accent hover:cursor-pointer hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground hover:cursor-pointer hover:bg-secondary/80",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "hover:bg-accent hover:text-accent-foreground hover:cursor-pointer dark:hover:bg-accent/50",
         link: 
-          "text-primary underline-offset-4 hover:underline",
+          "text-primary underline-offset-4 hover:cursor-pointer hover:underline",
         space:
         "bg-space-indigo-500",        
       },

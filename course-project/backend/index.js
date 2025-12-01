@@ -2,9 +2,6 @@
 'use strict';
 
 require('dotenv').config();
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on ${PORT}...`);
-});
 
 //const port = (() => {
 //    const args = process.argv;
@@ -61,8 +58,12 @@ app.get('/', (req, res) => {
 });
 
 //////////////////////////////////////////////////////////////////////////// SERVER STUFF
-const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+//const server = app.listen(port, () => {
+//    console.log(`Server running on port ${port}`);
+//});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on ${PORT}...`);
 });
 
 server.on('error', (err) => {

@@ -177,6 +177,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                                     value={formData[f.name]}
                                     onChange={handleChange}
                                     placeholder={f.multiNumber ? "Enter numbers separated by commas or spaces" : ""}
+                                    readOnly={f.readOnly}
                                     />
                                 )}
                                 {errors[f.name] && (

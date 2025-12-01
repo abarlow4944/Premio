@@ -95,7 +95,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("auth_token", { // clear the cookie
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // true in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
   });
 
   return res.status(200).json({ ok: true });

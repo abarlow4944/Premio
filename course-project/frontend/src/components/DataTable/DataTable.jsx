@@ -282,7 +282,7 @@ export default function DataTable({
                             <button
                                 type="button"
                                 onClick={() => onAwardPoints(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
@@ -292,7 +292,7 @@ export default function DataTable({
                             <button
                                 type="button"
                                 onClick={() => onViewRow(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
                                 aria-label="View in Full"
                             >
                                 <InformationCircleIcon className="size-5 hover:cursor-pointer" />
@@ -304,7 +304,7 @@ export default function DataTable({
                             <button
                                 type="button"
                                 onClick={() => onManageGuests(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
                                 aria-label="Manage event guests"
                                 title="Manage event guests"
                             >
@@ -317,7 +317,7 @@ export default function DataTable({
                                 type="button"
                                 onClick={() => onRSVP(row.original)}
                                 disabled={canRSVP && !canRSVP(row.original)}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                className={`px-3 py-1 hover:cursor-pointer rounded-md text-sm font-medium transition-colors ${
                                     canRSVP && !canRSVP(row.original)
                                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         : 'bg-strawberry-red-500 text-white hover:bg-strawberry-red-600'

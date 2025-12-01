@@ -153,7 +153,7 @@ export default function EditableGuestList({
                                         type="button"
                                         onClick={() => handleRemoveGuest(guest.utorid)}
                                         disabled={loading}
-                                        className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-md transition disabled:opacity-50"
+                                        className="ml-2 p-1 text-red-500 hover:cursor-pointer hover:bg-red-50 rounded-md transition disabled:opacity-50"
                                         aria-label="Remove guest"
                                     >
                                         <XMarkIcon className="size-4" />
@@ -230,7 +230,7 @@ export default function EditableGuestList({
                                         setError(null);
                                     }}
                                     disabled={loading}
-                                    className="flex-1 px-3 py-1 text-sm font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md transition disabled:opacity-50"
+                                    className="flex-1 px-3 py-1 text-sm hover:cursor-pointer font-medium border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-md transition disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>

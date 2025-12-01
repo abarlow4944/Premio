@@ -40,7 +40,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
-app.options('*', cors());
+app.options('/*', cors());
 
 app.use(express.json());
 app.use(cookieParser());
@@ -58,15 +58,13 @@ app.get('/', (req, res) => {
 });
 
 //////////////////////////////////////////////////////////////////////////// SERVER STUFF
-//const server = app.listen(port, () => {
-//    console.log(`Server running on port ${port}`);
-//});
+const port = process.env.PORT || 3000;
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on ${PORT}...`);
+const server = app.listen(port, () => {
+  console.log(`Server running on ${port}...`);
 });
 
 server.on('error', (err) => {
-    console.error(`cannot start server: ${err.message}`);
-    process.exit(1);
+  console.error(`cannot start server: ${err.message}`);
+  process.exit(1);
 });

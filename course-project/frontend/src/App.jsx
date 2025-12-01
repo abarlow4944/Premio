@@ -6,6 +6,7 @@ import Login from "./pages/Login"
 import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
+import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
 import TransactionsHome from "./pages/transactions/Transactions";
@@ -23,100 +24,102 @@ import Analytics from "./pages/Analytics";
 
 function App() {
 
-  return <UserProvider>
-    <BrowserRouter>
-      <Routes>
-        {/* Login Page */}
-        <Route path="/" element={<Login />} /> 
-
-        {/* Forgot Password Page */}
-        <Route path="/forgot-password" element={<ForgotPassword />} /> 
-
-        {/* Reset Password Page */}
-        <Route path="/reset-password" element={<ResetPassword />} /> 
-
-        {/* Reset Password Page */}
-        <Route path="/email-confirmation" element={<EmailConfirmation />} /> 
-
-        {/* Activate Account Page */}
-        <Route path="/activate-account" element={<ActivateAccount />} /> 
-
-        {/* Protected Landing Page */}
-        <Route path="/home" element={
-          <>
-            <Layout />
-            <Home />
-          </>
-        }/>
-
-        {/* Profile Management Page */}
-        <Route path="/profile" element={ 
-          <> 
-            <Layout />
-            <ProfileManagement />
-          </>
-        }/>
-
-        {/* Users Page */}
-        <Route path="/users" element={
-            <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>      
+  return <AuthProvider>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Login Page */}
+          <Route path="/" element={<Login />} /> 
+  
+          {/* Forgot Password Page */}
+          <Route path="/forgot-password" element={<ForgotPassword />} /> 
+  
+          {/* Reset Password Page */}
+          <Route path="/reset-password" element={<ResetPassword />} /> 
+  
+          {/* Reset Password Page */}
+          <Route path="/email-confirmation" element={<EmailConfirmation />} /> 
+  
+          {/* Activate Account Page */}
+          <Route path="/activate-account" element={<ActivateAccount />} /> 
+  
+          {/* Protected Landing Page */}
+          <Route path="/home" element={
+            <>
               <Layout />
-              <Users />
+              <Home />
+            </>
+          }/>
+  
+          {/* Profile Management Page */}
+          <Route path="/profile" element={ 
+            <> 
+              <Layout />
+              <ProfileManagement />
+            </>
+          }/>
+  
+          {/* Users Page */}
+          <Route path="/users" element={
+              <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>      
+                <Layout />
+                <Users />
+              </ProtectedRoute>
+            }>
+          </Route>
+  
+          {/* Promotions Page */}
+          <Route path="/promotions" element={
+              <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
+                <Layout />
+                <Promotions />
+              </ProtectedRoute>
+            }>
+          </Route>
+  
+          {/* Events Page */}
+          <Route path="/events" element={
+              <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
+                <Layout />
+                <Events />
+              </ProtectedRoute>
+            }>
+          </Route>
+  
+          {/* My Events Page */}
+          <Route path="/my-events" element={
+              <ProtectedRoute allowedRoles={["regular"]}>
+                <Layout />
+                <MyEvents />
+              </ProtectedRoute>
+            }>
+          </Route>
+          
+          {/* Transaction Page */}
+          <Route path="/transactions" element={
+            <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>
+              <Layout/>
+              <TransactionsHome />
             </ProtectedRoute>
           }>
-        </Route>
-
-        {/* Promotions Page */}
-        <Route path="/promotions" element={
-            <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
-              <Layout />
-              <Promotions />
+          </Route>
+  
+          {/* Analytics Page */}
+          <Route path="/analytics" element={
+            <ProtectedRoute allowedRoles={["manager", "superuser"]}>
+              <Layout/>
+              <Analytics />
             </ProtectedRoute>
           }>
-        </Route>
-
-        {/* Events Page */}
-        <Route path="/events" element={
-            <ProtectedRoute allowedRoles={["regular", "manager", "superuser"]}>
-              <Layout />
-              <Events />
-            </ProtectedRoute>
-          }>
-        </Route>
-
-        {/* My Events Page */}
-        <Route path="/my-events" element={
-            <ProtectedRoute allowedRoles={["regular"]}>
-              <Layout />
-              <MyEvents />
-            </ProtectedRoute>
-          }>
-        </Route>
-        
-        {/* Transaction Page */}
-        <Route path="/transactions" element={
-          <ProtectedRoute allowedRoles={["regular", "cashier", "manager", "superuser"]}>
-            <Layout/>
-            <TransactionsHome />
-          </ProtectedRoute>
-        }>
-        </Route>
-
-        {/* Analytics Page */}
-        <Route path="/analytics" element={
-          <ProtectedRoute allowedRoles={["manager", "superuser"]}>
-            <Layout/>
-            <Analytics />
-          </ProtectedRoute>
-        }>
-        </Route>
-        
-        {/* Not Found Page*/}
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
-    </BrowserRouter>
-  </UserProvider>
+          </Route>
+          
+          {/* Not Found Page*/}
+          <Route path="*" element={<NotFound />} />
+  
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
+    </AuthProvider>
 }
 
 export default App

@@ -158,7 +158,7 @@ export default function NavBar() {
                     <button
                       type="button"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="rounded-md text-gray-400 hover:text-gray-500"
+                      className="hover:cursor-pointer rounded-md text-gray-400 hover:text-gray-500"
                     >
                       <span className="sr-only">Close menu</span>
                       <svg className="size-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -172,7 +172,7 @@ export default function NavBar() {
                         return (
                           <div key="events-dropdown" className="space-y-1">
                             <button
-                              className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
                               onClick={() => {
                                 navigate('/events');
                                 setMobileMenuOpen(false);
@@ -181,7 +181,7 @@ export default function NavBar() {
                               Available Events
                             </button>
                             <button
-                              className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
                               onClick={() => {
                                 navigate('/my-events');
                                 setMobileMenuOpen(false);
@@ -200,7 +200,7 @@ export default function NavBar() {
                             navigate(item.path);
                             setMobileMenuOpen(false);
                           }}
-                          className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                          className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
                         >
                           {item.label}
                         </button>
@@ -219,7 +219,7 @@ export default function NavBar() {
                                 handleRoleSwitch(availableRole);
                                 setMobileMenuOpen(false);
                               }}
-                              className={`block w-full text-left rounded-lg px-3 py-2 text-base font-semibold ${
+                              className={`hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold ${
                                 (visualRole || role) === availableRole
                                   ? 'bg-strawberry-red-500 text-white'
                                   : 'text-flag-red-500 hover:bg-gray-100'
@@ -237,7 +237,7 @@ export default function NavBar() {
                         handleLogout();
                         setMobileMenuOpen(false);
                       }}
-                      className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                      className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
                     >
                       Logout
                     </button>
@@ -246,7 +246,7 @@ export default function NavBar() {
                         navigate("/profile");
                         setMobileMenuOpen(false);
                       }}
-                      className="block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                      className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
                     >
                       Profile
                     </button>
@@ -293,7 +293,7 @@ export default function NavBar() {
                 key={item.label}
                 type="button"
                 onClick={() => navigate(item.path)}
-                className={`text-sm font-semibold transition-colors px-3 py-1 rounded-lg whitespace-nowrap ${
+                className={`hover:cursor-pointer text-sm font-semibold transition-colors px-3 py-1 rounded-lg whitespace-nowrap ${
                   location.pathname === item.path
                     ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
                     : 'text-flag-red-500 hover:text-strawberry-red-700'

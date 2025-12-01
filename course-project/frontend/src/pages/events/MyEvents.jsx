@@ -456,7 +456,7 @@ export default function MyEvents() {
                 <div className="flex justify-center gap-2 mb-4">
                     <button
                         onClick={() => setViewMode('organized')}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-md font-medium transition-colors hover:cursor-pointer ${
                             viewMode === 'organized'
                                 ? 'bg-strawberry-red-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -466,7 +466,7 @@ export default function MyEvents() {
                     </button>
                     <button
                         onClick={() => setViewMode('guest')}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-md font-medium transition-colors hover:cursor-pointer ${
                             viewMode === 'guest'
                                 ? 'bg-strawberry-red-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -594,14 +594,14 @@ export default function MyEvents() {
                             <button
                                 type="button"
                                 onClick={() => setAwardPointsModalOpen(false)}
-                                className="rounded-md px-4 py-2 text-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+                                className="rounded-md px-4 py-2 text-md font-medium border border-gray-300 text-gray-700 hover:cursor-pointer hover:bg-gray-50 transition"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleAwardPointsSubmit}
-                                className="rounded-md px-4 py-2 text-md font-medium bg-strawberry-red-500 text-white hover:bg-strawberry-red-600 transition"
+                                className="rounded-md px-4 py-2 text-md font-medium bg-strawberry-red-500 text-white hover:cursor-pointer hover:bg-strawberry-red-600 transition"
                             >
                                 Award Points
                             </button>
@@ -634,7 +634,7 @@ export default function MyEvents() {
                             <button
                                 type="button"
                                 onClick={closeGuestsModal}
-                                className="text-gray-400 hover:text-gray-600 transition"
+                                className="text-gray-400 hover:text-gray-600 transition hover:cursor-pointer "
                                 aria-label="Close dialog"
                             >
                                 <XMarkIcon className="size-5" />

@@ -121,7 +121,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                         type="button"
                         onClick={handleClose}
                         aria-label="Close dialog"
-                        className="absolute top-4 right-4 rounded-md p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition duration-150 group/button z-10"
+                        className="absolute top-4 right-4 rounded-md p-2 hover:cursor-pointer text-gray-400 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition duration-150 group/button z-10"
                     >
                         <XMarkIcon className="size-5 transition-transform duration-150 group-hover/button:rotate-90" />
                     </button>

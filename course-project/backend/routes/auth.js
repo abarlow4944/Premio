@@ -55,12 +55,15 @@ router.post("/tokens", async (req, res) => {
 		const expiresInSeconds = 60 * 60 * 24; // 1 day default expiry
 		const token = jwt.sign(payload, JWT_SECRET, { algorithm: "HS256", expiresIn: expiresInSeconds });
 		const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
-
+		const isProduction = process.env.NODE_ENV === "production";
+		console.log("IN PRODUCTION: ", isProduction);
+		
 		// HTTP-only cookie
 		res.cookie("auth_token", token, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === "production", //true in production
-			sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+			secure: isProduction, //true in production
+			sameSite: isProduction ? "none" : "strict",
+			path: "/",
 			maxAge: expiresInSeconds * 1000
 		});
 

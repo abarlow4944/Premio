@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/Card";
 import Message from "@/components/Message";
-import { CardContent } from "@/components/ui/Card";
+import { CardContent, Card } from "@/components/ui/card";
 import { Typography } from "@mui/material";
 import { InputDefault } from "@/components/ui/Input";
 

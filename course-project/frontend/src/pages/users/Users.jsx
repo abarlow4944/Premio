@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
-import { Button } from "@/components/UI/button";
+import { Button } from "@/components/ui/button";
 import ModalForm from "../../components/Modal/ModalForm";
 import ModalView from "../../components/Modal/ModalView";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";

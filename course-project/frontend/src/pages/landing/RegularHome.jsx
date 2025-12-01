@@ -4,7 +4,7 @@ import Message from '@/components/Message'
 import { useUser } from '../../contexts/UserContexts'
 import QRCode from 'react-qr-code'
 import { ArrowsRightLeftIcon, QrCodeIcon, CursorArrowRaysIcon, ArrowPathIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/UI/Card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import {getTransactionFields} from "@/components/Modal/FormFields/TransactionFields";
 
 console.log('RegularHome rendered...')

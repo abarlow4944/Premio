@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { InputDefault } from '../UI/Input';
+import { InputDefault } from '../ui/Input';
 import { formatDateTime } from './Columns/PromoColumns';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 

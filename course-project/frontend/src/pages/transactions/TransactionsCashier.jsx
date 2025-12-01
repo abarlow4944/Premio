@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { Button } from "../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/UI/Card";
 import Message from "@/components/Message";
-import { CardContent } from "@/components/UI/Card";
+import { CardContent, Card } from "@/components/ui/card";
 import { Typography } from "@mui/material";
-import { InputDefault } from "@/components/UI/Input";
+import { InputDefault } from "@/components/ui/Input";
 
 export default function TransactionPage() {
     

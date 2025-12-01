@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { InputDefault } from "@/components/UI/Input";
+import { InputDefault } from "@/components/ui/Input";
 import { useUser } from "@/contexts/UserContexts";
-import { Button } from "@/components/UI/button";
+import { Button } from "@/components/ui/button";
 import Message from "@/components/Message";
 import LineGraph from "@/components/LineGraph";
 import { ListItem } from "@/components/UI/ListItem";

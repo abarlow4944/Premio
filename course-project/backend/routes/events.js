@@ -108,8 +108,18 @@ router.get("/", async(req, res) => {
     }
 
     try{
-        const {name, description, location, startTime, endTime, capacity, points, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw,} = req.query;
+        const {name, description, location, startTime, endTime, capacity, points, showFull = false, page = 1, limit = 10, published, sortBy: sortByRaw, sortOrder: sortOrderRaw, asRole} = req.query;
         const where = {};
+
+        // Determine the effective role for filtering
+        // If asRole is provided and user has the actual role to back it up, use asRole for filtering
+        let effectiveRole = user.role;
+        if (asRole && ['manager', 'cashier', 'superuser'].includes(user.role)) {
+            // Managers, cashiers, and superusers can view as regular to see filtered view
+            if (asRole === 'regular') {
+                effectiveRole = 'regular';
+            }
+        }
 
         const pageNum = Number(page);
         const limitNum = Number(limit);
@@ -132,7 +142,7 @@ router.get("/", async(req, res) => {
             where.capacity = { not: null };
         }
 
-        if (user.role !== "superuser" && user.role !== "manager"){
+        if (effectiveRole !== "superuser" && effectiveRole !== "manager"){
             where.published = true;
         }
         else{

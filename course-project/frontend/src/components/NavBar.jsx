@@ -101,6 +101,9 @@ export default function NavBar() {
         
         setVisualRole(newRole);
         localStorage.setItem('visualRole', newRole);
+        
+        // Refresh the page to reload data with new role
+        window.location.reload();
     }
 
     const availableRoles = getAvailableSwitchRoles(role);

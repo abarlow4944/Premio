@@ -64,6 +64,7 @@ export default function NavBar() {
     const isOnPromotionsPage = location.pathname === '/promotions';
     const isOnEventsPage = location.pathname === '/events';
     const isOnMyEventsPage = location.pathname === '/my-events';
+    const isOnProfilePage = location.pathname === '/profile';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -102,8 +103,13 @@ export default function NavBar() {
         setVisualRole(newRole);
         localStorage.setItem('visualRole', newRole);
         
-        // Refresh the page to reload data with new role
-        window.location.reload();
+        // Only refresh the page if not on the profile page
+        // On profile page, role switch updates the UI without reload
+        if (!isOnProfilePage) {
+            window.location.reload();
+        } else {
+            setMobileMenuOpen(false);
+        }
     }
 
     const availableRoles = getAvailableSwitchRoles(role);

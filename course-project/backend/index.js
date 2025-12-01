@@ -36,7 +36,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://premio.up.railway.app']
+    origin: ['http://localhost:5173', 'https://premio.up.railway.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true

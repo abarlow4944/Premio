@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import ModalForm from "../Modal/ModalForm";
 import { getFilterFields } from "../Modal/FormFields/TransactionFields";
 import Message from '../Message';
+import { useUser } from "@/contexts/UserContexts";
 
 
 export default function DataTable({
@@ -46,6 +47,8 @@ export default function DataTable({
     const [internalData, setInternalData] = useState(data);
     const [editingRowId, setEditingRowId] = useState(null); //which row is being edited
     const [editingRowBackup, setEditingRowBackup] = useState(null) // to store original info in case user cancels edits
+    const { user, visualRole } = useUser();
+    const role = visualRole || user?.role || 'regular';
 
     useEffect(() => { //keep in sync
         setInternalData(data);
@@ -202,7 +205,7 @@ export default function DataTable({
                         <button
                             type="button"
                             onClick={() => saveEditingRow(row)}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-green-600 hover:text-green-800 hover:cursor-pointer"
                             aria-label="Save row"
                         >
                             <CheckCircleIcon className="size-5" />
@@ -212,7 +215,7 @@ export default function DataTable({
                         <button
                             type="button"
                             onClick={cancelEditingRow}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:text-red-800 hover:cursor-pointer"
                             aria-label="Cancel edit"
                         >
                             <XCircleIcon className="size-5" />
@@ -221,20 +224,23 @@ export default function DataTable({
                     ) : (
                         <>
                         {/* Edit */}
-                        <button
-                            type="button"
-                            onClick={() => startEditingRow(row)}
-                            className="text-blue-600 hover:text-blue-800"
-                            aria-label="Edit row"
-                        >
-                            <PencilSquareIcon className="size-5" />
-                        </button>
+                        {role !== "regular" && 
+                            <button
+                                type="button"
+                                onClick={() => startEditingRow(row)}
+                                className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
+                                aria-label="Edit row"
+                            >
+                                <PencilSquareIcon className="size-5" />
+                            </button>
+                        }
+
                         {/* Award Points Action (for organizers) */}
                         {onAwardPoints ? (
                             <button
                                 type="button"
                                 onClick={() => onAwardPoints(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
@@ -244,7 +250,7 @@ export default function DataTable({
                             <button
                                 type="button"
                                 onClick={() => onViewRow(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
                                 aria-label="View in Full"
                             >
                                 <InformationCircleIcon className="size-5" />

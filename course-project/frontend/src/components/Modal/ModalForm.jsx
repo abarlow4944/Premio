@@ -110,7 +110,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
             <Box sx={modalStyle}>
                 {/* Faded background */}
                 <div
-                    className="absolute inset-0 bg-black/40"
+                    className="absolute inset-0 "
                     aria-hidden="true"
                     onClick={handleClose}
                 />

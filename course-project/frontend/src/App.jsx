@@ -6,7 +6,6 @@ import Login from "./pages/Login"
 import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
-import { AuthProvider } from "./contexts/AuthContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
 import TransactionsHome from "./pages/transactions/Transactions";
@@ -24,7 +23,7 @@ import Analytics from "./pages/Analytics";
 
 function App() {
 
-  return <AuthProvider>
+  return
     <UserProvider>
       <BrowserRouter>
         <Routes>
@@ -119,7 +118,6 @@ function App() {
         </Routes>
       </BrowserRouter>
     </UserProvider>
-    </AuthProvider>
 }
 
 export default App

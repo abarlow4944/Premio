@@ -6,7 +6,7 @@ import Login from "./pages/Login"
 import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import { UserProvider } from "./contexts/UserContexts";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContexts";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Users from "./pages/users/Users";
 import TransactionsHome from "./pages/transactions/Transactions";

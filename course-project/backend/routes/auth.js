@@ -62,10 +62,10 @@ router.post("/tokens", async (req, res) => {
 		// HTTP-only cookie
 		res.cookie("auth_token", token, {
 			httpOnly: true,
-			secure: isProduction, //true in production
-			sameSite: isProduction ? "none" : "strict",
+			secure: true,
+			sameSite: "none",
 			path: "/",
-			maxAge: expiresInSeconds * 1000
+			maxAge: 24 * 60 * 60 * 1000
 		});
 
 		// return only non-sensitive info to front end

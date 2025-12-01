@@ -94,6 +94,7 @@ export function getUserColumns(role) {
       accessorKey: "points",
       header: "Points",
       enableSorting: true,
+      filterType: "range"
     },
     {
       accessorKey: "createdAt",
@@ -128,18 +129,6 @@ export function getUserColumns(role) {
         { label: 'True', value: 'true' },
         { label: 'False', value: 'false' },
       ]
-    },
-    {
-      accessorKey: "suspicious",
-      header: "Suspicious",
-      enableSorting: true,
-      filterType: 'select', 
-      filterOptions: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ],
-      editableCell: TableCell,
-      editType: "select" 
     },
     ];
   }

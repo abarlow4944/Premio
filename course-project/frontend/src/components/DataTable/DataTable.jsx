@@ -644,7 +644,7 @@ export default function DataTable({
                                                 (() => {
                                                     return (
                                                     <>  
-                                                        <Button variant="outline" onClick={() => {
+                                                        <Button variant="outline" className="text-platinum-500 border-2 border-strawberry-red-600 hover:bg-platinum-800" onClick={() => {
                                                             setCurrentFilterKey(accessorKey);
                                                             setFilterModalOpen(true);
                                                         }}>Filter</Button>

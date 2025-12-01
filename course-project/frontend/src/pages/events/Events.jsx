@@ -173,6 +173,11 @@ export default function Events() {
 
                 // regular users can only see published events
                 if(role === "regular") params.append("published", true)
+                
+                // Pass asRole if viewing as a different role
+                if (user?.role && user.role !== 'regular' && role === 'regular') {
+                    params.append('asRole', 'regular');
+                }
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)

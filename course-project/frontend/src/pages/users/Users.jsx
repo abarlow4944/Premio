@@ -31,6 +31,9 @@ export default function Users() {
     const[success, setSuccess] = useState("")
     const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
+    
+    // Organizers (regular users) can edit users, as well as managers and superusers
+    const enableUserEditing = role === 'manager' || role === 'superuser' || role === 'regular';
 
     // go to the cashier's User page if the user is a cashier
     if(role === "cashier"){
@@ -214,6 +217,7 @@ export default function Users() {
                 setQuery={setQuery}
                 error={error}
                 success={success}
+                enableEditing={enableUserEditing}
                 onRowSave={handleRowSaved} // for editing rows
             />
         </div>

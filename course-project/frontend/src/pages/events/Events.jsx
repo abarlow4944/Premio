@@ -32,6 +32,7 @@ export default function Events() {
     const [users, setUsers] = useState([]);
     const [userOrganizedEventIds, setUserOrganizedEventIds] = useState(new Set());
     const [userGuestEventIds, setUserGuestEventIds] = useState(new Set());
+    const [currentEventData, setCurrentEventData] = useState(null);
     
     // Fetch user's organized and guest events to determine RSVP eligibility
     useEffect(() => {
@@ -331,6 +332,7 @@ export default function Events() {
             }
 
             const data = await res.json();
+            setCurrentEventData(data);
             setModalText(JSON.stringify(data, null, 2));
 
         } catch (err) {
@@ -343,7 +345,36 @@ export default function Events() {
     function closeModal(){
         setIsModalOpen(false);
         setModalText("");
+        setCurrentEventData(null);
     }
+
+    const handleGuestModified = (guestUtorid, action) => {
+        if (!currentEventData) return;
+        
+        setCurrentEventData(prev => {
+            if (!prev) return prev;
+            
+            let updatedGuests;
+            if (action === 'removed') {
+                updatedGuests = prev.guests.filter(g => g.utorid !== guestUtorid);
+            } else if (action === 'added') {
+                // Find the user details from the users array
+                const newGuest = users.find(u => u.utorid === guestUtorid);
+                if (newGuest) {
+                    updatedGuests = [...prev.guests, newGuest];
+                } else {
+                    updatedGuests = prev.guests;
+                }
+            } else {
+                updatedGuests = prev.guests;
+            }
+            
+            return {
+                ...prev,
+                guests: updatedGuests
+            };
+        });
+    };
 
     const handleCreateEvent = async (formData) => {
         setError("");
@@ -416,6 +447,9 @@ export default function Events() {
                     <h1 className="text-2xl font-semibold text-flag-red-500 mt-[10vh]">Events</h1>
                     <p className="text-sm text-space-indigo-500">
                         {role === 'regular' ? 'View and RSVP to events.' : 'View and manage all events in the system.'}
+                    </p>
+                    <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
+                        {role === 'manager' && 'Click the more details button to manage guests for an event.'}
                     </p>
                 </div>
             </div>
@@ -498,6 +532,11 @@ export default function Events() {
                 onClose={closeModal}
                 text={modalText}
                 title="Event Details"
+                role={role}
+                eventData={currentEventData}
+                users={users}
+                userUtorid={user?.utorid}
+                onGuestModified={handleGuestModified}
             />
 
             {/* Create Event Modal */}

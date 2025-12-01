@@ -255,6 +255,9 @@ router.get("/:eventId", async(req, res) =>{
         };
 
         if (user.role === "regular") {
+            // Check if user is an organizer of this event
+            const isOrganizer = flatten_guestlist.organizers.some(org => org.utorid === user.utorid);
+            
             const event_regular = {
                 id: flatten_guestlist.id,
                 name: flatten_guestlist.name,
@@ -266,6 +269,11 @@ router.get("/:eventId", async(req, res) =>{
                 organizers: Array.isArray(flatten_guestlist.organizers) ? flatten_guestlist.organizers : [],
                 numGuests: Array.isArray(flatten_guestlist.guests) ? flatten_guestlist.guests.length : 0,
             };
+
+            // If organizer, include the full guest list for editing
+            if (isOrganizer) {
+                event_regular.guests = Array.isArray(flatten_guestlist.guests) ? flatten_guestlist.guests : [];
+            }
 
             return res.status(200).json(event_regular);
         }
@@ -667,17 +675,21 @@ router.post("/:eventId/guests", async(req, res) => {
         }
 
         // allow if manager/superuser, or if user is an organizer of the event
-        if (!(user.role === "superuser" || user.role === "manager")){
-            const isOrganizer = await prisma.event.findFirst({
+        let isOrganizer = false;
+        if (user.role === "superuser" || user.role === "manager"){
+            isOrganizer = true;
+        } else {
+            const organizerCheck = await prisma.event.findFirst({
                 where: {
                     id: eventId,
                     organizers: { some: { utorid: user.utorid } },
                 },
                 select: { id: true },
             });
-            if (!isOrganizer){
+            if (!organizerCheck){
                 return res.status(403).json({ "error": "Not authorized" });
             }
+            isOrganizer = true;
         }
 
         const targetUser = await prisma.user.findUnique({
@@ -747,7 +759,8 @@ router.post("/:eventId/guests", async(req, res) => {
             return res.status(404).json({ "error": "Not Found" });
         }
 
-        if (guestlist.published === false){
+        // If not an organizer, require event to be published
+        if (!isOrganizer && guestlist.published === false){
             return res.status(404).json({ "error": "Not Found"});
         }
 
@@ -866,7 +879,7 @@ router.delete("/:eventId/guests/me", async(req, res) => {
 
 router.delete("/:eventId/guests/:userId", async (req,res) => {
     const user = req.user;
-    if (!user || (user.role !== "superuser" && user.role !== "manager")){ // clearance
+    if (!user){ // must be authenticated
         return res.status(403).json({ "error": "Not authorized" });
     }
     
@@ -876,6 +889,20 @@ router.delete("/:eventId/guests/:userId", async (req,res) => {
 
         if (isNaN(eventId) || isNaN(userId)){
             return res.status(400).json({ "error": "Bad Request: Not an integer" });
+        }
+
+        // allow if manager/superuser, or if user is an organizer of the event
+        if (!(user.role === "superuser" || user.role === "manager")){
+            const isOrganizer = await prisma.event.findFirst({
+                where: {
+                    id: eventId,
+                    organizers: { some: { utorid: user.utorid } },
+                },
+                select: { id: true },
+            });
+            if (!isOrganizer){
+                return res.status(403).json({ "error": "Not authorized" });
+            }
         }
 
         const event = await prisma.event.findUnique({
@@ -889,11 +916,11 @@ router.delete("/:eventId/guests/:userId", async (req,res) => {
             return res.status(400).json({ "error": "Bad Request: Event doesn't exist" });
         }
 
-        const user = await prisma.user.findUnique({
+        const targetUser = await prisma.user.findUnique({
             where: { id: userId},
         });
 
-        if(!user){
+        if(!targetUser){
             return res.status(400).json({ "error": "Bad Request: User doesn't exist" });
         }
 
@@ -901,7 +928,7 @@ router.delete("/:eventId/guests/:userId", async (req,res) => {
             where: {
                 eventId_utoridGuest: {
                 eventId: eventId,
-                utoridGuest: user.utorid,
+                utoridGuest: targetUser.utorid,
                 },
             },
         });

@@ -3,7 +3,7 @@ import { useUser } from "@/contexts/UserContexts";
 import { getUserColumns } from "@/components/DataTable/Columns/UserColumns";
 import { Button } from "@/components/ui/button";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
-import { Card, CardContent } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/card";
 import { InputDefault } from "@/components/ui/Input";
 import { Typography } from "@mui/material";
 import Message from "@/components/Message";

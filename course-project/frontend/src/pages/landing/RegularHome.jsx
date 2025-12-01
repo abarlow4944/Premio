@@ -339,7 +339,7 @@ export default function Regular() {
         >
           {/* Faded background */}
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0"
             aria-hidden="true"
             onClick={close}
           />
@@ -395,7 +395,7 @@ export default function Regular() {
         >
           {/* Faded background */}
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0"
             aria-hidden="true"
             onClick={() => setPendingRedemptionsOpen(false)}
           />

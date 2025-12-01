@@ -116,7 +116,7 @@ export default function ModalForm({ formTitle, formDescription, modalType, field
                 />
 
                 {/* Modal content */}
-                <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden max-h-[80vh] flex flex-col">
+                <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-y-auto max-h-[80vh] flex flex-col">
                     <button
                         type="button"
                         onClick={handleClose}

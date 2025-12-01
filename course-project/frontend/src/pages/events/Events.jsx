@@ -443,6 +443,9 @@ export default function Events() {
                     <p className="text-sm text-space-indigo-500">
                         {role === 'regular' ? 'View and RSVP to events.' : 'View and manage all events in the system.'}
                     </p>
+                    <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
+                        {role === 'manager' && 'Click the more details button to manage guests for an event.'}
+                    </p>
                 </div>
             </div>
 

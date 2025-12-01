@@ -60,7 +60,7 @@ router.post("/tokens", async (req, res) => {
 		res.cookie("auth_token", token, {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === "production", //true in production
-			sameSite: "strict",
+			sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 			maxAge: expiresInSeconds * 1000
 		});
 
@@ -95,7 +95,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("auth_token", { // clear the cookie
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // true in production
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",,
   });
 
   return res.status(200).json({ ok: true });

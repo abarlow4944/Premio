@@ -4,7 +4,7 @@ import { useUser } from "@/contexts/UserContexts";
 import { Button } from "@/components/ui/button";
 import Message from "@/components/Message";
 import LineGraph from "@/components/LineGraph";
-import { ListItem } from "@/components/UI/ListItem";
+import { ListItem } from "@/components/ui/ListItem";
 
 
 export default function Analytics() {

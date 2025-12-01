@@ -2,7 +2,9 @@
 'use strict';
 
 require('dotenv').config();
-const port = process.env.PORT || 3000;
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on ${PORT}...`);
+});
 
 //const port = (() => {
 //    const args = process.argv;

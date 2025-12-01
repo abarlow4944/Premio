@@ -76,6 +76,7 @@ router.post("/tokens", async (req, res) => {
 router.get("/me", async (req, res) => {
   try {
     const token = req.cookies.auth_token;
+	console.log("CHECKING COOKIES: ", req.cookies);
     if (!token) return res.status(401).json({ error: "Not authenticated" });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);

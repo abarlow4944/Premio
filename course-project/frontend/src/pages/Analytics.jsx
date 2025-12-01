@@ -4,6 +4,7 @@ import { useUser } from "@/contexts/UserContexts";
 import { Button } from "@/components/UI/button";
 import Message from "@/components/Message";
 import LineGraph from "@/components/LineGraph";
+import BarGraph from "@/components/BarGraph";
 import { ListItem } from "@/components/UI/ListItem";
 
 
@@ -12,6 +13,7 @@ export default function Analytics() {
     const [userData, setUserData] = useState([]);
     const [promoData, setPromoData] = useState([]);
     const [eventData, setEventData] = useState([]);
+    const [topUsersData, setTopUsersData] = useState([]);
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
 
@@ -159,6 +161,44 @@ export default function Analytics() {
         return top5
     }
 
+    // get top 5 users by points
+    const fetchTopUsers = async () => {
+        try {
+            // retrieve users
+            const res = await fetch(`${API_URL}/users?limit=1000`, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            const users = await res.json(); // response from endpoint (users)
+            
+            if(!res.ok){ // handle error
+                setError(`Could not retrieve user data: ${users.error}` || "Could not retrieve user data")
+                return []
+            }
+
+            if (!users.results || users.results.length === 0) {
+                return []
+            }
+            
+            // get top 5 users by points
+            const top5Users = users.results
+                .sort((a, b) => b.points - a.points)
+                .slice(0, 5)
+                .map((u, index) => ({
+                    name: u.name,
+                    utorid: u.utorid,
+                    points: u.points
+                }));
+
+            return top5Users
+        } catch (err) {
+            console.error("Error fetching top users:", err);
+            setError("Failed to fetch top users data");
+            return []
+        }
+    }
+
     useEffect(() => {
         async function loadData() {
             const userResult = await fetchUserData();
@@ -169,6 +209,9 @@ export default function Analytics() {
 
             const eventResult = await fetchEventData();
             setEventData(eventResult);
+
+            const topUsersResult = await fetchTopUsers();
+            setTopUsersData(topUsersResult);
         }
         loadData();
     }, []);
@@ -203,20 +246,39 @@ export default function Analytics() {
             {/* 3-column grid: chart spans 2 columns */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-                {/* left: line graph */}
-                <div className="xl:col-span-2 rounded-xl bg-white border border-gray-200 shadow p-8 h-[420px] flex flex-col">
-                    <h2 className="text-xl font-semibold text-space-indigo-600 text-center mb-4">
-                        Registered Users Over Time
-                    </h2>
+                {/* left: line graph and bar graph */}
+                <div className="xl:col-span-2 flex flex-col gap-8">
+                    {/* line graph */}
+                    <div className="rounded-xl bg-white border border-gray-200 shadow p-8 h-[420px] flex flex-col">
+                        <h2 className="text-xl font-semibold text-space-indigo-600 text-center mb-4">
+                            Registered Users Over Time
+                        </h2>
 
-                    <div className="flex-1 min-h-0"> 
-                        <LineGraph
-                            data={userData}
-                            xAxis="date"
-                            yAxis="count"
-                            name="Users"
-                            label="Registered Users"
-                        />
+                        <div className="flex-1 min-h-0"> 
+                            <LineGraph
+                                data={userData}
+                                xAxis="date"
+                                yAxis="count"
+                                name="Users"
+                                label="Registered Users"
+                            />
+                        </div>
+                    </div>
+
+                    {/* bar graph - top 5 users by points */}
+                    <div className="rounded-xl bg-white border border-gray-200 shadow p-8 h-[420px] flex flex-col">
+                        <h2 className="text-xl font-semibold text-space-indigo-600 text-center mb-4">
+                            Top 5 Users by Points
+                        </h2>
+
+                        <div className="flex-1 min-h-0"> 
+                            <BarGraph
+                                data={topUsersData}
+                                xAxis="utorid"
+                                yAxis="points"
+                                name="Points"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -224,7 +286,7 @@ export default function Analytics() {
                 <div className="flex flex-col gap-8">
 
                     {/* top promotions */}
-                    <div className="rounded-xl bg-white border border-gray-200 shadow p-6">
+                    <div className="rounded-xl bg-white border border-gray-200 shadow p-6 h-[420px] flex flex-col overflow-y-auto">
                         <h2 className="text-lg font-semibold text-space-indigo-600 text-center mb-4">
                             Top 5 Popular Promotions
                         </h2>
@@ -240,7 +302,7 @@ export default function Analytics() {
                     </div>
 
                     {/* top events */}
-                    <div className="rounded-xl bg-white border border-gray-200 shadow p-6">
+                    <div className="rounded-xl bg-white border border-gray-200 shadow p-6 h-[420px] flex flex-col overflow-y-auto">
                         <h2 className="text-lg font-semibold text-space-indigo-600 text-center mb-4">
                             Top 5 Popular Events
                         </h2>

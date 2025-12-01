@@ -33,12 +33,10 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+//const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({
-    origin: FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: "https://premio.up.railway.app",
     credentials: true
 }));
 

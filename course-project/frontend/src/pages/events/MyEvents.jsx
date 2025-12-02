@@ -113,21 +113,18 @@ export default function MyEvents() {
         // retrieve the user data by making a HTTP request
         try {
             const fetchData = async () => {
-                let dataToUse = userData;
-                
-                if (!dataToUse) {
-                    const res = await fetch(`${API_URL}/users/me`, {
-                        method: "GET",
-                        credentials: "include"
-                    });
+                // Always fetch fresh user data to ensure we have the latest organized/guest events
+                const res = await fetch(`${API_URL}/users/me`, {
+                    method: "GET",
+                    credentials: "include"
+                });
 
-                    dataToUse = await res.json();
-                    
-                    if(!res.ok){ // handle error
-                        setError(`Could not retrieve events data: ${dataToUse.error}` || "Could not retrieve events data")
-                        console.log("Error:", dataToUse.error)
-                        return
-                    }
+                const dataToUse = await res.json();
+                
+                if(!res.ok){ // handle error
+                    setError(`Could not retrieve events data: ${dataToUse.error}` || "Could not retrieve events data")
+                    console.log("Error:", dataToUse.error)
+                    return
                 }
 
                 // Combine organized and guest events based on viewMode

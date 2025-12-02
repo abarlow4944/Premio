@@ -61,6 +61,7 @@ model Transaction {
   relatedId   Int?
   createdBy   String?
   suspicious  Boolean         @default(false)
+  bookmarked  Boolean?        @default(false)
   processed   Boolean         @default(false)
   processedBy String?
   eventId     Int?

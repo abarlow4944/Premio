@@ -187,7 +187,7 @@ router.post("/resets", async (req, res) => {
 // POST /auth/activate: Request an activation email
 router.post("/activate", async (req, res) => {
 	const { utorid } = req.body;
-	const API_URL = process.env.VITE_API_URL; // API base URL
+	const API_URL = process.env.FRONTEND_URL; // API base URL
 
 	if (!utorid || typeof utorid !== "string") {
 		return res.status(400).json({ error: "Missing or invalid UTORid" });

@@ -6,12 +6,13 @@
   "scripts": {
     "createsuperuser": "node prisma/createsu.js",
     "clean": "rm -rf prisma/dev.db* node_modules package-lock.json prisma/migrations/",
-    "dev": "nodemon index.js 3000"
+    "dev": "nodemon index.js 3000",
+    "start": "node index.js"
   },
   "author": "CSC309 Student, Winter 2025",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.4.1",
+    "@prisma/client": "^6.19.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -28,5 +29,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
+  },
+   "prisma": {
+    "seed": "node database/seed.js"
   }
 }

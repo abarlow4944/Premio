@@ -3,23 +3,22 @@
 
 require('dotenv').config();
 
-const port = (() => {
-    const args = process.argv;
-
-    if (args.length !== 3) {
-        console.error("usage: node index.js port");
-        process.exit(1);
-    }
-
-    const num = parseInt(args[2], 10);
-    if (isNaN(num)) {
-        console.error("error: argument must be an integer.");
-        process.exit(1);
-    }
-
-    return num;
-})();
-
+//const port = (() => {
+//    const args = process.argv;
+//
+//    if (args.length !== 3) {
+//        console.error("usage: node index.js port");
+//        process.exit(1);
+//    }
+//
+//    const num = parseInt(args[2], 10);
+//    if (isNaN(num)) {
+//        console.error("error: argument must be an integer.");
+//        process.exit(1);
+//    }
+//
+//    return num;
+//})();
 
 const express = require("express");
 const auth = require("./routes/auth.js");
@@ -34,11 +33,12 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
 
@@ -58,11 +58,13 @@ app.get('/', (req, res) => {
 });
 
 //////////////////////////////////////////////////////////////////////////// SERVER STUFF
+const port = process.env.PORT || 3000;
+
 const server = app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+  console.log(`Server running on ${port}...`);
 });
 
 server.on('error', (err) => {
-    console.error(`cannot start server: ${err.message}`);
-    process.exit(1);
+  console.error(`cannot start server: ${err.message}`);
+  process.exit(1);
 });

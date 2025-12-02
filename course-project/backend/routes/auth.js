@@ -14,6 +14,7 @@ const resetRateLimiter = new Map();
 
 // POST /auth/tokens: Authenticate a user and return a JWT token
 router.post("/tokens", async (req, res) => {
+	console.log("IN AUTH TOKENS");
 	const { utorid, password } = req.body;
 
 	if (!utorid || !password) {
@@ -55,13 +56,16 @@ router.post("/tokens", async (req, res) => {
 		const expiresInSeconds = 60 * 60 * 24; // 1 day default expiry
 		const token = jwt.sign(payload, JWT_SECRET, { algorithm: "HS256", expiresIn: expiresInSeconds });
 		const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
-
+		const isProduction = process.env.NODE_ENV === "production";
+		console.log("IN PRODUCTION: ", isProduction);
+		
 		// HTTP-only cookie
 		res.cookie("auth_token", token, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === "production", //true in production
-			sameSite: "strict",
-			maxAge: expiresInSeconds * 1000
+			secure: true,
+			sameSite: "none",
+			path: "/",
+			maxAge: 24 * 60 * 60 * 1000
 		});
 
 		// return only non-sensitive info to front end
@@ -76,6 +80,7 @@ router.post("/tokens", async (req, res) => {
 router.get("/me", async (req, res) => {
   try {
     const token = req.cookies.auth_token;
+	console.log("CHECKING COOKIES: ", req.cookies);
     if (!token) return res.status(401).json({ error: "Not authenticated" });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -95,7 +100,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("auth_token", { // clear the cookie
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // true in production
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
   });
 
   return res.status(200).json({ ok: true });

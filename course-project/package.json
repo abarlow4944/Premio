@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@material-tailwind/react": "^2.1.10",
-    "body-parser": "^2.2.1",
-    "express": "^5.1.0",
-    "nodemailer": "^7.0.10"
-  }
-}

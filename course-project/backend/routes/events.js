@@ -160,7 +160,7 @@ router.get("/", async(req, res) => {
         });
 
         // apply sorting
-        const allowedSorts = ['name','description','location','startTime','endTime','capacity', 'published'];
+        const allowedSorts = ['name','description','location','startTime','endTime','capacity', 'published', 'bookmarked'];
         let orderBy = { id: 'asc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
             const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -198,6 +198,7 @@ router.get("/", async(req, res) => {
         const flatten_guestlist = events.map(event => ({
             ...event,
             guests: event.guests.map(g => g.guest),
+            bookmarked: event.bookmarked ?? false,
         }));
 
         return res.status(200).json({ count: count, results: flatten_guestlist})
@@ -1234,6 +1235,48 @@ router.post("/:eventId/transactions", async (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Internal Server Error" });
     }
+});
+
+// PATCH /events/:eventId/bookmark: Toggle bookmark status
+router.patch('/:eventId/bookmark', async (req, res) => {
+	try {
+		const user = req.user;
+
+		// All user roles can bookmark events
+		if (!user || !['regular', 'cashier', 'manager', 'superuser'].includes(user.role)) {
+			return res.status(403).json({ error: 'Not authorized' });
+		}
+
+		const { bookmarked } = req.body;
+
+		if (bookmarked === undefined || typeof bookmarked !== 'boolean') {
+			return res.status(400).json({ error: 'Missing or incorrect field type' });
+		}
+
+		const id = Number(req.params.eventId);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: 'Invalid eventId' });
+		}
+
+		const event = await prisma.event.findUnique({ where: { id } });
+		if (!event) {
+			return res.status(404).json({ error: 'Event not found' });
+		}
+
+		const updated = await prisma.event.update({
+			where: { id },
+			data: { bookmarked }
+		});
+
+		return res.status(200).json({
+			id: updated.id,
+			name: updated.name,
+			bookmarked: updated.bookmarked
+		});
+	} catch (err) {
+		console.error('Error updating bookmark:', err);
+		return res.status(500).json({ error: 'Internal server error' });
+	}
 });
 
 module.exports = router;

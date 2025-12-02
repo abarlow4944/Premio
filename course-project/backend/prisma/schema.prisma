@@ -80,6 +80,7 @@ model Event {
   pointsAwarded Int?          @default(0)
   transactions Transaction[] @relation("EventTransaction")
   published    Boolean?      @default(false)
+  bookmarked   Boolean?      @default(false)
   organizers   User[]        @relation("EventOrganizers")
   guests       EventGuest[]  @relation("EventGuestRelation") // guests who attended the event
 }

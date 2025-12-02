@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import ModalForm from "../../components/Modal/ModalForm";
 import ModalView from "../../components/Modal/ModalView";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
+import { FlagIcon } from "@heroicons/react/24/solid";
 import CashierUser from "./UserCashier"
 
 
@@ -21,8 +22,8 @@ export default function Users() {
         role: "",
         verified: "",
         activated: "",
-        sortBy: "",
-        sortOrder: "asc",
+        sortBy: "suspicious",
+        sortOrder: "desc",
         page: 1,
         limit: 10
     })
@@ -31,6 +32,9 @@ export default function Users() {
     const[success, setSuccess] = useState("")
     const role = visualRole || user?.role || 'regular';
     const columns = useMemo(() => getUserColumns(role), [role]);
+    
+    // Organizers (regular users) can edit users, as well as managers and superusers
+    const enableUserEditing = role === 'manager' || role === 'superuser' || role === 'regular';
 
     // go to the cashier's User page if the user is a cashier
     if(role === "cashier"){
@@ -173,6 +177,39 @@ export default function Users() {
         }
     }
 
+    // Toggle suspicious flag
+    const handleSuspiciousFlagToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${row.id}/suspicious`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ suspicious: !row.suspicious })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update suspicious status: ${data.error}` || "Could not update suspicious status");
+                console.warn('Could not update suspicious status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setData(prev => prev.map(r => 
+                r.id === row.id ? { ...r, suspicious: !r.suspicious } : r
+            ));
+            setSuccess("Successfully updated suspicious status");
+        } catch (err) {
+            setError(err.message || "Could not update suspicious status");
+            console.error("Error:", err);
+        }
+    };
+
 
     return (
         <div className="p-6 space-y-4">
@@ -181,6 +218,10 @@ export default function Users() {
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>
                 <p className="text-center text-sm text-space-indigo-500 mt-">
                     View and manage all users in the system.
+                </p>
+                <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
+                    <span>Suspicious users are marked with a</span>
+                    <FlagIcon className="size-4 text-red-600" />
                 </p>
             </div>
 
@@ -214,7 +255,10 @@ export default function Users() {
                 setQuery={setQuery}
                 error={error}
                 success={success}
+                enableEditing={enableUserEditing}
                 onRowSave={handleRowSaved} // for editing rows
+                showSuspiciousFlag={true}
+                onSuspiciousFlagToggle={handleSuspiciousFlagToggle}
             />
         </div>
 

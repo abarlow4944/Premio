@@ -146,7 +146,18 @@ router.get('/', async (req, res) => {
 			ended: endedRaw,
 			sortBy: sortByRaw,
 			sortOrder: sortOrderRaw,
+			asRole,
 		} = req.query;
+
+		// Determine the effective role for filtering
+		// If asRole is provided and user has the actual role to back it up, use asRole for filtering
+		let effectiveRole = user?.role;
+		if (asRole && ['manager', 'cashier', 'superuser'].includes(user?.role)) {
+			// Managers, cashiers, and superusers can view as regular to see filtered view
+			if (asRole === 'regular') {
+				effectiveRole = 'regular';
+			}
+		}
 
 		const page = Number(pageRaw);
 		const limit = Number(limitRaw);
@@ -212,7 +223,7 @@ router.get('/', async (req, res) => {
 		const now = new Date();
 
         // Manager-level clearance
-		const isManager = (user && ['manager', 'superuser'].includes(user.role));
+		const isManager = (effectiveRole && ['manager', 'superuser'].includes(effectiveRole));
 
 		const startedFilter = startedRaw === undefined ? undefined : (String(startedRaw).toLowerCase() === 'true');
 		const endedFilter = endedRaw === undefined ? undefined : (String(endedRaw).toLowerCase() === 'true');

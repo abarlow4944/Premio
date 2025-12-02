@@ -44,14 +44,23 @@ export function InputDefault({label, value, type, name, onChange, readOnly = fal
         )
     }
     else if(type === "date"){
-        return <input
-            type="datetime-local"
-            className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
-            value={value}
-            id={name}
-            name={name}
-            onChange={onChange}
-        />
+        return <div>
+            <label
+            htmlFor={label}
+            className="block text-sm/6 font-medium text-strawberry-red-500 text-left"
+            >
+            {label}
+            </label>
+            <input
+                type={type}
+                className="block w-full rounded-md mt-2 bg-white px-3 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-strawberry-red-500 sm:text-sm/6"
+                value={value}
+                id={name}
+                name={name}
+                onChange={onChange}
+            />
+        </div>
+        
     }
     else{
         return (

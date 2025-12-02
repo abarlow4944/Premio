@@ -3,7 +3,7 @@ import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-tabl
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon } from '@heroicons/react/24/outline'
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon, GiftIcon, UserPlusIcon } from '@heroicons/react/24/outline'
 import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import ModalForm from "../Modal/ModalForm";
@@ -32,6 +32,7 @@ export default function DataTable({
     onRSVP, // for RSVP action
     canRSVP, // function to check if RSVP is allowed for a row
     onAwardPoints, // for Award Points action (organizers only)
+    onManageGuests, // for managing guests action
     showSuspiciousFlag = false,
     onSuspiciousFlagToggle,
 }) {
@@ -208,7 +209,7 @@ export default function DataTable({
                             className="text-green-600 hover:text-green-800 hover:cursor-pointer"
                             aria-label="Save row"
                         >
-                            <CheckCircleIcon className="size-5" />
+                            <CheckCircleIcon className="size-5 hover:cursor-pointer" />
                         </button>
 
                         {/* Cancel */}
@@ -218,22 +219,20 @@ export default function DataTable({
                             className="text-red-600 hover:text-red-800 hover:cursor-pointer"
                             aria-label="Cancel edit"
                         >
-                            <XCircleIcon className="size-5" />
+                            <XCircleIcon className="size-5 hover:cursor-pointer" />
                         </button>
                         </>
                     ) : (
                         <>
                         {/* Edit */}
-                        {role !== "regular" && 
-                            <button
-                                type="button"
-                                onClick={() => startEditingRow(row)}
-                                className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
-                                aria-label="Edit row"
-                            >
-                                <PencilSquareIcon className="size-5" />
-                            </button>
-                        }
+                        <button
+                            type="button"
+                            onClick={() => startEditingRow(row)}
+                            className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
+                            aria-label="Edit row"
+                        >
+                            <PencilSquareIcon className="size-5 hover:cursor-pointer" />
+                        </button>
 
                         {/* Award Points Action (for organizers) */}
                         {onAwardPoints ? (
@@ -244,16 +243,29 @@ export default function DataTable({
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
-                                <GiftIcon className="size-5" />
+                                <GiftIcon className="size-5 hover:cursor-pointer" />
                             </button>
-                        ) : (
+                        ) : onViewRow ? (
                             <button
                                 type="button"
                                 onClick={() => onViewRow(row.original)}
                                 className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
                                 aria-label="View in Full"
                             >
-                                <InformationCircleIcon className="size-5" />
+                                <InformationCircleIcon className="size-5 hover:cursor-pointer" />
+                            </button>
+                        ) : null}
+
+                        {/* Manage Guests Action (for organizers) */}
+                        {onManageGuests && (
+                            <button
+                                type="button"
+                                onClick={() => onManageGuests(row.original)}
+                                className="text-blue-600 hover:text-blue-800 hover:cursor-pointer"
+                                aria-label="Manage event guests"
+                                title="Manage event guests"
+                            >
+                                <UserPlusIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         )}
                         </>
@@ -270,20 +282,33 @@ export default function DataTable({
                             <button
                                 type="button"
                                 onClick={() => onAwardPoints(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
                                 aria-label="Award points to guests"
                                 title="Award points to guests"
                             >
-                                <GiftIcon className="size-5" />
+                                <GiftIcon className="size-5 hover:cursor-pointer" />
                             </button>
-                        ) : (
+                        ) : onViewRow ? (
                             <button
                                 type="button"
                                 onClick={() => onViewRow(row.original)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
                                 aria-label="View in Full"
                             >
-                                <InformationCircleIcon className="size-5" />
+                                <InformationCircleIcon className="size-5 hover:cursor-pointer" />
+                            </button>
+                        ) : null}
+
+                        {/* Manage Guests Action (for organizers) */}
+                        {onManageGuests && (
+                            <button
+                                type="button"
+                                onClick={() => onManageGuests(row.original)}
+                                className="hover:cursor-pointer text-blue-600 hover:text-blue-800"
+                                aria-label="Manage event guests"
+                                title="Manage event guests"
+                            >
+                                <UserPlusIcon className="size-5 hover:cursor-pointer" />
                             </button>
                         )}
                         {/* RSVP Action */}
@@ -292,7 +317,7 @@ export default function DataTable({
                                 type="button"
                                 onClick={() => onRSVP(row.original)}
                                 disabled={canRSVP && !canRSVP(row.original)}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                className={`px-3 py-1 hover:cursor-pointer rounded-md text-sm font-medium transition-colors ${
                                     canRSVP && !canRSVP(row.original)
                                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         : 'bg-strawberry-red-500 text-white hover:bg-strawberry-red-600'
@@ -314,7 +339,7 @@ export default function DataTable({
         // console.log(actionsCol);
         return [...cols, actionsCol];
    
-    }, [columns, selectionEnabled, editingRowId, onRSVP, canRSVP, onViewRow, enableEditing, onAwardPoints]);
+    }, [columns, selectionEnabled, editingRowId, onRSVP, canRSVP, onViewRow, enableEditing, onAwardPoints, onManageGuests]);
 
 
     const table = useReactTable({
@@ -548,13 +573,13 @@ export default function DataTable({
                                                     return (
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button className="w-full flex items-center justify-between rounded-md p-2 text-sm text-left border-2 bg-strawberry-red-500 border-strawberry-red-600 text-white">
+                                                                <Button className="hover:cursor-pointer w-full flex items-center justify-between rounded-md p-2 text-sm text-left border-2 bg-strawberry-red-500 border-strawberry-red-600 text-white">
                                                                     <span className="text-white font-medium">{displayLabel}</span>
-                                                                    <ChevronDownIcon className="size-4 text-white" />
+                                                                    <ChevronDownIcon className="hover:cursor-pointer size-4 text-white" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent className="w-full p-1">
-                                                                <DropdownMenuItem className={`flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
+                                                                <DropdownMenuItem className={`hover:cursor-pointer flex items-center justify-between px-3 py-2 ${currentVal === '' ? 'bg-strawberry-red-500 text-white' : 'hover:bg-strawberry-red-100'}`} onSelect={() => setColumnFilters(prev => ({ ...prev, [accessorKey]: '' }))}>
                                                                     <span className={currentVal === '' ? 'font-medium text-white' : 'text-space-indigo-500  hover:bg-strawberry-red-100'}>All</span>
                                                                     {currentVal === '' && <CheckIcon className="size-4 text-white" />}
                                                                 </DropdownMenuItem>
@@ -619,7 +644,7 @@ export default function DataTable({
                                                 (() => {
                                                     return (
                                                     <>  
-                                                        <Button variant="outline" onClick={() => {
+                                                        <Button variant="outline" className="text-platinum-500 border-2 border-strawberry-red-600 hover:bg-platinum-800" onClick={() => {
                                                             setCurrentFilterKey(accessorKey);
                                                             setFilterModalOpen(true);
                                                         }}>Filter</Button>
@@ -737,14 +762,14 @@ export default function DataTable({
             <div className="flex items-center mb-4 sm:mb-0">
                 <span className="mr-2">Items per page</span>
                 <select
-                    className="border border-2 border-strawberry-red-500 rounded-md shadow-sm focus:ring-strawberry-red-500 focus:border-strawberry-red-500 p-2 focus:border-2"
+                    className="hover:cursor-pointer border border-2 border-strawberry-red-500 rounded-md shadow-sm focus:ring-strawberry-red-500 focus:border-strawberry-red-500 p-2 focus:border-2"
                     value={table.getState().pagination.pageSize}
                     onChange={e => { // update the page size when this is changed
                         table.setPageSize(Number(e.target.value))
                     }}
                     >
                     {[10, 20, 30, 40, 50].map(pageSize => (
-                        <option key={pageSize} value={pageSize}>
+                        <option key={pageSize} value={pageSize} className="hover:cursor-pointer">
                         {pageSize}
                         </option>
                     ))}

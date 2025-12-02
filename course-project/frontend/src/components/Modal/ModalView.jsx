@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Modal,
@@ -7,6 +7,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import React from 'react';
+import EditableGuestList from './EditableGuestList';
 
 function headerFormatter(str) {
   if (str === "id"){
@@ -86,7 +87,7 @@ function bodyFormatter(key, value, obj){
   return value;
 }
 
-function formatText(text){
+function formatText(text, role = null, eventData = null, users = [], onGuestModified = null, userUtorid = null){
   if (!text){
     return <p className="text-gray-600">No data.</p>
   }
@@ -113,6 +114,36 @@ function formatText(text){
 
   return Object.entries(obj).map(([key, value]) => {
     if (key === "promotionNames") return null; // skip 
+    
+    // Special handling for guests in event details
+    // Show for managers, superusers, or regular users who are organizers of this event
+    const isManagerOrAdmin = role === "manager" || role === "superuser";
+    const isOrganizerOfEvent = role === "regular" && userUtorid && eventData && (eventData.organizers || []).some(org => org.utorid === userUtorid || org === userUtorid);
+    const canEditGuests = isManagerOrAdmin || isOrganizerOfEvent;
+    
+    if (key === "guests" && canEditGuests && eventData) {
+      return (
+        <div key={key} className="flex flex-col py-3 px-1 border-b border-gray-100 last:border-b-0 hover:bg-red-50 rounded-md transition-colors duration-150">
+          <span className="text-sm font-semibold text-strawberry-red-600 mb-2">
+            {headerFormatter(key)}
+          </span>
+          <EditableGuestList
+            eventId={eventData.id}
+            guests={Array.isArray(eventData.guests) ? eventData.guests : []}
+            isManager={canEditGuests}
+            users={users}
+            organizers={eventData.organizers || []}
+            canRemoveGuests={true}
+            onGuestAdded={(utorid, action) => {
+              onGuestModified?.(utorid, action);
+            }}
+            onGuestRemoved={(utorid, action) => {
+              onGuestModified?.(utorid, action);
+            }}
+          />
+        </div>
+      );
+    }
 
     const header = headerFormatter(key);
     const body = bodyFormatter(key, value, obj);
@@ -141,8 +172,18 @@ const style = {
   outline: 'none',
 };
 
-export default function ModalView({ open, onClose, text, title }) {
-  const textBody = formatText(text);
+export default function ModalView({ open, onClose, text, title, role = null, eventData = null, users = [], onGuestModified = null, userUtorid = null }) {
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  const handleGuestModified = (guestUtorid, action) => {
+    setRefreshKey(prev => prev + 1);
+    onGuestModified?.(guestUtorid, action);
+  };
+
+  // Recalculate textBody whenever eventData changes to ensure fresh guest list
+  const textBody = useMemo(() => {
+    return formatText(text, role, eventData, users || [], handleGuestModified, userUtorid);
+  }, [text, role, eventData, users, handleGuestModified, userUtorid]);
     return (
       <Modal
         open={open}
@@ -153,13 +194,13 @@ export default function ModalView({ open, onClose, text, title }) {
         <Box sx={style}>
           {/* Faded background */}
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0"
             aria-hidden="true"
             onClick={onClose}
           />
 
           {/* Modal content */}
-          <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden max-h-[80vh] flex flex-col">
+          <Card className="relative z-10 w-full max-w-lg bg-white border border-gray-200 shadow-xl rounded-2xl overflow-y-auto max-h-[80vh] flex flex-col">
             <button
               type="button"
               onClick={onClose}
@@ -176,7 +217,7 @@ export default function ModalView({ open, onClose, text, title }) {
               </div>
             </CardHeader>
             <CardContent className="px-6 overflow-y-auto flex-1">
-              <div className="space-y-0">
+              <div className="space-y-0" key={refreshKey}>
                 {textBody}
               </div>
             </CardContent>

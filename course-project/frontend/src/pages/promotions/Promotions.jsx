@@ -60,6 +60,11 @@ export default function Promotions() {
                 if(query.endTime) params.append("endTime", query.endTime);
                 if(query.sortBy) params.append("sortBy", query.sortBy);
                 if(query.sortOrder) params.append("sortOrder", query.sortOrder);
+                
+                // Pass asRole if viewing as a different role
+                if (user?.role && user.role !== 'regular' && currentRole === 'regular') {
+                    params.append('asRole', 'regular');
+                }
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)
@@ -237,7 +242,7 @@ export default function Promotions() {
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                 >
                     <div
-                        className="absolute inset-0 bg-black/40"
+                        className="absolute inset-0"
                         aria-hidden="true"
                         onClick={() => setPendingDelete(null)}
                     />

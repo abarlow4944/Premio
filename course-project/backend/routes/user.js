@@ -108,8 +108,24 @@ router.get("/", async(req, res) => {
             sortOrder: sortOrderRaw,
         } = req.query;
 
-        // check if user has proper clearance (manager or higher)
-        if(!['manager', 'superuser'].includes(req.user.role)){
+        // check if user is authenticated and has some role
+        if(!req.user || !req.user.role){
+            return res.status(403).json({"error": "Not authorized"})
+        }
+
+        // Managers/superusers can always see all users
+        // Regular users can only see users list if they are organizers of at least one event
+        if(req.user.role === 'regular') {
+            const isOrganizer = await prisma.event.findFirst({
+                where: {
+                    organizers: { some: { utorid: req.user.utorid } },
+                },
+                select: { id: true },
+            });
+            if (!isOrganizer) {
+                return res.status(403).json({"error": "Not authorized"})
+            }
+        } else if(!['manager', 'superuser', 'cashier'].includes(req.user.role)){
             return res.status(403).json({"error": "Not authorized"})
         }
 

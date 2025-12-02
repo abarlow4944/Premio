@@ -30,7 +30,10 @@ function formatBirthday(iso) {
 // columns for the User table
 export function getUserColumns(role) {
   const isManager = role === 'manager' || role === 'superuser';
-  if (isManager) {
+  const isRegular = role === 'regular';
+  
+  // Show editable columns for managers, superusers, and regular users (organizers)
+  if (isManager || isRegular) {
     return [
     {
       accessorKey: "id",
@@ -73,13 +76,13 @@ export function getUserColumns(role) {
         { label: 'Cashier', value: 'cashier' },
         { label: 'Manager', value: 'manager' },
         { label: 'Superuser', value: 'superuser' },
-      ] :
+      ] : isRegular ? [] :
       [
         { label: 'Regular', value: 'regular' },
         { label: 'Cashier', value: 'cashier' },
       ],
-      editableCell: TableCell,
-      editType: "select" 
+      editableCell: isRegular ? undefined : TableCell,
+      editType: isRegular ? undefined : "select" 
     },
     {
       accessorKey: "birthday",
@@ -91,6 +94,7 @@ export function getUserColumns(role) {
       accessorKey: "points",
       header: "Points",
       enableSorting: true,
+      filterType: "range"
     },
     {
       accessorKey: "createdAt",
@@ -125,18 +129,6 @@ export function getUserColumns(role) {
         { label: 'True', value: 'true' },
         { label: 'False', value: 'false' },
       ]
-    },
-    {
-      accessorKey: "suspicious",
-      header: "Suspicious",
-      enableSorting: true,
-      filterType: 'select', 
-      filterOptions: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ],
-      editableCell: TableCell,
-      editType: "select" 
     },
     ];
   }

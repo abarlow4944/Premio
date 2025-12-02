@@ -2,11 +2,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/DataTable/DataTable";
 import ModalView from "../../components/Modal/ModalView";
+import EditableGuestList from "../../components/Modal/EditableGuestList";
 import Message from "../../components/Message";
 import { getEventColumns } from "@/components/DataTable/Columns/EventColumns";
 import { useUser } from "@/contexts/UserContexts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 
 export default function MyEvents() {
@@ -34,6 +36,10 @@ export default function MyEvents() {
     const [currentEventForAward, setCurrentEventForAward] = useState(null);
     const [selectedGuest, setSelectedGuest] = useState("");
     const [pointsAmount, setPointsAmount] = useState("");
+    const [awardToAll, setAwardToAll] = useState(false); // New state for award all guests option
+    const [manageGuestsModalOpen, setManageGuestsModalOpen] = useState(false);
+    const [currentEventForGuests, setCurrentEventForGuests] = useState(null);
+    const [users, setUsers] = useState([]);
     const columns = useMemo(() => getEventColumns(role, viewMode === 'organized'), [role, viewMode]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
@@ -54,6 +60,27 @@ export default function MyEvents() {
         setError("");
         setSuccess("");
     }, [role]);
+
+    // Fetch users list for guest selection
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch(`${API_URL}/users?limit=1000`, {
+                    method: "GET",
+                    credentials: "include"
+                });
+
+                const data = await res.json();
+                if (res.ok && data.results) {
+                    setUsers(data.results);
+                }
+            } catch (err) {
+                console.error("Error fetching users:", err);
+            }
+        };
+
+        fetchUsers();
+    }, [API_URL]);
 
     // Fetch user data to check if they have organized events
     useEffect(() => {
@@ -224,7 +251,21 @@ export default function MyEvents() {
         setCurrentEventForAward(event);
         setSelectedGuest("");
         setPointsAmount("");
+        setAwardToAll(false);
         setAwardPointsModalOpen(true);
+    };
+
+    // Manage guests handler for organizers
+    const handleManageGuests = (event) => {
+        setError("");
+        setSuccess("");
+        setCurrentEventForGuests(event);
+        setManageGuestsModalOpen(true);
+    };
+
+    function closeGuestsModal(){
+        setManageGuestsModalOpen(false);
+        setCurrentEventForGuests(null);
     };
 
     // saving updated data
@@ -265,8 +306,18 @@ export default function MyEvents() {
         setSuccess("");
 
         // Validate inputs
-        if (!selectedGuest || !pointsAmount) {
-            setError("Please select a guest and enter points amount");
+        if (!pointsAmount) {
+            setError("Please enter points amount");
+            return;
+        }
+
+        if (awardToAll && (!currentEventForAward.guests || currentEventForAward.guests.length === 0)) {
+            setError("No guests to award points to");
+            return;
+        }
+
+        if (!awardToAll && !selectedGuest) {
+            setError("Please select a guest or choose to award all guests");
             return;
         }
 
@@ -276,32 +327,76 @@ export default function MyEvents() {
             return;
         }
 
-        if (amount > (currentEventForAward.pointsRemain || 0)) {
-            setError(`Cannot award more than ${currentEventForAward.pointsRemain} points remaining`);
-            return;
+        if (awardToAll) {
+            const totalPoints = amount * (currentEventForAward.guests || []).length;
+            if (totalPoints > (currentEventForAward.pointsRemain || 0)) {
+                setError(`Cannot award ${totalPoints} points total (${amount} × ${currentEventForAward.guests.length} guests). Only ${currentEventForAward.pointsRemain} points remaining`);
+                return;
+            }
+        } else {
+            if (amount > (currentEventForAward.pointsRemain || 0)) {
+                setError(`Cannot award more than ${currentEventForAward.pointsRemain} points remaining`);
+                return;
+            }
         }
 
         try {
-            const res = await fetch(`${API_URL}/events/${currentEventForAward.id}/transactions`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    type: "event",
-                    utorid: selectedGuest,
-                    amount: amount
-                })
-            });
+            if (awardToAll) {
+                // Award points to all guests
+                const guestsToAward = currentEventForAward.guests || [];
+                let successCount = 0;
+                let failedCount = 0;
 
-            const responseData = await res.json();
-            if (!res.ok) {
-                setError(`Could not award points: ${responseData.error}` || "Could not award points");
-                return;
+                for (const guest of guestsToAward) {
+                    const res = await fetch(`${API_URL}/events/${currentEventForAward.id}/transactions`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            type: "event",
+                            utorid: guest.utorid,
+                            amount: amount
+                        })
+                    });
+
+                    if (res.ok) {
+                        successCount++;
+                    } else {
+                        failedCount++;
+                    }
+                }
+
+                if (failedCount > 0) {
+                    setSuccess(`Awarded ${amount} points to ${successCount} guests (${failedCount} failed)`);
+                } else {
+                    setSuccess(`Successfully awarded ${amount} points to all ${successCount} guests`);
+                }
+            } else {
+                // Award points to single guest
+                const res = await fetch(`${API_URL}/events/${currentEventForAward.id}/transactions`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        type: "event",
+                        utorid: selectedGuest,
+                        amount: amount
+                    })
+                });
+
+                const responseData = await res.json();
+                if (!res.ok) {
+                    setError(`Could not award points: ${responseData.error}` || "Could not award points");
+                    return;
+                }
+
+                setSuccess(`Successfully awarded ${amount} points to guest`);
             }
 
-            setSuccess(`Successfully awarded ${amount} points to guest`);
             setAwardPointsModalOpen(false);
 
             // Refresh event data to show updated pointsRemain
@@ -361,7 +456,7 @@ export default function MyEvents() {
                 <div className="flex justify-center gap-2 mb-4">
                     <button
                         onClick={() => setViewMode('organized')}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-md font-medium transition-colors hover:cursor-pointer ${
                             viewMode === 'organized'
                                 ? 'bg-strawberry-red-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -371,7 +466,7 @@ export default function MyEvents() {
                     </button>
                     <button
                         onClick={() => setViewMode('guest')}
-                        className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-md font-medium transition-colors hover:cursor-pointer ${
                             viewMode === 'guest'
                                 ? 'bg-strawberry-red-500 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -395,8 +490,9 @@ export default function MyEvents() {
                 setQuery={setQuery}
                 error={error}
                 success={success}
-                onViewRow={viewMode === 'organized' && role === 'regular' ? undefined : handleViewRow}
-                onAwardPoints={viewMode === 'organized' && role === 'regular' ? handleAwardPoints : undefined}
+                onViewRow={viewMode === 'organized' ? handleViewRow : undefined}
+                onAwardPoints={viewMode === 'organized' ? handleAwardPoints : undefined}
+                onManageGuests={viewMode === 'organized' ? handleManageGuests : undefined}
                 onRowSave={viewMode === 'organized' ? handleRowSaved : undefined}
                 enableEditing={viewMode === 'organized'}
             />
@@ -423,7 +519,7 @@ export default function MyEvents() {
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                 >
                     <div
-                        className="absolute inset-0 bg-black/40"
+                        className="absolute inset-0"
                         aria-hidden="true"
                         onClick={() => setAwardPointsModalOpen(false)}
                     />
@@ -438,29 +534,45 @@ export default function MyEvents() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {/* Guest Selection */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Select Guest
+                            {/* Award All Guests Toggle */}
+                            <div className="flex items-center gap-3">
+                                <input
+                                    id="award-all-toggle"
+                                    type="checkbox"
+                                    checked={awardToAll}
+                                    onChange={(e) => setAwardToAll(e.target.checked)}
+                                    className="w-4 h-4 text-strawberry-red-500 rounded focus:ring-2 focus:ring-strawberry-red-500"
+                                />
+                                <label htmlFor="award-all-toggle" className="text-sm font-medium text-gray-700">
+                                    Award all {(currentEventForAward.guests || []).length} guests
                                 </label>
-                                <Select value={selectedGuest} onValueChange={setSelectedGuest}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Choose a guest" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {(currentEventForAward.guests || []).map((guest) => (
-                                            <SelectItem key={guest.id} value={guest.utorid}>
-                                                {guest.name || guest.utorid}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
                             </div>
+
+                            {/* Guest Selection */}
+                            {!awardToAll && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Select Guest
+                                    </label>
+                                    <Select value={selectedGuest} onValueChange={setSelectedGuest} disabled={awardToAll}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Choose a guest" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {(currentEventForAward.guests || []).map((guest) => (
+                                                <SelectItem key={guest.id} value={guest.utorid}>
+                                                    {guest.name || guest.utorid}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
 
                             {/* Points Amount */}
                             <div>
                                 <label htmlFor="points-amount" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Points to Award
+                                    Points to Award {awardToAll && `(per guest)`}
                                 </label>
                                 <input
                                     id="points-amount"
@@ -471,24 +583,95 @@ export default function MyEvents() {
                                     placeholder="Enter points amount"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 />
+                                {awardToAll && pointsAmount && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Total: {Number(pointsAmount) * (currentEventForAward.guests || []).length} points
+                                    </p>
+                                )}
                             </div>
                         </CardContent>
                         <CardFooter className="justify-end gap-2">
                             <button
                                 type="button"
                                 onClick={() => setAwardPointsModalOpen(false)}
-                                className="rounded-md px-4 py-2 text-md font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+                                className="rounded-md px-4 py-2 text-md font-medium border border-gray-300 text-gray-700 hover:cursor-pointer hover:bg-gray-50 transition"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleAwardPointsSubmit}
-                                className="rounded-md px-4 py-2 text-md font-medium bg-strawberry-red-500 text-white hover:bg-strawberry-red-600 transition"
+                                className="rounded-md px-4 py-2 text-md font-medium bg-strawberry-red-500 text-white hover:cursor-pointer hover:bg-strawberry-red-600 transition"
                             >
                                 Award Points
                             </button>
                         </CardFooter>
+                    </Card>
+                </div>
+            )}
+
+            {/* Manage Guests Modal */}
+            {manageGuestsModalOpen && currentEventForGuests && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="manage-guests-title"
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                >
+                    <div
+                        className="absolute inset-0"
+                        aria-hidden="true"
+                        onClick={closeGuestsModal}
+                    />
+                    <Card className="relative z-10 w-full max-w-md bg-white border border-gray-200 shadow-xl max-h-[80vh] overflow-y-auto">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                            <div>
+                                <CardTitle id="manage-guests-title">Manage Guests</CardTitle>
+                                <CardDescription>
+                                    Event: {currentEventForGuests.name}
+                                </CardDescription>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeGuestsModal}
+                                className="text-gray-400 hover:text-gray-600 transition hover:cursor-pointer "
+                                aria-label="Close dialog"
+                            >
+                                <XMarkIcon className="size-5" />
+                            </button>
+                        </div>
+                        <CardContent className="p-6">
+                            <EditableGuestList
+                                eventId={currentEventForGuests.id}
+                                guests={currentEventForGuests.guests || []}
+                                isManager={true}
+                                users={users}
+                                organizers={currentEventForGuests.organizers || []}
+                                canRemoveGuests={false}
+                                onGuestAdded={(utorid, action) => {
+                                    // Update the current event data with new guest
+                                    const newGuest = users.find(u => u.utorid === utorid);
+                                    if (newGuest) {
+                                        setCurrentEventForGuests(prev => ({
+                                            ...prev,
+                                            guests: [...(prev.guests || []), newGuest]
+                                        }));
+                                        // Also update the data table
+                                        setData(prevData =>
+                                            prevData.map(row =>
+                                                row.id === currentEventForGuests.id
+                                                    ? { ...row, guests: [...(row.guests || []), newGuest] }
+                                                    : row
+                                            )
+                                        );
+                                    }
+                                }}
+                                onGuestRemoved={(utorid, action) => {
+                                    // This won't be used for organizers as they can't remove guests
+                                    // But keeping it for consistency
+                                }}
+                            />
+                        </CardContent>
                     </Card>
                 </div>
             )}

@@ -64,6 +64,7 @@ export default function NavBar() {
     const isOnPromotionsPage = location.pathname === '/promotions';
     const isOnEventsPage = location.pathname === '/events';
     const isOnMyEventsPage = location.pathname === '/my-events';
+    const isOnProfilePage = location.pathname === '/profile';
 
     const handleLogout = async() => {
         await fetch(`${API_URL}/auth/logout`, { // clear cookies through auth/logout endpoint
@@ -101,6 +102,14 @@ export default function NavBar() {
         
         setVisualRole(newRole);
         localStorage.setItem('visualRole', newRole);
+        
+        // Only refresh the page if not on the profile page
+        // On profile page, role switch updates the UI without reload
+        if (!isOnProfilePage) {
+            window.location.reload();
+        } else {
+            setMobileMenuOpen(false);
+        }
     }
 
     const availableRoles = getAvailableSwitchRoles(role);
@@ -134,14 +143,126 @@ export default function NavBar() {
             </button>
             </div>
 
+            {/* Mobile menu */}
+            {mobileMenuOpen && (
+              <div className="fixed inset-0 z-40 lg:hidden">
+                {/* Backdrop */}
+                <div 
+                  className="fixed inset-0 bg-black/50"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                {/* Menu content */}
+                <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="hover:cursor-pointer rounded-md text-gray-400 hover:text-gray-500"
+                    >
+                      <span className="sr-only">Close menu</span>
+                      <svg className="size-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {navItems.map((item) => {
+                      if (item.label === 'Events' && (visualRole === 'regular' || (visualRole === null && role === 'regular'))) {
+                        return (
+                          <div key="events-dropdown" className="space-y-1">
+                            <button
+                              className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              onClick={() => {
+                                navigate('/events');
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              Available Events
+                            </button>
+                            <button
+                              className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                              onClick={() => {
+                                navigate('/my-events');
+                                setMobileMenuOpen(false);
+                              }}
+                            >
+                              My Events
+                            </button>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <button
+                          key={item.label}
+                          onClick={() => {
+                            navigate(item.path);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-6 space-y-4 border-t border-gray-200 pt-4">
+                    {availableRoles.length > 1 && (
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Switch Role:</p>
+                        <div className="space-y-2">
+                          {availableRoles.map((availableRole) => (
+                            <button
+                              key={availableRole}
+                              onClick={() => {
+                                handleRoleSwitch(availableRole);
+                                setMobileMenuOpen(false);
+                              }}
+                              className={`hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold ${
+                                (visualRole || role) === availableRole
+                                  ? 'bg-strawberry-red-500 text-white'
+                                  : 'text-flag-red-500 hover:bg-gray-100'
+                              }`}
+                            >
+                              {availableRole.toUpperCase()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="border-t border-gray-200 pt-4" />
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setMobileMenuOpen(false);
+                      }}
+                      className="hover:cursor-pointer block w-full text-left rounded-lg px-3 py-2 text-base font-semibold text-flag-red-500 hover:bg-gray-100"
+                    >
+                      Profile
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Navigation items (based on role) */}
-            <div className="hidden lg:flex lg:gap-x-8">
+            <div className="hidden lg:flex lg:gap-x-6 lg:flex-1 lg:justify-center">
           {navItems.map((item) => {
             // Replace Events with dropdown for regular users
             if (item.label === 'Events' && (visualRole === 'regular' || (visualRole === null && role === 'regular'))) {
               return (
                 <DropdownMenu key="events-dropdown">
-                  <DropdownMenuTrigger className={`text-m font-bold transition-colors px-3 py-1 rounded-lg flex items-center gap-1 outline-none ${
+                  <DropdownMenuTrigger className={`text-sm font-semibold transition-colors px-3 py-1 rounded-lg flex items-center gap-1 outline-none whitespace-nowrap ${
                     location.pathname === '/events' || location.pathname === '/my-events'
                       ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
                       : 'text-flag-red-500 hover:text-strawberry-red-700'
@@ -172,7 +293,7 @@ export default function NavBar() {
                 key={item.label}
                 type="button"
                 onClick={() => navigate(item.path)}
-                className={`text-m font-bold transition-colors px-3 py-1 rounded-lg ${
+                className={`hover:cursor-pointer text-sm font-semibold transition-colors px-3 py-1 rounded-lg whitespace-nowrap ${
                   location.pathname === item.path
                     ? 'text-strawberry-red-500 border-2 border-strawberry-red-500'
                     : 'text-flag-red-500 hover:text-strawberry-red-700'
@@ -185,11 +306,11 @@ export default function NavBar() {
         </div>
 
         
-        <div className="lg:flex lg:flex-1 lg:justify-end gap-4 flex flex-wrap items-center">
+        <div className="lg:flex lg:flex-1 lg:justify-end lg:gap-4 hidden lg:flex items-center">
             {/* Role with Switch Dropdown */}
             {availableRoles.length > 1 ? (
               <DropdownMenu>
-                <DropdownMenuTrigger className="text-m text-white hover:text-gray-100 hover:cursor-pointer outline-none flex items-center gap-1 bg-strawberry-red-500 px-4 py-2 rounded-lg hover:bg-strawberry-red-600 transition-colors">
+                <DropdownMenuTrigger className="text-m text-white hover:text-gray-100 hover:cursor-pointer outline-none flex items-center gap-1 bg-strawberry-red-500 px-4 py-2 rounded-lg hover:bg-strawberry-red-600 transition-colors whitespace-nowrap">
                   Viewing as: <span className="font-bold">{(visualRole || role).toUpperCase()}</span>
                   <ChevronDownIcon className="size-4" />
                 </DropdownMenuTrigger>
@@ -206,14 +327,14 @@ export default function NavBar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              role === 'regular' ? null : <h2 className="text-m font-bold text-space-indigo-500">{visualRole}</h2>
+              role === 'regular' ? null : <h2 className="text-m font-bold text-space-indigo-500 whitespace-nowrap">{visualRole}</h2>
             )}
             
             {/* Logout */}
             <button
                 type="button"
                 onClick={handleLogout}
-                className="text-m font-bold text-flag-red-500 hover:text-strawberry-red-700 hover:cursor-pointer"
+                className="text-m font-bold text-flag-red-500 hover:text-strawberry-red-700 hover:cursor-pointer whitespace-nowrap"
                 >
                 Logout
             </button>

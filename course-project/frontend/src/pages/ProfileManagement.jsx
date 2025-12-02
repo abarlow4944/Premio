@@ -5,17 +5,27 @@ import { Button } from "@/components/ui/button";
 import Message from "@/components/Message";
 
 export default function ProfileManagement() {
-    const { user } = useUser();
+    const { user, setUser } = useUser();
+    console.log(user)
 
     const[error, setError] = useState("")
     const[success, setSuccess] = useState("")
 
     const [ oldPassword, setOldPassword] = useState("")
     const [ newPassword, setNewPassword] = useState("")
-    const [name, setName] = useState(user.name)
-    const [email, setEmail] = useState(user.email)
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
 
-    const initialBirthday = user.birthday ? user.birthday : null
+    useEffect(() => {
+        if (user) {
+            setName(user.name || "");
+            setEmail(user.email || "");
+            setBirthday(user.birthday || "");
+        }
+    }, [user]);
+
+
+    const initialBirthday = user?.birthday ? user.birthday : null
     const [birthday, setBirthday] = useState(initialBirthday)
 
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -49,13 +59,17 @@ export default function ProfileManagement() {
             setSuccess("")
             setError(data.error || "Could not change details")
 
-            //update context
-            user.name = name;
-            user.email = email;
             return;
         }
         else{
             setError("")
+            //update context
+            setUser(prev => ({
+                ...prev,
+                name,
+                email,
+                birthday
+            }));
             setSuccess("Successfully made changes")
         }
     }
@@ -116,10 +130,12 @@ export default function ProfileManagement() {
                     />
 
                     {/* UTORid */}
-                    <div>
-                        <p className="text-strawberry-red-500 text-sm/6 font-medium">UTORid</p>
-                        <p className="text-gray-900 sm:text-sm/6 mt-2">{user.utorid}</p>
-                    </div>
+                    <InputDefault
+                        label="UTORid"
+                        type="text"
+                        value={user?.utorid || ""}
+                        readOnly={true}
+                    />
 
                     {/* Email */}
                     <InputDefault
@@ -175,11 +191,11 @@ export default function ProfileManagement() {
             </div>
 
         {error && (
-            <Message notCorner message={error} status="error" onClose={() => setError(null)}/>
+            <Message message={error} status="error" onClose={() => setError(null)}/>
         )}
 
         {success && (
-            <Message notCorner message={success} status="success" onClose={() => setSuccess(null)}/>
+            <Message message={success} status="success" onClose={() => setSuccess(null)}/>
         )}
 
         </div>

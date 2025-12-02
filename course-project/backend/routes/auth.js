@@ -14,7 +14,6 @@ const resetRateLimiter = new Map();
 
 // POST /auth/tokens: Authenticate a user and return a JWT token
 router.post("/tokens", async (req, res) => {
-	console.log("IN AUTH TOKENS");
 	const { utorid, password } = req.body;
 
 	if (!utorid || !password) {
@@ -62,8 +61,8 @@ router.post("/tokens", async (req, res) => {
 		// HTTP-only cookie
 		res.cookie("auth_token", token, {
 			httpOnly: true,
-			secure: true,
-			sameSite: "none",
+			secure: isProduction,
+			sameSite: isProduction ? "none" : "lax",
 			path: "/",
 			maxAge: 24 * 60 * 60 * 1000
 		});
@@ -100,7 +99,7 @@ router.post("/logout", (req, res) => {
   res.clearCookie("auth_token", { // clear the cookie
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // true in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 
   return res.status(200).json({ ok: true });

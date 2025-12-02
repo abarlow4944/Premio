@@ -125,7 +125,7 @@ export default function NavBar() {
                 <span className="sr-only">Your Company</span>
                 <img
                     alt="Logo"
-                    src="./public/logo.png"
+                    src="/logo.png"
                     className="mx-auto h-15 w-auto"
                 />
             </a>

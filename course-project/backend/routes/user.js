@@ -179,11 +179,17 @@ router.get("/", async(req, res) => {
         });
 
         //apply filter with pagination
-        const allowedSorts = ['id','utorid','name','email','birthday','role','points','createdAt','lastLogin','verified','activated','suspicious'];
+        const allowedSorts = ['id','utorid','name','email','birthday','role','points','createdAt','lastLogin','verified','activated','suspicious','bookmarked'];
         let orderBy = { id: 'asc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
-            const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
-            orderBy = { [String(sortByRaw)]: dir };
+            // if sorting by bookmarked, also include suspicious as secondary sort
+            if (String(sortByRaw) === 'bookmarked') {
+                const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+                orderBy = [{ bookmarked: dir }, { suspicious: 'desc' }, { id: 'asc' }];
+            } else {
+                const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
+                orderBy = { [String(sortByRaw)]: dir };
+            }
         }
 
         const users = await prisma.user.findMany({
@@ -203,6 +209,7 @@ router.get("/", async(req, res) => {
                 verified: true,
                 activated: true,
                 suspicious: true,
+                bookmarked: true,
                 avatarUrl: true,
             },
             orderBy,
@@ -1190,6 +1197,72 @@ router.post("/:userId/transactions", async (req, res) => {
         return res.status(500).json({error: "Internal server error"})
     }
 })
+
+// Toggle suspicious flag on a user
+router.patch("/:userId/suspicious", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { suspicious } = req.body;
+
+        // Check if user has proper clearance (must be manager or superuser)
+        if (!["manager", "superuser"].includes(req.user.role)) {
+            return res.status(403).json({ error: "Not authorized" });
+        }
+
+        // Validate input
+        if (typeof suspicious !== "boolean") {
+            return res.status(400).json({ error: "Suspicious field must be a boolean" });
+        }
+
+        // Update user's suspicious status
+        const updatedUser = await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { suspicious: suspicious }
+        });
+
+        return res.status(200).json({
+            id: updatedUser.id,
+            utorid: updatedUser.utorid,
+            suspicious: updatedUser.suspicious
+        });
+    } catch (err) {
+        console.log("Error:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Toggle bookmark on a user
+router.patch("/:userId/bookmark", async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { bookmarked } = req.body;
+
+        // Check if user has proper clearance (must be manager or superuser)
+        if (!["manager", "superuser"].includes(req.user.role)) {
+            return res.status(403).json({ error: "Not authorized" });
+        }
+
+        // Validate input
+        if (typeof bookmarked !== "boolean") {
+            return res.status(400).json({ error: "Bookmarked field must be a boolean" });
+        }
+
+        // Update user's bookmarked status
+        const updatedUser = await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { bookmarked: bookmarked }
+        });
+
+        return res.status(200).json({
+            id: updatedUser.id,
+            utorid: updatedUser.utorid,
+            bookmarked: updatedUser.bookmarked
+        });
+    } catch (err) {
+        console.log("Error:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 /////////////////////////////////////////////////////////////////////////// HELPER FUNCTIONS
 // check if an email is unique

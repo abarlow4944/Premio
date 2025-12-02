@@ -107,6 +107,7 @@ model Promotion {
   points      Int?
   started     Boolean?
   end         Boolean?
+  bookmarked  Boolean?      @default(false)
 
   transactions Transaction[] @relation("PromotionTransactions")
 }

@@ -61,6 +61,7 @@ model Transaction {
   relatedId   Int?
   createdBy   String?
   suspicious  Boolean         @default(false)
+  bookmarked  Boolean?        @default(false)
   processed   Boolean         @default(false)
   processedBy String?
   eventId     Int?
@@ -79,6 +80,7 @@ model Event {
   pointsAwarded Int?          @default(0)
   transactions Transaction[] @relation("EventTransaction")
   published    Boolean?      @default(false)
+  bookmarked   Boolean?      @default(false)
   organizers   User[]        @relation("EventOrganizers")
   guests       EventGuest[]  @relation("EventGuestRelation") // guests who attended the event
 }
@@ -106,6 +108,7 @@ model Promotion {
   points      Int?
   started     Boolean?
   end         Boolean?
+  bookmarked  Boolean?      @default(false)
 
   transactions Transaction[] @relation("PromotionTransactions")
 }

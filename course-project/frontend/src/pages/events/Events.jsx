@@ -107,6 +107,39 @@ export default function Events() {
         }
     };
 
+    // Toggle bookmark
+    const handleBookmarkToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/events/${row.id}/bookmark`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ bookmarked: !row.bookmarked })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update bookmark status: ${data.error}` || "Could not update bookmark status");
+                console.warn('Could not update bookmark status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setData(prev => prev.map(r => 
+                r.id === row.id ? { ...r, bookmarked: !r.bookmarked } : r
+            ));
+            setSuccess("Successfully updated bookmark status");
+        } catch (err) {
+            setError(err.message || "Could not update bookmark status");
+            console.error("Error:", err);
+        }
+    };
+
     const columns = useMemo(() => getEventColumns(role), [role]);
 
     const [query, setQuery] = useState({ // the filters we will be applying (params)
@@ -116,8 +149,8 @@ export default function Events() {
         ended: "",
         showFull: false,
         published: null,
-        sortBy: "",
-        sortOrder: "asc",
+        sortBy: "bookmarked",
+        sortOrder: "desc",
         page: 1,
         limit: 10
     })
@@ -519,6 +552,9 @@ export default function Events() {
                 onRSVP={(visualRole === 'regular' || (visualRole === null && role === 'regular')) ? handleRSVP : undefined}
                 canRSVP={(visualRole === 'regular' || (visualRole === null && role === 'regular')) ? canRSVP : undefined}
                 enableEditing={selectionEnabled}
+                showBookmarks={true}
+                onBookmarkToggle={handleBookmarkToggle}
+                colorizeBookmarkedRows={true}
             />
         
             {/* _ event(s) selected message */}

@@ -3,6 +3,7 @@ import DataTable from "../../components/DataTable/DataTable";
 import { getTransactionColumns } from "../../components/DataTable/Columns/TransactionColumns"
 import { useState, useEffect, useMemo } from "react";
 import { useUser } from '../../contexts/UserContexts';
+import { BookmarkIcon } from "@heroicons/react/24/solid";
 
 export default function TransactionPage() {
     const { visualRole, role } = useUser();
@@ -10,6 +11,8 @@ export default function TransactionPage() {
     const [rows, setRows] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [globalMaxes, setGlobalMaxes] = useState(null);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -21,6 +24,8 @@ export default function TransactionPage() {
         relatedId: "",
         promotionIds: "",
         remark: "",
+        sortBy: "bookmarked",
+        sortOrder: "desc",
         page: 1,
         limit: 10,
     });
@@ -107,6 +112,39 @@ export default function TransactionPage() {
     // Pass columns
     const columns = useMemo(() => getTransactionColumns(role), [role]);
 
+    // Toggle bookmark
+    const handleBookmarkToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/transactions/${row.id}/bookmark`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ bookmarked: !row.bookmarked })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update bookmark status: ${data.error}` || "Could not update bookmark status");
+                console.warn('Could not update bookmark status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setRows(prev => prev.map(r => 
+                r.id === row.id ? { ...r, bookmarked: !r.bookmarked } : r
+            ));
+            setSuccess("Successfully updated bookmark status");
+        } catch (err) {
+            setError(err.message || "Could not update bookmark status");
+            console.error("Error:", err);
+        }
+    };
+
     return (
         <div className="p-6 space-y-4">
             {/* Page Title */}
@@ -116,6 +154,10 @@ export default function TransactionPage() {
                 </h1>
                 <p className="text-center text-sm text-space-indigo-500">
                     View your transaction history.
+                </p>
+                <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
+                    <span>Bookmarked transactions are marked with a</span>
+                    <BookmarkIcon className="size-4 text-red-600" />
                 </p>
             </div>
 
@@ -127,6 +169,10 @@ export default function TransactionPage() {
                 query={query}
                 setQuery={setQuery}
                 initialStableMax={globalMaxes}
+                error={error}
+                success={success}
+                showBookmarks={true}
+                onBookmarkToggle={handleBookmarkToggle}
             />
         </div>
     );

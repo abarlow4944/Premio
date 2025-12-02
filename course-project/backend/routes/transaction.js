@@ -322,12 +322,20 @@ router.get("/", async (req, res) => {
         if (amountNum !== undefined) where.amount = { [operator]: amountNum };
 
         // determine ordering
-        const allowedSorts = ['id', 'utorid', 'createdBy', 'promotionId', 'type', 'amount', 'spent', 'relatedId', 'suspicious', 'processed', 'processedBy', 'eventId'];
-        let orderBy = { id: 'desc' };
+        const allowedSorts = ['id', 'utorid', 'createdBy', 'promotionId', 'type', 'amount', 'spent', 'relatedId', 'suspicious', 'processed', 'processedBy', 'eventId', 'bookmarked'];
+        let orderBy = [{ bookmarked: 'desc' }, { suspicious: 'desc' }, { id: 'desc' }]; // default: bookmarked first, then suspicious
+        
+        // If user explicitly sorts by a column, use that single sort
         if (sortByRaw) {
-            const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
-            if (allowedSorts.includes(String(sortByRaw))) {
-                orderBy = { [String(sortByRaw)]: dir };
+            // if sorting by bookmarked, also include suspicious as secondary sort
+            if (String(sortByRaw) === 'bookmarked') {
+                const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
+                orderBy = [{ bookmarked: dir }, { suspicious: 'desc' }, { id: 'desc' }];
+            } else {
+                const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
+                if (allowedSorts.includes(String(sortByRaw))) {
+                    orderBy = { [String(sortByRaw)]: dir };
+                }
             }
         }
 
@@ -391,6 +399,7 @@ router.get("/", async (req, res) => {
             promotionIds: t.promotions.map(p => p.id),
             promotionNames: t.promotions.map(p => p.name),
             suspicious: t.suspicious ?? false,
+            bookmarked: t.bookmarked ?? false,
             remark: t.remark || "",
             createdBy: t.createdBy,
             relatedId: t.relatedId ?? undefined,
@@ -635,6 +644,70 @@ router.patch("/:transactionId/processed", async(req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
     
+})
+
+/////////////////////////////////// /TRANSACTIONS/:TRANSACTIONID/BOOKMARK
+router.patch("/:transactionId/bookmark", async (req, res) => {
+    try {
+        const { bookmarked } = req.body;
+
+        // All user roles can bookmark transactions
+        if (!['regular', 'cashier', 'manager', 'superuser'].includes(req.user.role)) {
+            return res.status(403).json({ error: "Not authorized" });
+        }
+
+        if(bookmarked === undefined || typeof bookmarked !== "boolean"){
+            return res.status(400).json({error: "Missing or incorrect field type"})
+        }
+
+        // check if transactionId is valid
+        const transactionId = Number(req.params.transactionId);
+        if(transactionId < 0 || !Number.isInteger(transactionId)){
+            return res.status(400).json({error: "Invalid transactionId"})
+        }
+
+        // check if transactionId exists
+        const transaction = await prisma.transaction.findUnique({
+            where: {
+                id: transactionId,
+            },
+        })
+
+        if(!transaction){
+            return res.status(404).json({error: "Transaction not found"})
+        }
+
+        const updatedTransaction = await prisma.transaction.update({
+            where: {
+                id: transactionId,
+            },
+            data: {
+                bookmarked: bookmarked,
+            },
+            include: {
+                promotions: {
+                    select: { id: true, name: true },
+                }
+            }
+        });
+
+        return res.status(200).json({
+            id: transactionId,
+            utorid: updatedTransaction.utorid,
+            type: updatedTransaction.type,
+            spent: updatedTransaction.spent,
+            amount: updatedTransaction.amount,
+            promotionIds: updatedTransaction.promotions.map(p => p.id),
+            promotionNames: updatedTransaction.promotions.map(p => p.name),
+            bookmarked: updatedTransaction.bookmarked,
+            remark: updatedTransaction.remark || "",
+            createdBy: updatedTransaction.createdBy
+        })
+    }
+    catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
 })
 
 //////////////////////////////// HELPER FUNCTIONS

@@ -33,8 +33,8 @@ export default function Promotions() {
         role: "",
         verified: "",
         activated: "",
-        sortBy: "",
-        sortOrder: "asc",
+        sortBy: "bookmarked",
+        sortOrder: "desc",
         page: 1,
         limit: 10
     })
@@ -183,6 +183,39 @@ export default function Promotions() {
         setSuccess("Successfully updated promotion")
     }
 
+    // Toggle bookmark
+    const handleBookmarkToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/promotions/${row.id}/bookmark`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ bookmarked: !row.bookmarked })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update bookmark status: ${data.error}` || "Could not update bookmark status");
+                console.warn('Could not update bookmark status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setData(prev => prev.map(r => 
+                r.id === row.id ? { ...r, bookmarked: !r.bookmarked } : r
+            ));
+            setSuccess("Successfully updated bookmark status");
+        } catch (err) {
+            setError(err.message || "Could not update bookmark status");
+            console.error("Error:", err);
+        }
+    };
+
     // handle promotion creation
     const handleCreatePromotion = async(formData) => {
         setError("")
@@ -309,6 +342,9 @@ export default function Promotions() {
                     success={success}
                     onRowSave={handleRowSaved} // for editing rows
                     onCreate={() => setOpen(true)}
+                    showBookmarks={true}
+                    onBookmarkToggle={handleBookmarkToggle}
+                    colorizeBookmarkedRows={true}
                 />
             )}
 

@@ -262,12 +262,13 @@ router.get('/', async (req, res) => {
 			minSpending: true,
 			rate: true,
 			points: true,
+			bookmarked: true, // include bookmarked for all users
 		};
 
 		// sorting
 		const allowedSorts = isManager
-			? ['name','description','type','startTime','endTime','minSpending','rate','points','id']
-			: ['name','description','endTime','points','minSpending'];
+			? ['name','description','type','startTime','endTime','minSpending','rate','points','id','bookmarked']
+			: ['name','description','endTime','points','minSpending','bookmarked'];
 		let orderBy = undefined;
 		if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
 			const dir = (String(sortOrderRaw).toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -295,8 +296,11 @@ router.get('/', async (req, res) => {
 				minSpending: p.minSpending ?? null,
 				rate: p.rate ?? null,
 				points: p.points ?? 0,
+				bookmarked: p.bookmarked ?? false,
 			};
-			if (isManager) base.startTime = p.startTime;
+			if (isManager) {
+				base.startTime = p.startTime;
+			}
 			return base;
 		});
 
@@ -551,6 +555,48 @@ router.delete('/:promotionId', async (req, res) => {
 		return res.status(204).send();
 	} catch (err) {
 		console.error('Error deleting promotion:', err);
+		return res.status(500).json({ error: 'Internal server error' });
+	}
+});
+
+// PATCH /promotions/:promotionId/bookmark: Toggle bookmark status
+router.patch('/:promotionId/bookmark', async (req, res) => {
+	try {
+		const user = req.user;
+
+		// All user roles can bookmark promotions
+		if (!user || !['regular', 'cashier', 'manager', 'superuser'].includes(user.role)) {
+			return res.status(403).json({ error: 'Not authorized' });
+		}
+
+		const { bookmarked } = req.body;
+
+		if (bookmarked === undefined || typeof bookmarked !== 'boolean') {
+			return res.status(400).json({ error: 'Missing or incorrect field type' });
+		}
+
+		const id = Number(req.params.promotionId);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: 'Invalid promotionId' });
+		}
+
+		const promo = await prisma.promotion.findUnique({ where: { id } });
+		if (!promo) {
+			return res.status(404).json({ error: 'Promotion not found' });
+		}
+
+		const updated = await prisma.promotion.update({
+			where: { id },
+			data: { bookmarked }
+		});
+
+		return res.status(200).json({
+			id: updated.id,
+			name: updated.name,
+			bookmarked: updated.bookmarked
+		});
+	} catch (err) {
+		console.error('Error updating bookmark:', err);
 		return res.status(500).json({ error: 'Internal server error' });
 	}
 });

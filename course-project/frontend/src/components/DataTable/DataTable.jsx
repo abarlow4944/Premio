@@ -37,6 +37,7 @@ export default function DataTable({
     onSuspiciousFlagToggle,
     showBookmarks = false,
     onBookmarkToggle,
+    colorizeBookmarkedRows = false, // no colored bookmarks on transactions page
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
@@ -745,7 +746,7 @@ export default function DataTable({
                             const styleForType = typeStyles[String(txType)] || {};
 
                             return (
-                                <tr key={row.id} className={`hover:bg-gray-50 ${row.original.bookmarked ? 'bg-red-50' : ''} ${styleForType.rowClass ?? ''}`}>
+                                <tr key={row.id} className={`hover:bg-gray-50 ${colorizeBookmarkedRows && row.original.bookmarked ? 'bg-red-50' : ''} ${styleForType.rowClass ?? ''}`}>
                                 {row.getVisibleCells().map((cell) => {
                             const isRowEditing = editingRowId === row.id;
                             const EditableComp = cell.column.columnDef.editableCell;

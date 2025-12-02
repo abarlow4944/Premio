@@ -852,7 +852,7 @@ router.get("/me/transactions", async (req, res) => {
         const skip = (pageNum - 1) * limitNum;
 
         // determine ordering
-        const allowedSorts = ['id', 'utorid', 'createdBy', 'type', 'amount', 'spent', 'relatedId'];
+        const allowedSorts = ['id', 'utorid', 'createdBy', 'type', 'amount', 'spent', 'relatedId', 'bookmarked'];
         let orderBy = { id: 'desc' }; // default
         if (sortByRaw && allowedSorts.includes(String(sortByRaw))) {
             const dir = (String(sortOrderRaw || '').toLowerCase() === 'desc') ? 'desc' : 'asc';
@@ -895,7 +895,8 @@ router.get("/me/transactions", async (req, res) => {
             remark: t.remark || "",
             createdBy: t.createdBy,
             processed: t.processed ?? false,
-            processedBy: t.processedBy ?? null
+            processedBy: t.processedBy ?? null,
+            bookmarked: t.bookmarked ?? false
         }));
         return res.status(200).json({ count, results });
     }

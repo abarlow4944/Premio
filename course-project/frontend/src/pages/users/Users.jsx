@@ -296,6 +296,7 @@ export default function Users() {
                 onSuspiciousFlagToggle={handleSuspiciousFlagToggle}
                 showBookmarks={true}
                 onBookmarkToggle={handleBookmarkToggle}
+                colorizeBookmarkedRows={true}
             />
         </div>
 

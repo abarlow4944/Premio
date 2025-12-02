@@ -130,16 +130,6 @@ export function getUserColumns(role) {
         { label: 'False', value: 'false' },
       ]
     },
-    {
-      accessorKey: "bookmarked",
-      header: "Bookmarked",
-      enableSorting: true,
-      filterType: 'select', 
-      filterOptions: [
-        { label: 'True', value: 'true' },
-        { label: 'False', value: 'false' },
-      ]
-    },
     ];
   }
 }

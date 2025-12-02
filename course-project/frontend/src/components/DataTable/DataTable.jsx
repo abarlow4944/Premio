@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DualRangeSlider } from '@/components/ui/dual-range-slider';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronRightIcon, ChevronLeftIcon, ChevronUpIcon, ChevronDownIcon, PencilSquareIcon, TrashIcon, PlusIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon, FlagIcon, GiftIcon, UserPlusIcon } from '@heroicons/react/24/outline'
-import { CheckIcon, FlagIcon as FlagIconSolid } from '@heroicons/react/24/solid'
+import { CheckIcon, FlagIcon as FlagIconSolid, BookmarkIcon } from '@heroicons/react/24/solid'
 import { Checkbox } from '@/components/ui/checkbox';
 import ModalForm from "../Modal/ModalForm";
 import { getFilterFields } from "../Modal/FormFields/TransactionFields";
@@ -35,6 +35,8 @@ export default function DataTable({
     onManageGuests, // for managing guests action
     showSuspiciousFlag = false,
     onSuspiciousFlagToggle,
+    showBookmarks = false,
+    onBookmarkToggle,
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
@@ -155,6 +157,30 @@ export default function DataTable({
         };
 
         cols = [flagCol, ...cols];
+    }
+
+    // If bookmarks are enabled, add the bookmark column at the start
+    if (showBookmarks) {
+        const bookmarkCol = {
+        id: '__bookmark',
+        accessorKey: 'bookmarked',
+        header: <BookmarkIcon className="size-4" />,
+        enableSorting: true,
+        size: 40,
+        cell: ({ row }) => (
+            <button
+            type="button"
+            onClick={() => onBookmarkToggle && onBookmarkToggle(row.original)}
+            className={`hover:scale-125 transition-transform cursor-pointer ${row.original.bookmarked ? 'text-red-600 opacity-100' : 'text-gray-300 hover:text-red-400 opacity-60 hover:opacity-100'}`}
+            title={row.original.bookmarked ? 'Remove bookmark' : 'Bookmark'}
+            aria-label={`Toggle bookmark for row ${row.id}`}
+            >
+                <BookmarkIcon className="size-5" />
+            </button>
+        ),
+        };
+
+        cols = [bookmarkCol, ...cols];
     }
 
     // If selection is enabled, add the checkbox column at the start
@@ -719,7 +745,7 @@ export default function DataTable({
                             const styleForType = typeStyles[String(txType)] || {};
 
                             return (
-                                <tr key={row.id} className={`hover:bg-gray-50 ${styleForType.rowClass ?? ''}`}>
+                                <tr key={row.id} className={`hover:bg-gray-50 ${row.original.bookmarked ? 'bg-red-50' : ''} ${styleForType.rowClass ?? ''}`}>
                                 {row.getVisibleCells().map((cell) => {
                             const isRowEditing = editingRowId === row.id;
                             const EditableComp = cell.column.columnDef.editableCell;

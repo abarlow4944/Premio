@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ModalForm from "../../components/Modal/ModalForm";
 import ModalView from "../../components/Modal/ModalView";
 import { getRegisterUserFields } from "@/components/Modal/FormFields/RegisterUserFields";
-import { FlagIcon } from "@heroicons/react/24/solid";
+import { FlagIcon, BookmarkIcon } from "@heroicons/react/24/solid";
 import CashierUser from "./UserCashier"
 
 
@@ -22,7 +22,7 @@ export default function Users() {
         role: "",
         verified: "",
         activated: "",
-        sortBy: "suspicious",
+        sortBy: "bookmarked",
         sortOrder: "desc",
         page: 1,
         limit: 10
@@ -210,6 +210,39 @@ export default function Users() {
         }
     };
 
+    // Toggle bookmark
+    const handleBookmarkToggle = async (row) => {
+        setError("");
+        setSuccess("");
+        
+        try {
+            const res = await fetch(`${API_URL}/users/${row.id}/bookmark`, {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ bookmarked: !row.bookmarked })
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                setError(`Could not update bookmark status: ${data.error}` || "Could not update bookmark status");
+                console.warn('Could not update bookmark status:', data.error || res.status);
+                return;
+            }
+
+            // Update the row in the table
+            setData(prev => prev.map(r => 
+                r.id === row.id ? { ...r, bookmarked: !r.bookmarked } : r
+            ));
+            setSuccess("Successfully updated bookmark status");
+        } catch (err) {
+            setError(err.message || "Could not update bookmark status");
+            console.error("Error:", err);
+        }
+    };
+
 
     return (
         <div className="p-6 space-y-4">
@@ -222,6 +255,8 @@ export default function Users() {
                 <p className="text-center text-sm text-gray-500 mt-2 flex items-center justify-center gap-1">
                     <span>Suspicious users are marked with a</span>
                     <FlagIcon className="size-4 text-red-600" />
+                    <span>and bookmarked users with a</span>
+                    <BookmarkIcon className="size-4 text-red-600" />
                 </p>
             </div>
 
@@ -259,6 +294,8 @@ export default function Users() {
                 onRowSave={handleRowSaved} // for editing rows
                 showSuspiciousFlag={true}
                 onSuspiciousFlagToggle={handleSuspiciousFlagToggle}
+                showBookmarks={true}
+                onBookmarkToggle={handleBookmarkToggle}
             />
         </div>
 

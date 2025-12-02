@@ -122,7 +122,7 @@ export default function NavBar() {
             {/* Logo */}
             <div className="flex lg:flex-1 flex-wrap items-center gap-4">
             <a onClick={() => navigate("/home")} className="-m-1.5 p-1.5 hover:cursor-pointer">
-                <span className="sr-only">Your Company</span>
+                <span className="sr-only">Premio</span>
                 <img
                     alt="Logo"
                     src="/logo.png"

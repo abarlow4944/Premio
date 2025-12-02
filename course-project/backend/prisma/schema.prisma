@@ -62,7 +62,6 @@ model Transaction {
   suspicious  Boolean         @default(false)
   processed   Boolean         @default(false)
   processedBy String?
-  Event       Event?          @relation(fields: [eventId], references: [id])
   eventId     Int?
   event       Event?          @relation("EventTransaction", fields: [eventId], references: [id])
 }
@@ -81,7 +80,6 @@ model Event {
   published    Boolean?      @default(false)
   organizers   User[]        @relation("EventOrganizers")
   guests       EventGuest[]  @relation("EventGuestRelation") // guests who attended the event
-  Transaction  Transaction[]
 }
 
 model EventGuest {

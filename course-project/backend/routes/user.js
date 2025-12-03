@@ -761,9 +761,9 @@ router.get("/me/transactions", async (req, res) => {
             };
         } else if (type) {
             where.type = type;
-            // For redemptions, regular users should only see their own redemptions
-            // For other transaction types, users can see ones they created or received
-            if (type === 'redemption' && !['cashier', 'manager', 'superuser'].includes(effectiveRole)) {
+            // Regular users should only see transactions where they are the recipient (utorid)
+            // Cashiers, managers, and superusers can see transactions they created or processed
+            if (!['cashier', 'manager', 'superuser'].includes(effectiveRole)) {
                 where.utorid = utorid;
             } else {
                 where.OR = [
@@ -773,28 +773,20 @@ router.get("/me/transactions", async (req, res) => {
                 ];
             }
         } else {
-            // If no type specified, show:
-            // - All non-event transactions where user is recipient OR created it OR processed it
-            // - All event transactions where user is either recipient or organizer
-            where = {
-                OR: [
-                    { 
-                        type: { not: 'event' },
-                        OR: [
-                            { utorid: utorid },
-                            { createdBy: utorid },
-                            { processedBy: utorid }
-                        ]
-                    },
-                    {
-                        type: 'event',
-                        OR: [
-                            { utorid: utorid },
-                            { createdBy: utorid }
-                        ]
-                    }
-                ]
-            };
+            // If no type specified
+            // Regular users: only see transactions where they are the recipient
+            // Staff: see transactions they created, received, or processed
+            if (!['cashier', 'manager', 'superuser'].includes(effectiveRole)) {
+                where.utorid = utorid;
+            } else {
+                where = {
+                    OR: [
+                        { utorid: utorid },
+                        { createdBy: utorid },
+                        { processedBy: utorid }
+                    ]
+                };
+            }
         }
         
         // Filter out suspicious transactions for regular users and unprocessed redemptions

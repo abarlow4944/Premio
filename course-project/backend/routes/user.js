@@ -102,6 +102,8 @@ router.get("/", async(req, res) => {
             verified: verifiedRaw,
             activated: activatedRaw,
             suspicious: suspiciousRaw,
+            pointsMin: pointsMinRaw,
+            pointsMax: pointsMaxRaw,
             page: pageRaw = '1',
             limit: limitRaw = '10',
             sortBy: sortByRaw,
@@ -158,6 +160,21 @@ router.get("/", async(req, res) => {
             else return res.status(400).json({ error: 'Incorrect type for fields' });
         }
 
+        // parse points range filters
+        let pointsMin, pointsMax;
+        if (pointsMinRaw !== undefined) {
+            const minNum = Number(pointsMinRaw);
+            if (!Number.isNaN(minNum) && minNum >= 0) {
+                pointsMin = minNum;
+            }
+        }
+        if (pointsMaxRaw !== undefined) {
+            const maxNum = Number(pointsMaxRaw);
+            if (!Number.isNaN(maxNum) && maxNum >= 0) {
+                pointsMax = maxNum;
+            }
+        }
+
         // extract filter data
         const where = {};
         if (utoridFilter) where.utorid = {contains: utoridFilter};
@@ -167,6 +184,13 @@ router.get("/", async(req, res) => {
         if (verified !== undefined) where.verified = verified;
         if (activated !== undefined) where.activated = activated;
         if (suspicious !== undefined) where.suspicious = suspicious;
+        
+        // Add points range filter
+        if (pointsMin !== undefined || pointsMax !== undefined) {
+            where.points = {};
+            if (pointsMin !== undefined) where.points.gte = pointsMin;
+            if (pointsMax !== undefined) where.points.lte = pointsMax;
+        }
 
         const pageNum = page;
         const take = limit;

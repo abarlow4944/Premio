@@ -60,15 +60,18 @@ export default function Regular() {
         credentials: 'include'
       })
       if (!res.ok) throw new Error('Failed to fetch QR token')
-      const data = await res.json()
-      setQrValue(data.qrToken)
+      // Create JSON object with just utorid
+      const qrData = {
+        utorid: user.utorid
+      }
+      setQrValue(JSON.stringify(qrData))
     } catch (e) {
       console.error(e)
       setQrValue(null)
     } finally {
       setQrLoading(false)
     }
-  }, [user])
+  }, [user, API_URL])
 
   // Fetch pending redemptions on component mount
   useEffect(() => {

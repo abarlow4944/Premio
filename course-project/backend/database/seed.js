@@ -7,6 +7,13 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getRandomDatePastMonths(months = 4) {
+  const now = new Date();
+  const pastDate = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30 * months);
+  const randomTime = pastDate.getTime() + Math.random() * (now.getTime() - pastDate.getTime());
+  return new Date(randomTime);
+}
+
 async function getOrCreatePromotion(p) {
   const found = await prisma.promotion.findFirst({ where: { name: p.name } });
   if (found) return found;
@@ -22,17 +29,17 @@ async function getOrCreateEvent(e) {
 async function seedData() {
   try {
     const users = [
-      { utorid: 'alice1', name: 'Alice Bennett', email: 'alice.bennett@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 120 },
-      { utorid: 'bob2', name: 'Bob Chen', email: 'bob.chen@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 80 },
-      { utorid: 'john3', name: 'John Doe', email: 'john.doe@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 200 },
-      { utorid: 'qiaohui2', name: 'Cindy Qiao', email: 'cindy.qiao@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 5 },
-      { utorid: 'barlowa2', name: 'Alicia Barlow', email: 'alicia.barlow@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 65 },
-      { utorid: 'elia6', name: 'Elia Cheng', email: 'elia.cheng@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 500 },
-      { utorid: 'pan7', name: 'Pan Chen', email: 'pan.chen@mail.utoronto.ca', password: 'Password1!', role: 'manager', verified: true, activated: true, points: 1000 },
-      { utorid: 'xiling8', name: 'Xiling Zhao', email: 'xiling.zhao@mail.utoronto.ca', password: 'Password1!', role: 'manager', verified: true, activated: true, points: 30 },
-      { utorid: 'emily9', name: 'Emily Wang', email: 'emily.wang@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 47 },
-      { utorid: 'jack10', name: 'Jack Brown', email: 'jack.brown@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 14 },
-      { utorid: 'kate11', name: 'Kate Lee', email: 'kate.lee@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 220 },
+      { utorid: 'alicex1', name: 'Alice Bennett', email: 'alice.bennett@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 120, birthday: '1998-03-15' },
+      { utorid: 'bobbyj2', name: 'Bob Chen', email: 'bob.chen@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 80, birthday: '1999-07-22' },
+      { utorid: 'johnny3', name: 'John Doe', email: 'john.doe@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 200, birthday: '1997-11-08' },
+      { utorid: 'qiaohui2', name: 'Cindy Qiao', email: 'hui.qiao@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 5, suspicious: true, birthday: '1996-05-20' },
+      { utorid: 'barlowa2', name: 'Alicia Barlow', email: 'alicia.barlow@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 65, birthday: '2000-01-10' },
+      { utorid: 'chengel6', name: 'Elia Cheng', email: 'elia.cheng@mail.utoronto.ca', password: 'Password1!', role: 'cashier', verified: true, activated: true, points: 500, birthday: '1998-09-14' },
+      { utorid: 'chenpa7', name: 'Pan Chen', email: 'pan.chen@mail.utoronto.ca', password: 'Password1!', role: 'superuser', verified: true, activated: true, points: 1000, birthday: '1995-12-25' },
+      { utorid: 'zhaoxi8', name: 'Xiling Zhao', email: 'xiling.zhao@mail.utoronto.ca', password: 'Password1!', role: 'manager', verified: true, activated: true, points: 30, birthday: '1997-04-03' },
+      { utorid: 'emilyw9', name: 'Emily Wang', email: 'emily.wang@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 47, birthday: '1999-06-17' },
+      { utorid: 'jackb10', name: 'Jack Brown', email: 'jack.brown@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 0, birthday: '2001-02-28' },
+      { utorid: 'katele11', name: 'Kate Lee', email: 'kate.lee@mail.utoronto.ca', password: 'Password1!', role: 'regular', verified: true, activated: true, points: 220, birthday: '1998-08-11' },
     ];
 
     const createdUsers = [];
@@ -52,6 +59,7 @@ async function seedData() {
             avatarUrl: u.avatarUrl,
             password: hashed,
             points: u.points || 0,
+            createdAt: getRandomDatePastMonths(4),
           },
         });
         createdUsers.push(cu);
@@ -141,9 +149,9 @@ async function seedData() {
       location: 'Mobile App',
       startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 45),
       endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 46),
-      capacity: 99999,
-      pointsRemain: 99999,
-      pointsAwarded: 1000,
+      capacity: 5,
+      pointsRemain: 500,
+      pointsAwarded: 100,
       published: false
     }
     ];
@@ -154,14 +162,38 @@ async function seedData() {
       events.push(ev);
     }
 
+    // assign organizers for each event
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      const organizer = managerUsers[i % managerUsers.length];
+      try {
+        await prisma.event.update({
+          where: { id: ev.id },
+          data: {
+            organizers: { connect: { utorid: organizer.utorid } },
+          },
+        });
+      } catch (e) {
+        // ignore duplicates
+      }
+    }
+
     // create EventGuest entries for some events
     const guestUsers = createdUsers.slice(0, 8);
     for (let i = 0; i < events.length; i++) {
       const ev = events[i];
+      const eventWithOrganizers = await prisma.event.findUnique({
+        where: { id: ev.id },
+        include: { organizers: true },
+      });
+      const organizerUtoIds = eventWithOrganizers?.organizers.map(o => o.utorid) || [];
+      
       const guestCount = randomInt(3, 6);
       for (let g = 0; g < guestCount; g++) {
         const u = guestUsers[(i + g) % guestUsers.length];
         try {
+          // event guest cannot be the organizer
+          if (organizerUtoIds.includes(u.utorid)) continue;
           await prisma.eventGuest.create({
             data: {
               eventId: ev.id,
@@ -199,12 +231,34 @@ async function seedData() {
             processedByUtorid = c.utorid;
           }
         }
+        // for event transactions, only event organizers can assign points
+        if (t === 'event') {
+          const organizedEvents = await prisma.event.findMany({
+            where: { organizers: { some: { utorid: user.utorid } } },
+          });
+          if (organizedEvents.length === 0) continue;
+          const oe = organizedEvents[randomInt(0, organizedEvents.length - 1)];
+          const tx = {
+            utorid: user.utorid,
+            type: t,
+            spent: null,
+            remark: `Assigned event points for ${oe.name}`,
+            amount: oe.pointsAwarded || 10,
+            relatedId: oe.id,
+            createdBy: user.utorid,
+            suspicious: false,
+            processed: true,
+            processedBy: user.utorid,
+          };
+          transactionsToCreate.push(tx);
+          continue;
+        }
         const base = {
           utorid: user.utorid,
           type: t,
           spent: t === 'purchase' ? parseFloat((Math.random() * 20 + 1).toFixed(2)) : null,
           remark: `${t} transaction sample`,
-          amount: t === 'redemption' ? -randomInt(1, 20) : randomInt(1, 200),
+          amount: t === 'redemption' ? randomInt(1, 20) : randomInt(1, 200),
           relatedId: null,
           createdBy: createdByUtorid,
           suspicious: false,
@@ -219,7 +273,7 @@ async function seedData() {
       const user = createdUsers[randomInt(0, createdUsers.length - 1)];
       const t = txnTypes[randomInt(0, txnTypes.length - 1)];
       const spent = t === 'purchase' ? parseFloat((Math.random() * 50 + 0.5).toFixed(2)) : null;
-      const amount = t === 'redemption' ? -randomInt(1, 50) : randomInt(1, 300);
+      const amount = t === 'redemption' ? randomInt(1, 50) : randomInt(1, 300);
       // ensure adjustments are created by a manager and purchases by a cashier
       let createdByUtorid = user.utorid;
       let processedByUtorid = user.utorid;
@@ -242,7 +296,7 @@ async function seedData() {
         utorid: user.utorid,
         type: t,
         spent,
-        remark: `Auto ${t} txn`,
+        remark: `Sample ${t} transaction`,
         amount,
         createdBy: createdByUtorid,
         suspicious: Math.random() < 0.05,

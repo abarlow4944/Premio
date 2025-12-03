@@ -60,6 +60,8 @@ export default function Users() {
                 if(query.verified) params.append("verified", query.verified);
                 if(query.activated) params.append("activated", query.activated);
                 if(query.suspicious) params.append("suspicious", query.suspicious);
+                if(query.pointsMin) params.append("pointsMin", query.pointsMin);
+                if(query.pointsMax) params.append("pointsMax", query.pointsMax);
 
                 params.append("page", query.page)
                 params.append("limit", query.limit)

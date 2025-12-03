@@ -38,6 +38,7 @@ export default function DataTable({
     showBookmarks = false,
     onBookmarkToggle,
     colorizeBookmarkedRows = false, // no colored bookmarks on transactions page
+    showActionsColumn = true,
 }) {
 
     const [rowSelection, setRowSelection] = useState({});
@@ -364,9 +365,9 @@ export default function DataTable({
         };
         
         // console.log(actionsCol);
-        return [...cols, actionsCol];
+        return showActionsColumn ? [...cols, actionsCol] : cols;
    
-    }, [columns, selectionEnabled, editingRowId, onRSVP, canRSVP, onViewRow, enableEditing, onAwardPoints, onManageGuests]);
+    }, [columns, selectionEnabled, editingRowId, onRSVP, canRSVP, onViewRow, enableEditing, onAwardPoints, onManageGuests, showActionsColumn]);
 
 
     const table = useReactTable({

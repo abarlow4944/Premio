@@ -35,6 +35,14 @@ export function getPromoColumns(role) {
   }
   return [
     { 
+      accessorKey: 'id', 
+      header: 'ID', 
+      enableSorting: true, 
+      enableSearch: true, 
+      editableCell: TableCell,
+      editType: "text" 
+    },
+    { 
       accessorKey: 'name', 
       header: 'Name', 
       enableSorting: true, 

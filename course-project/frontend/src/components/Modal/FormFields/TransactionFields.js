@@ -13,7 +13,7 @@ export const TransactionFieldSets = {
             { name: "utorid", label: "UTORid", required: true, type: "text" },
             { name: "type", label: "Type", required: true, value: "purchase", readOnly: true, type: "text" },
             { name: "spent", label: "Price", type: "price", required: true },
-            { name: "promotionIds", label: "Promotion ID", multiNumber: true, type: "number" },
+            { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark", type: "text" }
         ],
         adjust: [
@@ -21,7 +21,7 @@ export const TransactionFieldSets = {
             { name: "type", label: "Type", required: true, value: "adjustment", readOnly: true, type: "text" },
             { name: "amount", label: "Points", type: "number", required: true, min:0 },
             { name: "relatedId", label: "Transaction ID", type: "number", required: true },
-            { name: "promotionIds", label: "Promotion ID", multiNumber: true, type: "number" },
+            { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark", type: "text" }
         ]
     },
@@ -30,7 +30,7 @@ export const TransactionFieldSets = {
             { name: "utorid", label: "UTORid", required: true, type: "text" },
             { name: "type", label: "Type", required: true, value: "purchase", readOnly: true, type: "text" },
             { name: "spent", label: "Price", type: "price", required: true },
-            { name: "promotionIds", label: "Promotion ID", multiNumber: true, type: "number" },
+            { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark", type: "text" }
         ],
         adjust: [
@@ -38,7 +38,7 @@ export const TransactionFieldSets = {
             { name: "type", label: "Type", required: true, value: "adjustment", readOnly: true, type: "text" },
             { name: "amount", label: "Points", type: "number", required: true },
             { name: "relatedId", label: "Transaction ID", type: "number", required: true },
-            { name: "promotionIds", label: "Promotion ID", multiNumber: true, type: "number" },
+            { name: "promotionIds", label: "Promotion ID", multiNumber: true },
             { name: "remark", label: "Remark", type: "text" }
         ]
     },

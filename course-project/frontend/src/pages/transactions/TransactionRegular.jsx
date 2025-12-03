@@ -4,6 +4,7 @@ import { getTransactionColumns } from "../../components/DataTable/Columns/Transa
 import { useState, useEffect, useMemo } from "react";
 import { useUser } from '../../contexts/UserContexts';
 import { BookmarkIcon } from "@heroicons/react/24/solid";
+import { select } from "@material-tailwind/react";
 
 export default function TransactionPage() {
     const { visualRole, role } = useUser();
@@ -173,6 +174,7 @@ export default function TransactionPage() {
                 success={success}
                 showBookmarks={true}
                 onBookmarkToggle={handleBookmarkToggle}
+                showActionsColumn={currentRole !== 'regular'}
             />
         </div>
     );

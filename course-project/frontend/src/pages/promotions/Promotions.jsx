@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { useUser } from "../../contexts/UserContexts";
 import { getPromotionFields } from "@/components/Modal/FormFields/PromotionFields";
 import ModalForm from "@/components/Modal/ModalForm";
+import { fabClasses } from "@mui/material";
 
 export default function Promotions() {
     const API_URL = import.meta.env.VITE_API_URL; // API base URL 
@@ -341,10 +342,11 @@ export default function Promotions() {
                     error={error}
                     success={success}
                     onRowSave={handleRowSaved} // for editing rows
-                    onCreate={() => setOpen(true)}
+                    onCreate={selectionEnabled ? () => setOpen(true) : undefined}
                     showBookmarks={true}
                     onBookmarkToggle={handleBookmarkToggle}
                     colorizeBookmarkedRows={true}
+                    showActionsColumn={selectionEnabled}
                 />
             )}
 

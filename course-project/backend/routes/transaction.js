@@ -728,10 +728,10 @@ async function arePromotionIdsValid(promotionIds, utorid, spent, type="purchase"
             }
         }
 
-        if(type === "purchase"){
+        if (type === "purchase") {
             where.OR = [
-                { minSpending: null },
-                { minSpending: { lte: spent ?? 0 } },
+                { minSpending: { equals: null } },
+                { minSpending: { lte: spent ?? 0 } }
             ]
         }
 

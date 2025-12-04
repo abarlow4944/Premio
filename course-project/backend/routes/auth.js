@@ -8,7 +8,9 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const nodemailer = require('nodemailer'); 
+import sgMail from "@sendgrid/mail"
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 
 const resetRateLimiter = new Map();
 
@@ -56,7 +58,6 @@ router.post("/tokens", async (req, res) => {
 		const token = jwt.sign(payload, JWT_SECRET, { algorithm: "HS256", expiresIn: expiresInSeconds });
 		const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 		const isProduction = process.env.NODE_ENV === "production";
-		console.log("IN PRODUCTION: ", isProduction);
 		
 		// HTTP-only cookie
 		res.cookie("auth_token", token, {
@@ -79,7 +80,6 @@ router.post("/tokens", async (req, res) => {
 router.get("/me", async (req, res) => {
   try {
     const token = req.cookies.auth_token;
-	console.log("CHECKING COOKIES: ", req.cookies);
     if (!token) return res.status(401).json({ error: "Not authenticated" });
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -144,37 +144,15 @@ router.post("/resets", async (req, res) => {
 		const resetLink = `${API_URL}/reset-password?token=${token}&utorid=${utorid}` // reset link
 		const recipientEmail = user.email
 
-		// email configuration
-		const transporter = nodemailer.createTransport({
-			host: process.env.SMTP_HOST, // for gmail
-			port: Number(process.env.SMTP_PORT),
-			secure: process.env.SMTP_SECURE === "true",
-			auth: {
-				user: process.env.SMTP_USER, // email
-				pass: process.env.SMTP_PASS, //password
-			},
-		});
-
-		// Define the email options
-		const mailOptions = {
-			from: process.env.SMTP_USER, 
-			to: recipientEmail, 
-			subject: "Password Reset Request", 
-			html: `
-				<p>Click below to reset your password:</p>
-				<a href="${resetLink}">${resetLink}</a>
-				<p>This link expires in 1 hour.</p>
-			`,
-		};
-
-		// Send the email
-		transporter.sendMail(mailOptions, (error, info) => {
-			if (error) {
-				console.error("Error occurred:", error);
-				res.status(500).send('Error in sending email. Please try again later.');
-			} else {
-				res.send('Email sent successfully!');
-			}
+		await sgMail.send({
+		to: recipientEmail,
+		from: process.env.EMAIL_ADDRESS,
+		subject: "Password Reset Request",
+		html: `
+			<p>Click below to reset your password:</p>
+			<a href="${resetLink}">${resetLink}</a>
+			<p>This link expires in 1 hour.</p>
+		`,
 		});
 
 		return res.status(202).json({ expiresAt: saved.expiresAt.toISOString(), resetToken: saved.token });
@@ -219,41 +197,19 @@ router.post("/activate", async (req, res) => {
 			create: { utorid, token, expiresAt: expiresAtDate, used: false },
 		});
 
-		// send the password reset email
-		const resetLink = `${API_URL}/activate-account?token=${token}&utorid=${utorid}` // reset link
+		// send the account activation email
+		const activationLink = `${API_URL}/activate-account?token=${token}&utorid=${utorid}` // reset link
 		const recipientEmail = user.email
 
-		// email configuration
-		const transporter = nodemailer.createTransport({
-			host: process.env.SMTP_HOST, // for gmail
-			port: Number(process.env.SMTP_PORT),
-			secure: process.env.SMTP_SECURE === "true",
-			auth: {
-				user: process.env.SMTP_USER, // email
-				pass: process.env.SMTP_PASS, //password
-			},
-		});
-
-		// Define the email options
-		const mailOptions = {
-			from: process.env.SMTP_USER, 
-			to: recipientEmail, 
-			subject: "Account Activation Request", 
-			html: `
-				<p>Click below to activate your account:</p>
-				<a href="${resetLink}">${resetLink}</a>
-				<p>This link expires in 7 days.</p>
-			`,
-		};
-
-		// Send the email
-		transporter.sendMail(mailOptions, (error, info) => {
-			if (error) {
-				console.error("Error occurred:", error);
-				res.status(500).send('Error in sending email. Please try again later.');
-			} else {
-				res.send('Email sent successfully!');
-			}
+		await sgMail.send({
+		to: recipientEmail,
+		from: process.env.EMAIL_ADDRESS,
+		subject: "Account Activation Request",
+		html: `
+			<p>Click below to activate your account:</p>
+			<a href="${activationLink}">${activationLink}</a>
+			<p>This link expires in 7 days.</p>
+		`,
 		});
 
 		return res.status(202).json({ expiresAt: saved.expiresAt.toISOString(), resetToken: saved.token });

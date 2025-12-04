@@ -96,6 +96,26 @@ export default function Users() {
 
     return (
         <div className="p-6 space-y-4">
+            {/* Error/Success Messages */}
+            {error && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="error" 
+                        message={error}
+                        onClose={() => setError("")}
+                    />
+                </div>
+            )}
+            {success && (
+                <div className="fixed top-[10vh] right-6 z-50 max-w-xs">
+                    <Message 
+                        status="success" 
+                        message={success}
+                        onClose={() => setSuccess("")}
+                    />
+                </div>
+            )}
+
             {/* Page Title */}
             <div className="mb-[2vh]">
                 <h1 className="text-center text-2xl font-semibold text-flag-red-500 mt-[10vh]">Users</h1>

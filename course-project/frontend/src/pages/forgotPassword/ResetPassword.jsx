@@ -18,6 +18,8 @@ export default function ResetPassword() {
         const resetToken = params.get("token")
         const utorid = params.get("utorid")
 
+        console.log("utorid:", utorid)
+
         // check if passwords match
         if(newPassword !== confirmPassword){
             setError("Passwords do not match")

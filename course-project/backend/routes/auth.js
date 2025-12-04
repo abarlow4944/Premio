@@ -141,7 +141,7 @@ router.post("/resets", async (req, res) => {
 		});
 
 		// send the password reset email
-		const resetLink = `${process.env.FRONTEND_URL_URL}/reset-password?token=${token}&utorid=${utorid}` // reset link
+		const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}&utorid=${utorid}` // reset link
 		const recipientEmail = user.email
 
 		await sgMail.send({
@@ -198,7 +198,7 @@ router.post("/activate", async (req, res) => {
 		});
 
 		// send the account activation email
-		const activationLink = `${process.env.FRONTEND_URL_URL}/activate-account?token=${token}&utorid=${utorid}` // reset link
+		const activationLink = `${process.env.FRONTEND_URL}/activate-account?token=${token}&utorid=${utorid}` // reset link
 		const recipientEmail = user.email
 
 		await sgMail.send({

@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-import sgMail from "@sendgrid/mail"
+const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 

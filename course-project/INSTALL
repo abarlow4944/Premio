@@ -97,7 +97,7 @@ Our application follows a modern full-stack architecture consisting of a React/V
 - **React** – Component-based UI framework used for building interactive pages and user flows.
 - **Vite** – Development server and build tool providing fast HMR and optimized production builds.
 - **TailwindCSS** – Utility-first CSS framework used for rapid styling.
-- **TanStack Table (React Table)** – Used for building the main DataTable component.
+- **TanStack** – Used for building the main DataTable component.
 - **React Router** – Client-side routing for navigation between pages.
 - **Recharts** – Library used for charts and data visualization on Analytics page.
 - **React-QR-Code** – Generates QR codes where needed in the UI.

@@ -80,7 +80,9 @@ These are libraries the app uses at runtime:
 - nodemon
 
 # 2. How to configure various servers (e.g., Nginx, Apache, etc)
-Deployed on Railway
+- Production is deployed on Railway
+- To deploy locally, run `npm run dev` in both the frontend and backend subdirectories
+- The GitHub repo can be found here: https://github.com/abarlow4944/Premio.git
 
 # 3. Demo Credentials
 - SuperUser: chenpa7, Password1!

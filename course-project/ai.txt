@@ -1,1 +1,3 @@
 AI (ChatGPT) was used to generate a logo for the application.
+
+ChatGPT was also used to generate some generic data for use by the seed script. Additionally, if we couldn't understand some error messages we got during debugging, we used ChatGPT to help explain what these errors meant.

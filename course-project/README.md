@@ -26,6 +26,54 @@ Available features vary depending on user role. However, features include:
 
 ---
 
+## 📷 Website Screenshots
+
+### 🔐 Login Page
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/cfdc7d56-cd18-403b-9eef-ff1037e0cd27"
+       alt="Login Page"
+       width="700" />
+</p>
+
+---
+
+### 🏠 Landing Page (Regular User)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4f5f8fa6-3daf-4bca-9980-c8ede3b6807d"
+       alt="Landing Page for Regular User"
+       width="100%" />
+</p>
+
+---
+
+### 📊 Transactions Page (Manager User)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/0a3b2be4-df5c-4596-bace-c43ca0b66ea5"
+       alt="Transactions Page for Manager User"
+       width="100%" />
+</p>
+
+---
+
+### 📅 Events Page (Manager User)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/665e3521-03fc-4f6d-a4ac-be704b386de9"
+       alt="Events Page for Manager User"
+       width="100%" />
+</p>
+
+---
+
+### 📈 Analytics Page (Manager User)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/80749cd7-c533-47b3-8319-daf46e0180fc"
+       alt="Analytics Page for Manager User"
+       width="100%" />
+</p>
+
+
+---
+
 ## 🛠️ Technologies Used
 ## **Frontend**
 - **React** – Component-based UI framework used for building interactive pages and user flows.
@@ -53,6 +101,14 @@ Available features vary depending on user role. However, features include:
 
 Railway hosts the PostgreSQL database instance used in production.
 
+---
 ## **DevOps / Deployment**
 - **Railway** – Platform used to deploy the backend server and host the PostgreSQL database.
 - **Nodemon** – Development tool for automatic backend restarts during coding.
+
+
+
+
+
+
+
